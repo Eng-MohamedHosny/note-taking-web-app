@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
-import { Note, ActiveView, ToastMessage, SettingsTab } from '../types/note';
+import { Note, ActiveView, ToastMessage, SettingsTab, ViewMode } from '../types/note';
 import { INITIAL_NOTES } from '../utils/initialData';
 import { useAuth } from './AuthContext';
 import { fetchCloudNotes, upsertCloudNote, deleteCloudNote } from '../services/supabase';
@@ -10,6 +10,7 @@ interface NotesContextType {
   selectedNote: Note | null;
   activeView: ActiveView;
   searchQuery: string;
+  viewMode: ViewMode;
   isCreatingNewNote: boolean;
   syncStatus: 'synced' | 'syncing' | 'local';
   toasts: ToastMessage[];
@@ -19,6 +20,7 @@ interface NotesContextType {
   // Actions
   selectNote: (id: string | null) => void;
   setActiveView: (view: ActiveView) => void;
+  setViewMode: (mode: ViewMode) => void;
   openSettingsTab: (tab?: SettingsTab) => void;
   setSearchQuery: (query: string) => void;
   setIsCreatingNewNote: (isCreating: boolean) => void;
@@ -65,6 +67,15 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (view.type !== 'search') {
       setSearchQuery('');
     }
+  };
+
+  const [viewMode, setViewModeState] = useState<ViewMode>(() => {
+    return (localStorage.getItem('notes_view_mode') as ViewMode) || 'list';
+  });
+
+  const setViewMode = (mode: ViewMode) => {
+    setViewModeState(mode);
+    localStorage.setItem('notes_view_mode', mode);
   };
   const [isCreatingNewNote, setIsCreatingNewNote] = useState<boolean>(false);
   const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'local'>('local');
@@ -335,6 +346,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         selectedNote,
         activeView,
         searchQuery,
+        viewMode,
         isCreatingNewNote,
         syncStatus,
         toasts,
@@ -342,6 +354,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         filteredNotes,
         selectNote,
         setActiveView,
+        setViewMode,
         openSettingsTab,
         setSearchQuery,
         setIsCreatingNewNote,

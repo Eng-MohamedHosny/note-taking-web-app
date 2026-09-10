@@ -72,3 +72,44 @@ html[data-font-theme="monospace"] {
   outline: 2px solid #335CFF;
   outline-offset: 2px;
 }
+
+/* Extra Dark (OLED Pure Black) Mode */
+html.extra-dark {
+  --color-neutral-950: #000000;
+  --color-neutral-900: #0D0E11;
+  --color-neutral-800: #16181D;
+  --color-neutral-700: #22252C;
+  background-color: #000000;
+}
+
+html.extra-dark body {
+  background-color: #000000;
+}
+
+html.extra-dark .bg-neutral-950,
+html.extra-dark .dark\:bg-neutral-950,
+html.extra-dark .dark\:bg-\[\#0E121B\] {
+  background-color: #000000 !important;
+}
+
+html.extra-dark .bg-neutral-900,
+html.extra-dark .dark\:bg-neutral-900 {
+  background-color: #0A0A0C !important;
+}
+
+html.extra-dark .border-\[\#232530\],
+html.extra-dark .dark\:border-\[\#232530\],
+html.extra-dark .dark\:border-neutral-800 {
+  border-color: #1A1C22 !important;
+}
+
+html.extra-dark .dark\:bg-\[\#1A1D24\],
+html.extra-dark .dark\:bg-\[\#191B25\] {
+  background-color: #1C1C1E !important;
+  border-color: #27272A !important;
+}
+
+html.extra-dark .dark\:hover\:bg-\[\#232530\]:hover {
+  background-color: #26262A !important;
+}
+

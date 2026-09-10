@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNotes } from '../context/NotesContext';
 import { NoteCard } from './NoteCard';
-import { DeleteIcon, SearchIcon, CrossIcon } from './Icons';
+import { NoteGridCard } from './NoteGridCard';
+import { DeleteIcon, SearchIcon, CrossIcon, GridViewIcon, ListViewIcon } from './Icons';
 
 interface NoteListProps {
   onSelectMobileNote?: () => void;
@@ -18,6 +19,8 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
     searchQuery,
     setSearchQuery,
     emptyTrash,
+    viewMode,
+    setViewMode,
   } = useNotes();
 
   const handleSelect = (id: string) => {
@@ -59,9 +62,41 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
     <div className="w-full lg:w-[290px] border-r-0 lg:border-r border-[#E0E4EA] dark:border-[#232530] bg-white dark:bg-[#0E121B] flex flex-col h-full shrink-0 overflow-hidden">
       {/* 1. Tablet & Mobile Viewport Top Header & Search (#2231:43924 & #2231:43568) */}
       <div className="lg:hidden px-4 pt-5 pb-2 md:px-8 md:pt-6">
-        <h1 className="text-2xl font-bold text-[#0E121B] dark:text-white tracking-tight">
-          {activeView.type === 'search' ? 'Search' : getHeadingTitle()}
-        </h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold text-[#0E121B] dark:text-white tracking-tight">
+            {activeView.type === 'search' ? 'Search' : getHeadingTitle()}
+          </h1>
+
+          {/* Grid / List View Toggle for Mobile & Tablet */}
+          <div className="flex items-center p-0.5 rounded-lg border border-[#E0E4EA] dark:border-[#2B303B] bg-[#F3F5F8] dark:bg-[#1A1D24] shrink-0">
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                viewMode === 'list'
+                  ? 'bg-white dark:bg-[#232530] text-[#335CFF] shadow-xs font-semibold'
+                  : 'text-[#525866] dark:text-[#99A0AE] hover:text-[#0E121B] dark:hover:text-white'
+              }`}
+              title="List view"
+              aria-label="List view"
+            >
+              <ListViewIcon className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                viewMode === 'grid'
+                  ? 'bg-white dark:bg-[#232530] text-[#335CFF] shadow-xs font-semibold'
+                  : 'text-[#525866] dark:text-[#99A0AE] hover:text-[#0E121B] dark:hover:text-white'
+              }`}
+              title="Grid view"
+              aria-label="Grid view"
+            >
+              <GridViewIcon className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
 
         {/* Dedicated Search Input on Mobile/Tablet when in Search Tab */}
         {activeView.type === 'search' && (
@@ -106,14 +141,14 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
         ) : null}
       </div>
 
-      {/* 2. Desktop Top Action (+ Create New Note / Empty Trash) matching Figma */}
-      <div className="hidden lg:block p-4 border-b border-[#E0E4EA] dark:border-[#232530]">
+      {/* 2. Desktop Top Action (+ Create New Note / Empty Trash + View Mode Toggle) */}
+      <div className="hidden lg:flex items-center justify-between p-4 border-b border-[#E0E4EA] dark:border-[#232530] gap-2">
         {activeView.type === 'trash' ? (
           <button
             type="button"
             onClick={emptyTrash}
             disabled={filteredNotes.length === 0}
-            className="w-full h-[44px] px-4 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+            className="flex-1 h-[44px] px-3 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
           >
             <DeleteIcon className="w-4 h-4" />
             <span>Empty Trash</span>
@@ -122,11 +157,41 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
           <button
             type="button"
             onClick={handleCreateNew}
-            className="w-full h-[44px] px-4 rounded-lg bg-[#335CFF] hover:bg-blue-600 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+            className="flex-1 h-[44px] px-4 rounded-lg bg-[#335CFF] hover:bg-blue-600 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
           >
             <span>+ Create New Note</span>
           </button>
         )}
+
+        {/* Grid / List View Toggle for Desktop */}
+        <div className="flex items-center p-0.5 rounded-lg border border-[#E0E4EA] dark:border-[#2B303B] bg-[#F3F5F8] dark:bg-[#1A1D24] shrink-0">
+          <button
+            type="button"
+            onClick={() => setViewMode('list')}
+            className={`p-1.5 rounded-md transition-all cursor-pointer ${
+              viewMode === 'list'
+                ? 'bg-white dark:bg-[#232530] text-[#335CFF] shadow-xs font-semibold'
+                : 'text-[#525866] dark:text-[#99A0AE] hover:text-[#0E121B] dark:hover:text-white'
+            }`}
+            title="List view"
+            aria-label="List view"
+          >
+            <ListViewIcon className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('grid')}
+            className={`p-1.5 rounded-md transition-all cursor-pointer ${
+              viewMode === 'grid'
+                ? 'bg-white dark:bg-[#232530] text-[#335CFF] shadow-xs font-semibold'
+                : 'text-[#525866] dark:text-[#99A0AE] hover:text-[#0E121B] dark:hover:text-white'
+            }`}
+            title="Grid view"
+            aria-label="Grid view"
+          >
+            <GridViewIcon className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* 3. Desktop Subtitle Description matching Figma EL-235a7561 / EL-137555fe / EL-c4e58cf1 */}
@@ -144,8 +209,8 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
         </div>
       ) : null}
 
-      {/* 4. Notes List with 1px Dividers & Empty State Box matching Figma EL-2eed9263 & EL-2ebc4c71 */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 lg:px-4 py-2 space-y-1 pb-32 lg:pb-4">
+      {/* 4. Notes List / Grid & Empty State Box matching Figma EL-2eed9263 & EL-2ebc4c71 */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 lg:px-4 py-2 pb-32 lg:pb-4">
         {filteredNotes.length === 0 ? (
           <div className="p-2 rounded-lg border border-[#E0E4EA] dark:border-[#2B303B] bg-[#F3F5F8] dark:bg-[#232530] text-sm text-[#0E121B] dark:text-[#CACFD8] my-2">
             {isSearching ? (
@@ -190,19 +255,34 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
               'You don’t have any notes yet. Start a new note to capture your thoughts and ideas.'
             )}
           </div>
-        ) : (
-          filteredNotes.map((note, idx) => (
-            <React.Fragment key={note.id}>
-              <NoteCard
+        ) : viewMode === 'grid' ? (
+          /* Grid View Layout (2 columns mobile matching user screenshot, 2-3 cols tablet, 1 col in 290px desktop) */
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-1 gap-2.5 sm:gap-3 py-1">
+            {filteredNotes.map((note) => (
+              <NoteGridCard
+                key={note.id}
                 note={note}
                 isSelected={!isCreatingNewNote && selectedNoteId === note.id}
                 onSelect={() => handleSelect(note.id)}
               />
-              {idx < filteredNotes.length - 1 && (
-                <div className="h-px bg-[#E0E4EA] dark:bg-[#232530] my-1" />
-              )}
-            </React.Fragment>
-          ))
+            ))}
+          </div>
+        ) : (
+          /* Classic List View Layout with 1px Dividers */
+          <div className="space-y-1 py-1">
+            {filteredNotes.map((note, idx) => (
+              <React.Fragment key={note.id}>
+                <NoteCard
+                  note={note}
+                  isSelected={!isCreatingNewNote && selectedNoteId === note.id}
+                  onSelect={() => handleSelect(note.id)}
+                />
+                {idx < filteredNotes.length - 1 && (
+                  <div className="h-px bg-[#E0E4EA] dark:bg-[#232530] my-1" />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
         )}
       </div>
     </div>

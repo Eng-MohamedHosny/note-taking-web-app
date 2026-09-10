@@ -233,6 +233,42 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                   </div>
                 </div>
 
+                {/* Extra Dark (OLED Pure Black) Option */}
+                <div
+                  onClick={() => setSelectedColor('extra-dark')}
+                  className={`h-18 px-4 flex items-center gap-4 rounded-xl border transition-all cursor-pointer ${
+                    selectedColor === 'extra-dark'
+                      ? 'bg-neutral-100 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700 shadow-xs'
+                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-black border border-neutral-800 flex items-center justify-center shrink-0 text-white shadow-inner">
+                    <MoonIcon className="w-6 h-6 text-blue-500" />
+                  </div>
+                  <div className="flex-1 flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-neutral-950 dark:text-white">
+                        Extra Dark Mode
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                        OLED Black
+                      </span>
+                    </div>
+                    <span className="text-xs text-neutral-700 dark:text-neutral-400">
+                      High-contrast pitch black theme with sleek dark cards
+                    </span>
+                  </div>
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                    selectedColor === 'extra-dark'
+                      ? 'border-blue-500 dark:border-blue-500'
+                      : 'border-neutral-300 dark:border-neutral-600'
+                  }`}>
+                    {selectedColor === 'extra-dark' && (
+                      <div className="w-2 h-2 rounded-full bg-blue-500" />
+                    )}
+                  </div>
+                </div>
+
                 {/* System Option */}
                 <div
                   onClick={() => setSelectedColor('system')}

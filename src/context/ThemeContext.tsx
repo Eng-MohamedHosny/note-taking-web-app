@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ColorTheme, FontTheme } from '../types/note';
 
 interface ThemeContextType {
@@ -27,13 +27,20 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const applyTheme = () => {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const shouldBeDark = colorTheme === 'dark' || (colorTheme === 'system' && prefersDark);
+      const isExtra = colorTheme === 'extra-dark';
+      const shouldBeDark = colorTheme === 'dark' || isExtra || (colorTheme === 'system' && prefersDark);
       
       setIsDark(shouldBeDark);
       if (shouldBeDark) {
         root.classList.add('dark');
       } else {
         root.classList.remove('dark');
+      }
+
+      if (isExtra) {
+        root.classList.add('extra-dark');
+      } else {
+        root.classList.remove('extra-dark');
       }
     };
 
