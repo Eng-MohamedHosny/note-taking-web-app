@@ -1,4 +1,4 @@
-﻿export interface Note {
+export interface Note {
   id: string;
   title: string;
   tags: string[];
@@ -13,10 +13,14 @@
 export type ColorTheme = 'light' | 'dark' | 'system';
 export type FontTheme = 'sans-serif' | 'serif' | 'monospace';
 
+export type SettingsTab = 'color' | 'font' | 'password';
+
 export type ActiveView = 
   | { type: 'all' }
   | { type: 'archived' }
   | { type: 'tag'; tag: string }
+  | { type: 'search' }
+  | { type: 'settings'; tab: SettingsTab }
   | { type: 'trash' };
 
 export type AuthMode = 'login' | 'signup' | 'forgot-password' | 'reset-password' | null;

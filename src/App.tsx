@@ -6,21 +6,38 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { NoteList } from './components/NoteList';
 import { NoteEditor } from './components/Editor/NoteEditor';
-import { SettingsModal } from './components/Modals/SettingsModal';
+import { RightSidebar } from './components/RightSidebar';
+import { SettingsView } from './components/Settings/SettingsView';
+import { BottomMenuBar } from './components/Navigation/BottomMenuBar';
+import { FloatingActionButton } from './components/Navigation/FloatingActionButton';
+import { TagsModal } from './components/Modals/TagsModal';
+import { DeleteModal } from './components/Modals/DeleteModal';
+import { ArchiveModal } from './components/Modals/ArchiveModal';
 import { AuthModal } from './components/Auth/AuthModal';
 import { CommandPalette } from './components/CommandPalette';
 import { ToastContainer } from './components/Toast';
 
 const MainLayout: React.FC = () => {
-  const { isCreatingNewNote, selectedNoteId, startNewNote } = useNotes();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-  
-  // Responsive mobile view toggle: 'list' or 'editor'
-  const [mobileView, setMobileView] = useState<'list' | 'editor'>('list');
+  const {
+    activeView,
+    setActiveView,
+    selectedNoteId,
+    selectedNote,
+    isCreatingNewNote,
+    startNewNote,
+    archiveNote,
+    restoreNote,
+    deleteNote,
+    openSettingsTab,
+  } = useNotes();
 
-  // Whenever a note is selected or newly created, on mobile automatically show editor
+  const [mobileView, setMobileView] = useState<'list' | 'editor'>('list');
+  const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
+  const [isRightDeleteOpen, setIsRightDeleteOpen] = useState(false);
+  const [isRightArchiveOpen, setIsRightArchiveOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+
+  // When a note is selected or created, on mobile toggle to editor
   useEffect(() => {
     if (selectedNoteId || isCreatingNewNote) {
       setMobileView('editor');
@@ -30,12 +47,10 @@ const MainLayout: React.FC = () => {
   // Global keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+K or Cmd+K: Open Command Palette
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsCommandPaletteOpen((prev) => !prev);
       }
-      // Ctrl+Alt+N or Alt+N: New Note
       if (e.altKey && e.key.toLowerCase() === 'n') {
         e.preventDefault();
         startNewNote();
@@ -47,57 +62,104 @@ const MainLayout: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [startNewNote]);
 
+  const isSettingsView = activeView.type === 'settings';
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-neutral-100 dark:bg-neutral-950 font-inherit">
-      {/* Left Sidebar */}
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-      />
+      {/* 1. Left Navigation Sidebar (Desktop 272px in Figma) */}
+      <Sidebar />
 
-      {/* Main Container */}
+      {/* 2. Main Work Area */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        {/* Top Header (81px height in Figma) */}
         <Header
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+          onOpenSettings={() => {
+            if (isSettingsView) {
+              setActiveView({ type: 'all' });
+            } else {
+              openSettingsTab('color');
+            }
+          }}
         />
 
-        {/* 2-Column Split Body (Desktop) or Toggled View (Mobile) */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* NoteList column */}
-          <div
-            className={`w-full lg:w-80 h-full ${
-              mobileView === 'list' ? 'flex' : 'hidden lg:flex'
-            }`}
-          >
-            <NoteList onSelectMobileNote={() => setMobileView('editor')} />
-          </div>
+        {/* Dynamic Body: Either Settings View OR Notes Split View */}
+        {isSettingsView ? (
+          <SettingsView />
+        ) : (
+          <div className="flex-1 flex overflow-hidden relative">
+            {/* NoteList (290px in Figma Desktop, full on mobile list view) */}
+            <div
+              className={`w-full lg:w-[290px] h-full ${
+                mobileView === 'list' ? 'flex' : 'hidden lg:flex'
+              }`}
+            >
+              <NoteList onSelectMobileNote={() => setMobileView('editor')} />
+            </div>
 
-          {/* NoteEditor column */}
-          <div
-            className={`flex-1 h-full ${
-              mobileView === 'editor' ? 'flex' : 'hidden lg:flex'
-            }`}
-          >
-            <NoteEditor onBackToList={() => setMobileView('list')} />
+            {/* NoteEditor (Main center area, full on mobile editor view) */}
+            <div
+              className={`flex-1 h-full ${
+                mobileView === 'editor' ? 'flex' : 'hidden lg:flex'
+              }`}
+            >
+              <NoteEditor onBackToList={() => setMobileView('list')} />
+            </div>
+
+            {/* Right Menu Sidebar (258px in Figma Desktop) */}
+            {selectedNote && !isCreatingNewNote && (
+              <RightSidebar
+                onArchive={() => setIsRightArchiveOpen(true)}
+                onDelete={() => setIsRightDeleteOpen(true)}
+                onRestore={() => {
+                  if (selectedNote.isDeleted) {
+                    restoreNote(selectedNote.id);
+                  } else {
+                    restoreNote(selectedNote.id);
+                  }
+                }}
+              />
+            )}
           </div>
-        </div>
+        )}
+
+        {/* Mobile & Tablet Bottom Navigation Bar (Figma Tablet & Mobile specs) */}
+        <BottomMenuBar onOpenTagsModal={() => setIsTagsModalOpen(true)} />
+
+        {/* Mobile & Tablet Floating Action Button (+ Create Note) */}
+        {mobileView === 'list' && (
+          <FloatingActionButton onClick={() => setMobileView('editor')} />
+        )}
       </div>
 
-      {/* Global Modals & Notifications */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
+      {/* Modals & Dialogs */}
+      <TagsModal
+        isOpen={isTagsModalOpen}
+        onClose={() => setIsTagsModalOpen(false)}
       />
+
+      {selectedNote && (
+        <>
+          <DeleteModal
+            isOpen={isRightDeleteOpen}
+            onClose={() => setIsRightDeleteOpen(false)}
+            onConfirm={() => deleteNote(selectedNote.id)}
+            isPermanent={Boolean(selectedNote.isDeleted)}
+          />
+
+          <ArchiveModal
+            isOpen={isRightArchiveOpen}
+            onClose={() => setIsRightArchiveOpen(false)}
+            onConfirm={() => archiveNote(selectedNote.id)}
+          />
+        </>
+      )}
 
       <AuthModal />
 
       <CommandPalette
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenSettings={() => openSettingsTab('color')}
       />
 
       <ToastContainer />

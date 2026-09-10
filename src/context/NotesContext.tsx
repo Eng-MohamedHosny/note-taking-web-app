@@ -1,5 +1,5 @@
-﻿import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
-import { Note, ActiveView, ToastMessage } from '../types/note';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import { Note, ActiveView, ToastMessage, SettingsTab } from '../types/note';
 import { INITIAL_NOTES } from '../utils/initialData';
 import { useAuth } from './AuthContext';
 import { fetchCloudNotes, upsertCloudNote, deleteCloudNote } from '../services/supabase';
@@ -19,6 +19,7 @@ interface NotesContextType {
   // Actions
   selectNote: (id: string | null) => void;
   setActiveView: (view: ActiveView) => void;
+  openSettingsTab: (tab?: SettingsTab) => void;
   setSearchQuery: (query: string) => void;
   setIsCreatingNewNote: (isCreating: boolean) => void;
   startNewNote: () => void;
@@ -73,7 +74,6 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setSyncStatus('syncing');
       fetchCloudNotes(user.id).then((cloudNotes) => {
         if (cloudNotes && cloudNotes.length > 0) {
-          // Merge strategy: update or add cloud notes
           setNotes((local) => {
             const map = new Map<string, Note>();
             local.forEach((n) => map.set(n.id, n));
@@ -81,7 +81,6 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             return Array.from(map.values());
           });
         } else {
-          // Upload local notes to Supabase for the first time
           notes.forEach((note) => {
             upsertCloudNote(note, user.id);
           });
@@ -148,7 +147,6 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       return true;
     }).sort((a, b) => {
-      // Pinned notes first, then latest edited
       if (Boolean(a.isPinned) !== Boolean(b.isPinned)) {
         return a.isPinned ? -1 : 1;
       }
@@ -164,11 +162,22 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const startNewNote = () => {
     setIsCreatingNewNote(true);
     setSelectedNoteId(null);
+    if (activeView.type === 'settings' || activeView.type === 'trash') {
+      setActiveView({ type: 'all' });
+    }
   };
 
   const selectNote = (id: string | null) => {
     setIsCreatingNewNote(false);
     setSelectedNoteId(id);
+    if (activeView.type === 'settings') {
+      setActiveView({ type: 'all' });
+    }
+  };
+
+  const openSettingsTab = (tab: SettingsTab = 'color') => {
+    setActiveView({ type: 'settings', tab });
+    setIsCreatingNewNote(false);
   };
 
   const saveNote = ({ title, content, tags }: { title: string; content: string; tags: string[] }) => {
@@ -262,7 +271,6 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (!target) return;
 
     if (target.isDeleted) {
-      // Permanent deletion
       setNotes((prev) => prev.filter((n) => n.id !== id));
       if (selectedNoteId === id) setSelectedNoteId(null);
       addToast('Note permanently deleted', 'info');
@@ -270,7 +278,6 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         deleteCloudNote(id, user.id);
       }
     } else {
-      // Soft delete to Trash
       setNotes((prev) =>
         prev.map((n) => (n.id === id ? { ...n, isDeleted: true, lastEdited: new Date().toISOString() } : n))
       );
@@ -317,6 +324,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         filteredNotes,
         selectNote,
         setActiveView,
+        openSettingsTab,
         setSearchQuery,
         setIsCreatingNewNote,
         startNewNote,
