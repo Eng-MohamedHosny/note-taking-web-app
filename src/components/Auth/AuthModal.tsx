@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotes } from '../../context/NotesContext';
-import { Eye, EyeOff, X, ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
+import { Logo } from '../Logo';
+import { CrossIcon, GoogleIcon, ShowPasswordIcon, HidePasswordIcon } from '../Icons';
 
 export const AuthModal: React.FC = () => {
   const { authModal, setAuthModal, loginWithEmail, signUpWithEmail, resetPassword, updatePassword, loginAsGuest } = useAuth();
@@ -79,13 +81,13 @@ export const AuthModal: React.FC = () => {
           className="absolute right-4 top-4 p-1.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 rounded-lg transition-colors cursor-pointer z-10"
           aria-label="Close dialog"
         >
-          <X className="w-5 h-5" />
+          <CrossIcon className="w-5 h-5" />
         </button>
 
         <div className="p-8">
           {/* Brand Logo matching Figma */}
           <div className="flex items-center gap-2 mb-6">
-            <img src="/assets/images/logo.svg" alt="Notes Logo" className="h-7 w-auto dark:invert" />
+            <Logo className="h-7 w-auto" />
           </div>
 
           {/* Header Title & Subtitle */}
@@ -160,7 +162,7 @@ export const AuthModal: React.FC = () => {
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 cursor-pointer"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? <HidePasswordIcon className="w-4 h-4" /> : <ShowPasswordIcon className="w-4 h-4" />}
                   </button>
                 </div>
                 {authModal === 'signup' && (
@@ -188,8 +190,9 @@ export const AuthModal: React.FC = () => {
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 cursor-pointer"
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showConfirmPassword ? <HidePasswordIcon className="w-4 h-4" /> : <ShowPasswordIcon className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
@@ -245,7 +248,7 @@ export const AuthModal: React.FC = () => {
                 }}
                 className="w-full py-2.5 px-4 rounded-lg border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-medium text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
-                <img src="/assets/images/icon-google.svg" alt="Google" className="w-4 h-4" />
+                <GoogleIcon className="w-4 h-4" />
                 <span>Google</span>
               </button>
             </>

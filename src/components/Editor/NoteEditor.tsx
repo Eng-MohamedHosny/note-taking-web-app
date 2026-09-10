@@ -3,6 +3,7 @@ import { useNotes } from '../../context/NotesContext';
 import { formatDate } from '../../utils/formatters';
 import { DeleteModal } from '../Modals/DeleteModal';
 import { ArchiveModal } from '../Modals/ArchiveModal';
+import { ArrowLeftIcon, DeleteIcon, ArchiveIcon, RestoreIcon, TagIcon, ClockIcon } from '../Icons';
 
 interface NoteEditorProps {
   onBackToList?: () => void;
@@ -102,7 +103,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
           onClick={onBackToList}
           className="flex items-center gap-1 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:text-neutral-950 dark:hover:text-white cursor-pointer"
         >
-          <img src="/assets/images/icon-arrow-left.svg" alt="" className="w-4 h-4 dark:invert" />
+          <ArrowLeftIcon className="w-4 h-4" />
           <span>Go Back</span>
         </button>
 
@@ -115,7 +116,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
                 className="p-1.5 text-neutral-500 hover:text-red-500 cursor-pointer"
                 aria-label="Delete note"
               >
-                <img src="/assets/images/icon-delete.svg" alt="" className="w-4 h-4 dark:invert" />
+                <DeleteIcon className="w-4 h-4" />
               </button>
 
               <button
@@ -130,11 +131,11 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
                 className="p-1.5 text-neutral-500 hover:text-blue-500 cursor-pointer"
                 aria-label={isArchived ? 'Restore note' : 'Archive note'}
               >
-                <img
-                  src={isArchived ? '/assets/images/icon-restore.svg' : '/assets/images/icon-archive.svg'}
-                  alt=""
-                  className="w-4 h-4 dark:invert"
-                />
+                {isArchived ? (
+                  <RestoreIcon className="w-4 h-4" />
+                ) : (
+                  <ArchiveIcon className="w-4 h-4" />
+                )}
               </button>
             </>
           )}
@@ -172,9 +173,9 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
         <div className="flex flex-col gap-2 pb-4 border-b border-neutral-200 dark:border-neutral-800">
           {/* Tags Row */}
           <div className="flex items-center gap-2">
-            <div className="w-[115px] flex items-center gap-1.5 shrink-0">
-              <img src="/assets/images/icon-tag.svg" alt="" className="w-4 h-4 opacity-70 dark:invert" />
-              <span className="text-sm font-normal text-neutral-700 dark:text-neutral-400">
+            <div className="w-[115px] flex items-center gap-1.5 shrink-0 text-neutral-700 dark:text-neutral-400">
+              <TagIcon className="w-4 h-4" />
+              <span className="text-sm font-normal">
                 Tags
               </span>
             </div>
@@ -189,9 +190,9 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
 
           {/* Last Edited Row */}
           <div className="flex items-center gap-2">
-            <div className="w-[115px] flex items-center gap-1.5 shrink-0">
-              <img src="/assets/images/icon-clock.svg" alt="" className="w-4 h-4 opacity-70 dark:invert" />
-              <span className="text-sm font-normal text-neutral-700 dark:text-neutral-400">
+            <div className="w-[115px] flex items-center gap-1.5 shrink-0 text-neutral-700 dark:text-neutral-400">
+              <ClockIcon className="w-4 h-4" />
+              <span className="text-sm font-normal">
                 Last edited
               </span>
             </div>

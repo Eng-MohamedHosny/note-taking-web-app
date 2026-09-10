@@ -3,7 +3,21 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useNotes } from '../../context/NotesContext';
 import { ColorTheme, FontTheme, SettingsTab } from '../../types/note';
-import { Eye, EyeOff } from 'lucide-react';
+import {
+  SunIcon,
+  FontIcon,
+  LockIcon,
+  LogoutIcon,
+  ChevronRightIcon,
+  MoonIcon,
+  SystemThemeIcon,
+  FontSansSerifIcon,
+  FontSerifIcon,
+  FontMonospaceIcon,
+  InfoIcon,
+  HidePasswordIcon,
+  ShowPasswordIcon,
+} from '../Icons';
 
 interface SettingsViewProps {
   initialTab?: SettingsTab;
@@ -11,7 +25,7 @@ interface SettingsViewProps {
 
 export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color' }) => {
   const { colorTheme, fontTheme, setColorTheme, setFontTheme } = useTheme();
-  const { updatePassword, logout, setAuthModal } = useAuth();
+  const { updatePassword, logout } = useAuth();
   const { addToast, activeView, setActiveView } = useNotes();
 
   const currentTab: SettingsTab =
@@ -85,11 +99,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
           }`}
         >
           <div className="flex items-center gap-2.5">
-            <img src="/assets/images/icon-sun.svg" alt="" className="w-5 h-5 dark:invert" />
+            <SunIcon className={`w-5 h-5 ${currentTab === 'color' ? 'text-blue-500' : 'text-neutral-500 dark:text-neutral-400'}`} />
             <span>Color Theme</span>
           </div>
           {currentTab === 'color' && (
-            <img src="/assets/images/icon-chevron-right.svg" alt="" className="w-2.5 h-3.5 dark:invert" />
+            <ChevronRightIcon className="w-2.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
           )}
         </button>
 
@@ -102,11 +116,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
           }`}
         >
           <div className="flex items-center gap-2.5">
-            <img src="/assets/images/icon-font.svg" alt="" className="w-5 h-5 dark:invert" />
+            <FontIcon className={`w-5 h-5 ${currentTab === 'font' ? 'text-blue-500' : 'text-neutral-500 dark:text-neutral-400'}`} />
             <span>Font Theme</span>
           </div>
           {currentTab === 'font' && (
-            <img src="/assets/images/icon-chevron-right.svg" alt="" className="w-2.5 h-3.5 dark:invert" />
+            <ChevronRightIcon className="w-2.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
           )}
         </button>
 
@@ -119,11 +133,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
           }`}
         >
           <div className="flex items-center gap-2.5">
-            <img src="/assets/images/icon-lock.svg" alt="" className="w-5 h-5 dark:invert" />
+            <LockIcon className={`w-5 h-5 ${currentTab === 'password' ? 'text-blue-500' : 'text-neutral-500 dark:text-neutral-400'}`} />
             <span>Change Password</span>
           </div>
           {currentTab === 'password' && (
-            <img src="/assets/images/icon-chevron-right.svg" alt="" className="w-2.5 h-3.5 dark:invert" />
+            <ChevronRightIcon className="w-2.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
           )}
         </button>
 
@@ -136,7 +150,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
           }}
           className="w-full flex items-center gap-2.5 p-2 rounded-md text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
         >
-          <img src="/assets/images/icon-logout.svg" alt="" className="w-5 h-5 dark:invert" />
+          <LogoutIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400" />
           <span>Logout</span>
         </button>
       </div>
@@ -151,7 +165,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                 <h2 className="text-base font-semibold text-neutral-950 dark:text-white">
                   Color Theme
                 </h2>
-                <p className="text-sm text-neutral-700 dark:text-neutral-300">
+                <p className="text-sm text-neutral-700 dark:text-neutral-400">
                   Choose your color theme:
                 </p>
               </div>
@@ -162,12 +176,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                   onClick={() => setSelectedColor('light')}
                   className={`h-18 px-4 flex items-center gap-4 rounded-xl border transition-all cursor-pointer ${
                     selectedColor === 'light'
-                      ? 'bg-neutral-100 dark:bg-neutral-800/80 border-neutral-300 dark:border-neutral-700 shadow-xs'
-                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-850'
+                      ? 'bg-neutral-100 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700 shadow-xs'
+                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0">
-                    <img src="/assets/images/icon-sun.svg" alt="" className="w-6 h-6 dark:invert" />
+                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0 text-neutral-950 dark:text-white">
+                    <SunIcon className="w-6 h-6" />
                   </div>
                   <div className="flex-1 flex flex-col">
                     <span className="text-sm font-medium text-neutral-950 dark:text-white">
@@ -177,7 +191,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                       Pick a clean and classic light theme
                     </span>
                   </div>
-                  <div className="w-4 h-4 rounded-full border border-neutral-300 dark:border-neutral-600 flex items-center justify-center shrink-0">
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                    selectedColor === 'light'
+                      ? 'border-blue-500 dark:border-blue-500'
+                      : 'border-neutral-300 dark:border-neutral-600'
+                  }`}>
                     {selectedColor === 'light' && (
                       <div className="w-2 h-2 rounded-full bg-blue-500" />
                     )}
@@ -189,12 +207,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                   onClick={() => setSelectedColor('dark')}
                   className={`h-18 px-4 flex items-center gap-4 rounded-xl border transition-all cursor-pointer ${
                     selectedColor === 'dark'
-                      ? 'bg-neutral-100 dark:bg-neutral-800/80 border-neutral-300 dark:border-neutral-700 shadow-xs'
-                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-850'
+                      ? 'bg-neutral-100 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700 shadow-xs'
+                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0">
-                    <img src="/assets/images/icon-moon.svg" alt="" className="w-6 h-6 dark:invert" />
+                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0 text-neutral-950 dark:text-white">
+                    <MoonIcon className="w-6 h-6" />
                   </div>
                   <div className="flex-1 flex flex-col">
                     <span className="text-sm font-medium text-neutral-950 dark:text-white">
@@ -204,7 +222,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                       Select a sleek and modern dark theme
                     </span>
                   </div>
-                  <div className="w-4 h-4 rounded-full border border-neutral-300 dark:border-neutral-600 flex items-center justify-center shrink-0">
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                    selectedColor === 'dark'
+                      ? 'border-blue-500 dark:border-blue-500'
+                      : 'border-neutral-300 dark:border-neutral-600'
+                  }`}>
                     {selectedColor === 'dark' && (
                       <div className="w-2 h-2 rounded-full bg-blue-500" />
                     )}
@@ -216,12 +238,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                   onClick={() => setSelectedColor('system')}
                   className={`h-18 px-4 flex items-center gap-4 rounded-xl border transition-all cursor-pointer ${
                     selectedColor === 'system'
-                      ? 'bg-neutral-100 dark:bg-neutral-800/80 border-neutral-300 dark:border-neutral-700 shadow-xs'
-                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-850'
+                      ? 'bg-neutral-100 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700 shadow-xs'
+                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0">
-                    <img src="/assets/images/icon-system-theme.svg" alt="" className="w-6 h-6 dark:invert" />
+                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0 text-neutral-950 dark:text-white">
+                    <SystemThemeIcon className="w-6 h-6" />
                   </div>
                   <div className="flex-1 flex flex-col">
                     <span className="text-sm font-medium text-neutral-950 dark:text-white">
@@ -231,7 +253,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                       Adapts to your device’s theme
                     </span>
                   </div>
-                  <div className="w-4 h-4 rounded-full border border-neutral-300 dark:border-neutral-600 flex items-center justify-center shrink-0">
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                    selectedColor === 'system'
+                      ? 'border-blue-500 dark:border-blue-500'
+                      : 'border-neutral-300 dark:border-neutral-600'
+                  }`}>
                     {selectedColor === 'system' && (
                       <div className="w-2 h-2 rounded-full bg-blue-500" />
                     )}
@@ -259,7 +285,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                 <h2 className="text-base font-semibold text-neutral-950 dark:text-white">
                   Font Theme
                 </h2>
-                <p className="text-sm text-neutral-700 dark:text-neutral-300">
+                <p className="text-sm text-neutral-700 dark:text-neutral-400">
                   Choose your font theme:
                 </p>
               </div>
@@ -270,12 +296,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                   onClick={() => setSelectedFont('sans-serif')}
                   className={`h-18 px-4 flex items-center gap-4 rounded-xl border transition-all cursor-pointer ${
                     selectedFont === 'sans-serif'
-                      ? 'bg-neutral-100 dark:bg-neutral-800/80 border-neutral-300 dark:border-neutral-700 shadow-xs'
-                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-850'
+                      ? 'bg-neutral-100 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700 shadow-xs'
+                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0">
-                    <img src="/assets/images/icon-font-sans-serif.svg" alt="" className="w-6 h-6 dark:invert" />
+                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0 text-neutral-950 dark:text-white">
+                    <FontSansSerifIcon className="w-6 h-6" />
                   </div>
                   <div className="flex-1 flex flex-col font-sans">
                     <span className="text-sm font-medium text-neutral-950 dark:text-white">
@@ -285,7 +311,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                       Clean and modern, easy to read.
                     </span>
                   </div>
-                  <div className="w-4 h-4 rounded-full border border-neutral-300 dark:border-neutral-600 flex items-center justify-center shrink-0">
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                    selectedFont === 'sans-serif'
+                      ? 'border-blue-500 dark:border-blue-500'
+                      : 'border-neutral-300 dark:border-neutral-600'
+                  }`}>
                     {selectedFont === 'sans-serif' && (
                       <div className="w-2 h-2 rounded-full bg-blue-500" />
                     )}
@@ -297,12 +327,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                   onClick={() => setSelectedFont('serif')}
                   className={`h-18 px-4 flex items-center gap-4 rounded-xl border transition-all cursor-pointer ${
                     selectedFont === 'serif'
-                      ? 'bg-neutral-100 dark:bg-neutral-800/80 border-neutral-300 dark:border-neutral-700 shadow-xs'
-                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-850'
+                      ? 'bg-neutral-100 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700 shadow-xs'
+                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0">
-                    <img src="/assets/images/icon-font-serif.svg" alt="" className="w-6 h-6 dark:invert" />
+                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0 text-neutral-950 dark:text-white">
+                    <FontSerifIcon className="w-6 h-6" />
                   </div>
                   <div className="flex-1 flex flex-col font-serif">
                     <span className="text-sm font-medium text-neutral-950 dark:text-white">
@@ -312,7 +342,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                       Classic and elegant for a timeless feel.
                     </span>
                   </div>
-                  <div className="w-4 h-4 rounded-full border border-neutral-300 dark:border-neutral-600 flex items-center justify-center shrink-0">
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                    selectedFont === 'serif'
+                      ? 'border-blue-500 dark:border-blue-500'
+                      : 'border-neutral-300 dark:border-neutral-600'
+                  }`}>
                     {selectedFont === 'serif' && (
                       <div className="w-2 h-2 rounded-full bg-blue-500" />
                     )}
@@ -324,12 +358,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                   onClick={() => setSelectedFont('monospace')}
                   className={`h-18 px-4 flex items-center gap-4 rounded-xl border transition-all cursor-pointer ${
                     selectedFont === 'monospace'
-                      ? 'bg-neutral-100 dark:bg-neutral-800/80 border-neutral-300 dark:border-neutral-700 shadow-xs'
-                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-850'
+                      ? 'bg-neutral-100 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700 shadow-xs'
+                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0">
-                    <img src="/assets/images/icon-font-monospace.svg" alt="" className="w-6 h-6 dark:invert" />
+                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0 text-neutral-950 dark:text-white">
+                    <FontMonospaceIcon className="w-6 h-6" />
                   </div>
                   <div className="flex-1 flex flex-col font-mono">
                     <span className="text-sm font-medium text-neutral-950 dark:text-white">
@@ -339,7 +373,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                       Code-like, great for a technical vibe.
                     </span>
                   </div>
-                  <div className="w-4 h-4 rounded-full border border-neutral-300 dark:border-neutral-600 flex items-center justify-center shrink-0">
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                    selectedFont === 'monospace'
+                      ? 'border-blue-500 dark:border-blue-500'
+                      : 'border-neutral-300 dark:border-neutral-600'
+                  }`}>
                     {selectedFont === 'monospace' && (
                       <div className="w-2 h-2 rounded-full bg-blue-500" />
                     )}
@@ -367,7 +405,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                 <h2 className="text-base font-semibold text-neutral-950 dark:text-white">
                   Change Password
                 </h2>
-                <p className="text-sm text-neutral-700 dark:text-neutral-300">
+                <p className="text-sm text-neutral-700 dark:text-neutral-400">
                   Update your account password
                 </p>
               </div>
@@ -390,14 +428,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                       value={oldPassword}
                       onChange={(e) => setOldPassword(e.target.value)}
                       placeholder="Enter old password"
-                      className="w-full px-4 py-3 pr-11 text-sm rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden focus:border-blue-500"
+                      className="w-full px-4 py-3 pr-11 text-sm rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden focus:border-blue-500 transition-colors"
                     />
                     <button
                       type="button"
                       onClick={() => setShowOldPassword(!showOldPassword)}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 cursor-pointer"
+                      aria-label={showOldPassword ? 'Hide password' : 'Show password'}
                     >
-                      {showOldPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showOldPassword ? <HidePasswordIcon className="w-4 h-4" /> : <ShowPasswordIcon className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
@@ -414,18 +453,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Enter new password"
                       required
-                      className="w-full px-4 py-3 pr-11 text-sm rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden focus:border-blue-500"
+                      className="w-full px-4 py-3 pr-11 text-sm rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden focus:border-blue-500 transition-colors"
                     />
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 cursor-pointer"
+                      aria-label={showNewPassword ? 'Hide password' : 'Show password'}
                     >
-                      {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showNewPassword ? <HidePasswordIcon className="w-4 h-4" /> : <ShowPasswordIcon className="w-4 h-4" />}
                     </button>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400">
-                    <img src="/assets/images/icon-info.svg" alt="" className="w-3.5 h-3.5 dark:invert" />
+                    <InfoIcon className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
                     <span>At least 8 characters</span>
                   </div>
                 </div>
@@ -442,14 +482,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Confirm new password"
                       required
-                      className="w-full px-4 py-3 pr-11 text-sm rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden focus:border-blue-500"
+                      className="w-full px-4 py-3 pr-11 text-sm rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden focus:border-blue-500 transition-colors"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 cursor-pointer"
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                     >
-                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showConfirmPassword ? <HidePasswordIcon className="w-4 h-4" /> : <ShowPasswordIcon className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>

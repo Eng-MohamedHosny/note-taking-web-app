@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNotes } from '../context/NotesContext';
 import { NoteCard } from './NoteCard';
-import { Trash2 } from 'lucide-react';
+import { DeleteIcon } from './Icons';
 
 interface NoteListProps {
   onSelectMobileNote?: () => void;
@@ -44,7 +44,7 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
             disabled={filteredNotes.length === 0}
             className="w-full py-3 px-4 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
           >
-            <Trash2 className="w-4 h-4" />
+            <DeleteIcon className="w-4 h-4" />
             <span>Empty Trash</span>
           </button>
         ) : (

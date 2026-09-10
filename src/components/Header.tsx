@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNotes } from '../context/NotesContext';
-import { X } from 'lucide-react';
+import { Logo } from './Logo';
+import { SearchIcon, SettingsIcon, CrossIcon } from './Icons';
 
 interface HeaderProps {
   onOpenSettings: () => void;
@@ -34,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
       <div className="flex items-center gap-3">
         {/* Mobile/Tablet Logo matching Figma */}
         <div className="flex items-center gap-2 lg:hidden">
-          <img src="/assets/images/logo.svg" alt="Notes" className="h-6 w-auto dark:invert" />
+          <Logo className="h-6 w-auto" />
         </div>
 
         {/* Desktop Page Title */}
@@ -48,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
         {/* Search Field matching Figma */}
         <div className="relative w-full max-w-[300px] hidden sm:block">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-            <img src="/assets/images/icon-search.svg" alt="" className="w-5 h-5 opacity-60 dark:invert" />
+            <SearchIcon className="w-5 h-5 text-neutral-400" />
           </div>
           <input
             type="text"
@@ -62,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
               onClick={() => setSearchQuery('')}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 cursor-pointer"
             >
-              <X className="w-4 h-4" />
+              <CrossIcon className="w-4 h-4" />
             </button>
           )}
         </div>
@@ -72,12 +73,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
           onClick={onOpenSettings}
           className={`w-[42px] h-[42px] rounded-[10px] flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
             activeView.type === 'settings'
-              ? 'bg-neutral-100 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700'
-              : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'
+              ? 'bg-neutral-100 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-950 dark:text-white'
+              : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-950 dark:hover:text-white'
           }`}
           aria-label="Open settings"
         >
-          <img src="/assets/images/icon-settings.svg" alt="" className="w-6 h-6 dark:invert" />
+          <SettingsIcon className="w-6 h-6" />
         </button>
       </div>
     </header>

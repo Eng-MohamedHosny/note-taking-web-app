@@ -1,5 +1,5 @@
 import React from 'react';
-import { Archive } from 'lucide-react';
+import { ArchiveIcon } from '../Icons';
 
 interface ArchiveModalProps {
   isOpen: boolean;
@@ -17,14 +17,14 @@ export const ArchiveModal: React.FC<ArchiveModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div 
-        className="w-full max-w-[440px] bg-white dark:bg-neutral-900 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden"
+        className="w-full max-w-[440px] bg-white dark:bg-neutral-800 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="archive-modal-title"
       >
         <div className="p-6">
-          <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center mb-4">
-            <Archive className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/15 text-blue-500 flex items-center justify-center mb-4">
+            <ArchiveIcon className="w-6 h-6" />
           </div>
 
           <h3 id="archive-modal-title" className="text-xl font-bold text-neutral-950 dark:text-white mb-2">

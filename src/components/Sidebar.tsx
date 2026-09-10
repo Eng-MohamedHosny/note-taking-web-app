@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNotes } from '../context/NotesContext';
 import { useAuth } from '../context/AuthContext';
-import { Trash2 } from 'lucide-react';
+import { Logo } from './Logo';
+import { HomeIcon, ArchiveIcon, TagIcon, ChevronRightIcon, DeleteIcon } from './Icons';
 
 export const Sidebar: React.FC = () => {
   const { activeView, setActiveView, allTags, notes } = useNotes();
@@ -17,7 +18,7 @@ export const Sidebar: React.FC = () => {
     <aside className="hidden lg:flex flex-col w-[272px] h-screen bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 shrink-0 select-none">
       {/* Logo Wrapper matching Figma #2161:9525 */}
       <div className="px-6 py-6 border-b border-neutral-200 dark:border-neutral-800">
-        <img src="/assets/images/logo.svg" alt="Notes" className="h-7 w-auto dark:invert" />
+        <Logo className="h-7 w-auto" />
       </div>
 
       {/* Navigation Content */}
@@ -34,15 +35,13 @@ export const Sidebar: React.FC = () => {
             }`}
           >
             <div className="flex items-center gap-3">
-              <img
-                src="/assets/images/icon-home.svg"
-                alt=""
-                className={`w-5 h-5 ${isAllNotesActive ? 'dark:invert' : 'opacity-70 dark:invert'}`}
+              <HomeIcon
+                className={`w-5 h-5 ${isAllNotesActive ? 'text-blue-500' : 'text-neutral-500 dark:text-neutral-400'}`}
               />
               <span>All Notes</span>
             </div>
             {isAllNotesActive && (
-              <img src="/assets/images/icon-chevron-right.svg" alt="" className="w-2.5 h-3.5 dark:invert" />
+              <ChevronRightIcon className="w-2.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
             )}
           </button>
 
@@ -56,15 +55,13 @@ export const Sidebar: React.FC = () => {
             }`}
           >
             <div className="flex items-center gap-3">
-              <img
-                src="/assets/images/icon-archive.svg"
-                alt=""
-                className={`w-5 h-5 ${isArchivedActive ? 'dark:invert' : 'opacity-70 dark:invert'}`}
+              <ArchiveIcon
+                className={`w-5 h-5 ${isArchivedActive ? 'text-blue-500' : 'text-neutral-500 dark:text-neutral-400'}`}
               />
               <span>Archived Notes</span>
             </div>
             {isArchivedActive && (
-              <img src="/assets/images/icon-chevron-right.svg" alt="" className="w-2.5 h-3.5 dark:invert" />
+              <ChevronRightIcon className="w-2.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
             )}
           </button>
 
@@ -79,7 +76,7 @@ export const Sidebar: React.FC = () => {
             }`}
           >
             <div className="flex items-center gap-3">
-              <Trash2 className={`w-4 h-4 ${isTrashActive ? 'text-red-500' : 'text-neutral-400'}`} />
+              <DeleteIcon className={`w-5 h-5 ${isTrashActive ? 'text-red-500' : 'text-neutral-400'}`} />
               <span>Trash</span>
             </div>
             {trashCount > 0 && (
@@ -117,15 +114,13 @@ export const Sidebar: React.FC = () => {
                     }`}
                   >
                     <div className="flex items-center gap-3 truncate">
-                      <img
-                        src="/assets/images/icon-tag.svg"
-                        alt=""
-                        className={`w-4 h-4 shrink-0 ${isTagActive ? 'dark:invert' : 'opacity-70 dark:invert'}`}
+                      <TagIcon
+                        className={`w-4 h-4 shrink-0 ${isTagActive ? 'text-blue-500' : 'text-neutral-500 dark:text-neutral-400'}`}
                       />
                       <span className="truncate">{tag}</span>
                     </div>
                     {isTagActive && (
-                      <img src="/assets/images/icon-chevron-right.svg" alt="" className="w-2.5 h-3.5 dark:invert" />
+                      <ChevronRightIcon className="w-2.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
                     )}
                   </button>
                 );

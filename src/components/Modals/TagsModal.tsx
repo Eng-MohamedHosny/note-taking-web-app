@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNotes } from '../../context/NotesContext';
-import { X, Tag } from 'lucide-react';
+import { TagIcon, CrossIcon } from '../Icons';
 
 interface TagsModalProps {
   isOpen: boolean;
@@ -22,8 +22,8 @@ export const TagsModal: React.FC<TagsModalProps> = ({ isOpen, onClose }) => {
         aria-label="Tags"
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
-          <div className="flex items-center gap-2">
-            <Tag className="w-5 h-5 text-neutral-500" />
+          <div className="flex items-center gap-2 text-neutral-500">
+            <TagIcon className="w-5 h-5" />
             <h3 className="text-base font-bold text-neutral-950 dark:text-white">
               Tags
             </h3>
@@ -32,7 +32,7 @@ export const TagsModal: React.FC<TagsModalProps> = ({ isOpen, onClose }) => {
             onClick={onClose}
             className="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 rounded-lg cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <CrossIcon className="w-5 h-5" />
           </button>
         </div>
 
@@ -56,7 +56,7 @@ export const TagsModal: React.FC<TagsModalProps> = ({ isOpen, onClose }) => {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <img src="/assets/images/icon-tag.svg" alt="" className="w-4 h-4 dark:invert" />
+                    <TagIcon className={`w-4 h-4 ${isSelected ? 'text-blue-500' : 'text-neutral-500 dark:text-neutral-400'}`} />
                     <span>{tag}</span>
                   </div>
                   {isSelected && (

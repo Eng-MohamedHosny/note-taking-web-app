@@ -23,7 +23,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, isSelected, onSelect }
       className={`w-full p-2 rounded-md transition-colors cursor-pointer text-left outline-hidden select-none ${
         isSelected
           ? 'bg-neutral-100 dark:bg-neutral-800'
-          : 'hover:bg-neutral-50 dark:hover:bg-neutral-850'
+          : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
       }`}
     >
       <div className="flex flex-col gap-3">

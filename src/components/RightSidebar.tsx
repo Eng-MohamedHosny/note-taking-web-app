@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNotes } from '../context/NotesContext';
+import { ArchiveIcon, DeleteIcon, RestoreIcon } from './Icons';
 
 interface RightSidebarProps {
   onArchive: () => void;
@@ -28,7 +29,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             onClick={onRestore}
             className="w-full flex items-center gap-2.5 px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-950 dark:text-white text-sm font-medium transition-colors cursor-pointer"
           >
-            <img src="/assets/images/icon-restore.svg" alt="" className="w-5 h-5 dark:invert" />
+            <RestoreIcon className="w-5 h-5 text-neutral-600 dark:text-neutral-300" />
             <span>Restore Note</span>
           </button>
 
@@ -37,7 +38,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             onClick={onDelete}
             className="w-full flex items-center gap-2.5 px-4 py-3 rounded-lg border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 text-sm font-medium transition-colors cursor-pointer"
           >
-            <img src="/assets/images/icon-delete.svg" alt="" className="w-5 h-5" />
+            <DeleteIcon className="w-5 h-5 text-red-500" />
             <span>Delete Permanently</span>
           </button>
         </>
@@ -48,7 +49,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             onClick={onRestore}
             className="w-full flex items-center gap-2.5 px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-950 dark:text-white text-sm font-medium transition-colors cursor-pointer"
           >
-            <img src="/assets/images/icon-restore.svg" alt="" className="w-5 h-5 dark:invert" />
+            <RestoreIcon className="w-5 h-5 text-neutral-600 dark:text-neutral-300" />
             <span>Restore Note</span>
           </button>
 
@@ -57,7 +58,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             onClick={onDelete}
             className="w-full flex items-center gap-2.5 px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-950 dark:text-white text-sm font-medium transition-colors cursor-pointer"
           >
-            <img src="/assets/images/icon-delete.svg" alt="" className="w-5 h-5 dark:invert" />
+            <DeleteIcon className="w-5 h-5 text-neutral-600 dark:text-neutral-300" />
             <span>Delete Note</span>
           </button>
         </>
@@ -68,7 +69,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             onClick={onArchive}
             className="w-full flex items-center gap-2.5 px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-950 dark:text-white text-sm font-medium transition-colors cursor-pointer"
           >
-            <img src="/assets/images/icon-archive.svg" alt="" className="w-5 h-5 dark:invert" />
+            <ArchiveIcon className="w-5 h-5 text-neutral-600 dark:text-neutral-300" />
             <span>Archive Note</span>
           </button>
 
@@ -77,7 +78,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             onClick={onDelete}
             className="w-full flex items-center gap-2.5 px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-950 dark:text-white text-sm font-medium transition-colors cursor-pointer"
           >
-            <img src="/assets/images/icon-delete.svg" alt="" className="w-5 h-5 dark:invert" />
+            <DeleteIcon className="w-5 h-5 text-neutral-600 dark:text-neutral-300" />
             <span>Delete Note</span>
           </button>
         </>

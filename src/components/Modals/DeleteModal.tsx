@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2 } from 'lucide-react';
+import { DeleteIcon } from '../Icons';
 
 interface DeleteModalProps {
   isOpen: boolean;
@@ -19,14 +19,14 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div 
-        className="w-full max-w-[440px] bg-white dark:bg-neutral-900 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden"
+        className="w-full max-w-[440px] bg-white dark:bg-neutral-800 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="delete-modal-title"
       >
         <div className="p-6">
-          <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-500/10 text-red-500 flex items-center justify-center mb-4">
-            <Trash2 className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-500/15 text-red-500 flex items-center justify-center mb-4">
+            <DeleteIcon className="w-6 h-6" />
           </div>
 
           <h3 id="delete-modal-title" className="text-xl font-bold text-neutral-950 dark:text-white mb-2">
