@@ -46,8 +46,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
 
       {/* Right: Search Field (300px in Figma) + Settings Button (42x42px) */}
       <div className="flex items-center gap-4">
-        {/* Search Field matching Figma */}
-        <div className="relative w-full max-w-[300px] hidden sm:block">
+        {/* Desktop Header Search Field matching Figma #2165:11967 */}
+        <div className="relative w-full max-w-[300px] hidden lg:block">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
             <SearchIcon className="w-5 h-5 text-neutral-400" />
           </div>

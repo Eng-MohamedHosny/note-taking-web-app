@@ -16,86 +16,90 @@ export const BottomMenuBar: React.FC<BottomMenuBarProps> = ({ onOpenTagsModal })
   const isSettings = activeView.type === 'settings';
 
   return (
-    <nav 
+    <nav
       aria-label="Bottom navigation"
-      className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between px-2 sm:px-8 z-30 shadow-lg"
+      className="lg:hidden fixed bottom-0 left-0 right-0 h-16 md:h-[72px] bg-white dark:bg-[#0E121B] border-t border-[#E0E4EA] dark:border-[#232530] flex items-center justify-between px-3 md:px-8 z-30 shadow-lg select-none"
     >
-      {/* Home */}
+      {/* Home Button matching Figma Tablet EL-9861f917 / Mobile EL-0bb99e3f */}
       <button
         type="button"
         onClick={() => setActiveView({ type: 'all' })}
-        className={`flex-1 h-12 flex flex-col items-center justify-center gap-1 rounded-sm transition-colors cursor-pointer ${
+        className={`flex-1 md:w-[80px] md:flex-initial py-1.5 md:py-1 flex flex-col items-center justify-center gap-1 rounded-[4px] transition-colors cursor-pointer ${
           isHome
-            ? 'bg-blue-100 dark:bg-neutral-700 text-blue-500'
-            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+            ? 'bg-[#EBF1FF] dark:bg-[#2B303B] text-[#335CFF]'
+            : 'bg-transparent text-[#525866] dark:text-[#99A0AE] hover:bg-[#F3F5F8] dark:hover:bg-[#232530]/60'
         }`}
       >
-        <HomeIcon className="w-5 h-5" />
-        <span className="text-[11px] font-medium leading-none">Home</span>
+        <HomeIcon className="w-5 h-5 md:w-5 md:h-5 shrink-0" />
+        <span className="hidden md:block text-[12px] font-normal leading-none tracking-tight">Home</span>
       </button>
 
-      <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-800 shrink-0" />
+      {/* Divider (Tablet only, hidden on mobile matching Figma) */}
+      <div className="hidden md:block w-px h-6 bg-[#E0E4EA] dark:bg-[#232530] shrink-0" />
 
-      {/* Search */}
+      {/* Search Button matching Figma */}
       <button
         type="button"
         onClick={() => setActiveView({ type: 'search' })}
-        className={`flex-1 h-12 flex flex-col items-center justify-center gap-1 rounded-sm transition-colors cursor-pointer ${
+        className={`flex-1 md:w-[80px] md:flex-initial py-1.5 md:py-1 flex flex-col items-center justify-center gap-1 rounded-[4px] transition-colors cursor-pointer ${
           isSearch
-            ? 'bg-blue-100 dark:bg-neutral-700 text-blue-500'
-            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+            ? 'bg-[#EBF1FF] dark:bg-[#2B303B] text-[#335CFF]'
+            : 'bg-transparent text-[#525866] dark:text-[#99A0AE] hover:bg-[#F3F5F8] dark:hover:bg-[#232530]/60'
         }`}
       >
-        <SearchIcon className="w-5 h-5" />
-        <span className="text-[11px] font-medium leading-none">Search</span>
+        <SearchIcon className="w-5 h-5 md:w-5 md:h-5 shrink-0" />
+        <span className="hidden md:block text-[12px] font-normal leading-none tracking-tight">Search</span>
       </button>
 
-      <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-800 shrink-0" />
+      {/* Divider */}
+      <div className="hidden md:block w-px h-6 bg-[#E0E4EA] dark:bg-[#232530] shrink-0" />
 
-      {/* Archived */}
+      {/* Archived Button matching Figma */}
       <button
         type="button"
         onClick={() => setActiveView({ type: 'archived' })}
-        className={`flex-1 h-12 flex flex-col items-center justify-center gap-1 rounded-sm transition-colors cursor-pointer ${
+        className={`flex-1 md:w-[80px] md:flex-initial py-1.5 md:py-1 flex flex-col items-center justify-center gap-1 rounded-[4px] transition-colors cursor-pointer ${
           isArchived
-            ? 'bg-blue-100 dark:bg-neutral-700 text-blue-500'
-            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+            ? 'bg-[#EBF1FF] dark:bg-[#2B303B] text-[#335CFF]'
+            : 'bg-transparent text-[#525866] dark:text-[#99A0AE] hover:bg-[#F3F5F8] dark:hover:bg-[#232530]/60'
         }`}
       >
-        <ArchiveIcon className="w-5 h-5" />
-        <span className="text-[11px] font-medium leading-none">Archived</span>
+        <ArchiveIcon className="w-5 h-5 md:w-5 md:h-5 shrink-0" />
+        <span className="hidden md:block text-[12px] font-normal leading-none tracking-tight">Archived</span>
       </button>
 
-      <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-800 shrink-0" />
+      {/* Divider */}
+      <div className="hidden md:block w-px h-6 bg-[#E0E4EA] dark:bg-[#232530] shrink-0" />
 
-      {/* Tags */}
+      {/* Tags Button matching Figma */}
       <button
         type="button"
         onClick={onOpenTagsModal}
-        className={`flex-1 h-12 flex flex-col items-center justify-center gap-1 rounded-sm transition-colors cursor-pointer ${
+        className={`flex-1 md:w-[80px] md:flex-initial py-1.5 md:py-1 flex flex-col items-center justify-center gap-1 rounded-[4px] transition-colors cursor-pointer ${
           isTag
-            ? 'bg-blue-100 dark:bg-neutral-700 text-blue-500'
-            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+            ? 'bg-[#EBF1FF] dark:bg-[#2B303B] text-[#335CFF]'
+            : 'bg-transparent text-[#525866] dark:text-[#99A0AE] hover:bg-[#F3F5F8] dark:hover:bg-[#232530]/60'
         }`}
       >
-        <TagIcon className="w-5 h-5" />
-        <span className="text-[11px] font-medium leading-none">Tags</span>
+        <TagIcon className="w-5 h-5 md:w-5 md:h-5 shrink-0" />
+        <span className="hidden md:block text-[12px] font-normal leading-none tracking-tight">Tags</span>
       </button>
 
-      <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-800 shrink-0" />
+      {/* Divider */}
+      <div className="hidden md:block w-px h-6 bg-[#E0E4EA] dark:bg-[#232530] shrink-0" />
 
-      {/* Settings */}
+      {/* Settings Button matching Figma */}
       <button
         type="button"
         onClick={() => openSettingsTab('color')}
-        className={`flex-1 h-12 flex flex-col items-center justify-center gap-1 rounded-sm transition-colors cursor-pointer ${
+        className={`flex-1 md:w-[80px] md:flex-initial py-1.5 md:py-1 flex flex-col items-center justify-center gap-1 rounded-[4px] transition-colors cursor-pointer ${
           isSettings
-            ? 'bg-blue-100 dark:bg-neutral-700 text-blue-500'
-            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+            ? 'bg-[#EBF1FF] dark:bg-[#2B303B] text-[#335CFF]'
+            : 'bg-transparent text-[#525866] dark:text-[#99A0AE] hover:bg-[#F3F5F8] dark:hover:bg-[#232530]/60'
         }`}
       >
-        <SettingsIcon className="w-5 h-5" />
-        <span className="text-[11px] font-medium leading-none">Settings</span>
+        <SettingsIcon className="w-5 h-5 md:w-5 md:h-5 shrink-0" />
+        <span className="hidden md:block text-[12px] font-normal leading-none tracking-tight">Settings</span>
       </button>
     </nav>
   );

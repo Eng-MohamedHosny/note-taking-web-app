@@ -38,12 +38,10 @@ const MainLayout: React.FC = () => {
   const [isRightArchiveOpen, setIsRightArchiveOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
-  // When a note is selected or created, on mobile toggle to editor
+  // Switch to list view whenever active view changes (e.g. clicking Home, Search, Archive)
   useEffect(() => {
-    if (selectedNoteId || isCreatingNewNote) {
-      setMobileView('editor');
-    }
-  }, [selectedNoteId, isCreatingNewNote]);
+    setMobileView('list');
+  }, [activeView]);
 
   // Global keyboard shortcuts
   useEffect(() => {
