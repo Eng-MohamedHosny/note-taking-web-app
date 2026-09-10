@@ -236,14 +236,13 @@ export const AuthModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Guest / Demo Mode Button */}
+              {/* Join as Guest */}
               <button
                 type="button"
                 onClick={loginAsGuest}
-                className="w-full py-2.5 px-4 mb-3 rounded-lg border border-blue-200 dark:border-blue-900/50 bg-blue-50/60 dark:bg-blue-500/10 hover:bg-blue-100/70 text-blue-600 dark:text-blue-400 font-medium text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                className="w-full py-2.5 px-4 mb-3 rounded-lg border border-[#E0E4EA] dark:border-[#2B303B] hover:bg-[#F3F5F8] dark:hover:bg-[#232530] text-[#525866] dark:text-[#CACDD5] font-medium text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
-                <Sparkles className="w-4 h-4" />
-                <span>Continue in Demo / Guest Mode</span>
+                <span>Join as Guest</span>
               </button>
 
               <button

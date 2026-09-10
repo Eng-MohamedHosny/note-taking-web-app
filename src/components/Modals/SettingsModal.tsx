@@ -404,7 +404,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                         Account Status
                       </p>
                       <p className="text-sm font-semibold text-neutral-950 dark:text-white">
-                        {isGuest ? 'Guest / Demo Mode' : user?.email || 'Logged In'}
+                        {isGuest ? 'Guest Mode' : user?.email || 'Logged In'}
                       </p>
                     </div>
                     <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${

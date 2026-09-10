@@ -255,13 +255,13 @@ export const AuthPage: React.FC = () => {
               <span>Google</span>
             </button>
 
-            {/* Quick Demo Mode for immediate evaluation */}
+            {/* Join as Guest */}
             <button
               type="button"
               onClick={loginAsGuest}
-              className="w-full mt-3 py-2.5 px-4 rounded-lg border border-dashed border-[#335CFF]/40 bg-blue-50/50 dark:bg-blue-500/10 hover:bg-blue-100/50 text-[#335CFF] font-medium text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              className="w-full mt-3 py-2.5 px-4 rounded-lg border border-[#E0E4EA] dark:border-[#2B303B] hover:bg-[#F3F5F8] dark:hover:bg-[#232530] text-[#525866] dark:text-[#CACDD5] font-medium text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
-              <span>Continue in Demo / Guest Mode</span>
+              <span>Join as Guest</span>
             </button>
           </>
         )}
