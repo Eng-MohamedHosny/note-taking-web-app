@@ -18,35 +18,44 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div 
-        className="w-full max-w-[440px] bg-white dark:bg-neutral-800 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden"
+      <div
+        className="w-full max-w-[440px] bg-white dark:bg-[#2B303B] rounded-[12px] border border-[#E0E4EA] dark:border-[#525866] shadow-xl overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="delete-modal-title"
       >
-        <div className="p-6">
-          <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-500/15 text-red-500 flex items-center justify-center mb-4">
-            <DeleteIcon className="w-6 h-6" />
+        {/* Top: Horizontal Row matching Figma EL-1b85c00d */}
+        <div className="p-5 flex items-start gap-4">
+          {/* Icon Box: 40x40 rounded-lg matching Figma EL-635f9545 / EL-bcc5253d */}
+          <div className="w-10 h-10 rounded-lg bg-[#F3F5F8] dark:bg-[#525866] text-[#0E121B] dark:text-white flex items-center justify-center shrink-0">
+            <DeleteIcon className="w-5 h-5" />
           </div>
 
-          <h3 id="delete-modal-title" className="text-xl font-bold text-neutral-950 dark:text-white mb-2">
-            {isPermanent ? 'Delete Note Permanently' : 'Delete Note'}
-          </h3>
-
-          <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
-            {isPermanent
-              ? 'Are you sure you want to permanently delete this note? This action cannot be undone.'
-              : 'Are you sure you want to delete this note? It will be moved to the Trash where you can restore it anytime.'}
-          </p>
+          {/* Text Content matching Figma EL-b45a9547 */}
+          <div className="flex-1 min-w-0 space-y-1.5">
+            <h3
+              id="delete-modal-title"
+              className="text-base font-semibold text-[#0E121B] dark:text-white tracking-tight"
+            >
+              {isPermanent ? 'Delete Note Permanently' : 'Delete Note'}
+            </h3>
+            <p className="text-sm leading-relaxed text-[#525866] dark:text-[#E0E4EA]">
+              {isPermanent
+                ? 'Are you sure you want to permanently delete this note? This action cannot be undone.'
+                : 'Are you sure you want to delete this note? It will be moved to the Trash where you can restore it anytime.'}
+            </p>
+          </div>
         </div>
 
-        <div className="h-px bg-neutral-200 dark:bg-neutral-800 w-full" />
+        {/* Divider: 1px matching Figma EL-e31e7215 / EL-8e4e70fb */}
+        <div className="h-px bg-[#E0E4EA] dark:bg-[#525866] w-full" />
 
-        <div className="p-4 bg-neutral-50 dark:bg-neutral-900/50 flex items-center justify-end gap-3">
+        {/* Bottom Actions matching Figma EL-cd10b777 */}
+        <div className="px-5 py-4 flex items-center justify-end gap-4 bg-transparent">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/60 dark:hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer"
+            className="px-4 py-3 rounded-lg text-sm font-medium bg-[#F3F5F8] dark:bg-[#525866] text-[#525866] dark:text-white hover:bg-[#E0E4EA] dark:hover:bg-[#656C7B] transition-colors cursor-pointer"
           >
             Cancel
           </button>
@@ -56,7 +65,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
               onConfirm();
               onClose();
             }}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors cursor-pointer shadow-xs"
+            className="px-4 py-3 rounded-lg text-sm font-medium text-white bg-[#FB3748] hover:bg-red-600 transition-colors cursor-pointer"
           >
             {isPermanent ? 'Delete Permanently' : 'Delete Note'}
           </button>

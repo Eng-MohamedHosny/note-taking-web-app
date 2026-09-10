@@ -103,7 +103,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
             <span>Color Theme</span>
           </div>
           {currentTab === 'color' && (
-            <ChevronRightIcon className="w-2.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
+            <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
           )}
         </button>
 
@@ -120,7 +120,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
             <span>Font Theme</span>
           </div>
           {currentTab === 'font' && (
-            <ChevronRightIcon className="w-2.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
+            <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
           )}
         </button>
 
@@ -137,7 +137,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
             <span>Change Password</span>
           </div>
           {currentTab === 'password' && (
-            <ChevronRightIcon className="w-2.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
+            <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
           )}
         </button>
 

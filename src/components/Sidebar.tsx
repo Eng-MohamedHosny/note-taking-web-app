@@ -17,7 +17,7 @@ export const Sidebar: React.FC = () => {
   return (
     <aside className="hidden lg:flex flex-col w-[272px] h-screen bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 shrink-0 select-none">
       {/* Logo Wrapper matching Figma #2161:9525 */}
-      <div className="px-6 py-6 border-b border-neutral-200 dark:border-neutral-800">
+      <div className="px-6 py-6">
         <Logo className="h-7 w-auto" />
       </div>
 
@@ -41,7 +41,7 @@ export const Sidebar: React.FC = () => {
               <span>All Notes</span>
             </div>
             {isAllNotesActive && (
-              <ChevronRightIcon className="w-2.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
+              <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
             )}
           </button>
 
@@ -61,7 +61,7 @@ export const Sidebar: React.FC = () => {
               <span>Archived Notes</span>
             </div>
             {isArchivedActive && (
-              <ChevronRightIcon className="w-2.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
+              <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
             )}
           </button>
 
@@ -120,7 +120,7 @@ export const Sidebar: React.FC = () => {
                       <span className="truncate">{tag}</span>
                     </div>
                     {isTagActive && (
-                      <ChevronRightIcon className="w-2.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
+                      <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
                     )}
                   </button>
                 );

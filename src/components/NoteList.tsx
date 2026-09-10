@@ -35,8 +35,8 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
 
   return (
     <div className="w-full lg:w-[290px] border-r border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 flex flex-col h-full shrink-0">
-      {/* Top Action: + Create New Note Button matching Figma */}
-      <div className="p-4 border-b border-neutral-200 dark:border-neutral-800">
+      {/* Top Action: + Create New Note Button (Desktop only, mobile/tablet uses FAB) */}
+      <div className="hidden lg:block p-4 border-b border-neutral-200 dark:border-neutral-800">
         {activeView.type === 'trash' ? (
           <button
             type="button"
@@ -59,7 +59,7 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
       </div>
 
       {/* Notes List with 1px Dividers matching Figma */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-1">
+      <div className="flex-1 overflow-y-auto p-4 space-y-1 pb-32 lg:pb-4">
         {filteredNotes.length === 0 ? (
           <div className="py-12 px-2 text-center">
             <p className="text-sm font-medium text-neutral-950 dark:text-white mb-1">
