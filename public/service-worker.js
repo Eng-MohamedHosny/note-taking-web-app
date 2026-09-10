@@ -1,10 +1,17 @@
-const CACHE_NAME = 'notes-app-cache-v1';
+const CACHE_NAME = 'notes-app-cache-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/assets/images/logo.svg',
+  '/favicon.svg',
+  '/favicon.ico',
   '/assets/images/favicon-32x32.png',
+  '/assets/images/favicon-192x192.png',
+  '/assets/images/favicon-512x512.png',
+  '/assets/images/favicon-maskable-192x192.png',
+  '/assets/images/favicon-maskable-512x512.png',
+  '/assets/images/apple-touch-icon.png',
+  '/assets/images/logo.svg',
   '/assets/images/icon-home.svg',
   '/assets/images/icon-archive.svg',
   '/assets/images/icon-tag.svg',
