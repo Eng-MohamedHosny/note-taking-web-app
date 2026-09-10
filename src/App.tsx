@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthPage } from './components/Auth/AuthPage';
 import { NotesProvider, useNotes } from './context/NotesContext';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
@@ -167,12 +168,30 @@ const MainLayout: React.FC = () => {
   );
 };
 
+const AppContent: React.FC = () => {
+  const { user, isGuest, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-[#F3F5F8] dark:bg-[#0E121B]">
+        <div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user && !isGuest) {
+    return <AuthPage />;
+  }
+
+  return <MainLayout />;
+};
+
 export const App: React.FC = () => {
   return (
     <ThemeProvider>
       <AuthProvider>
         <NotesProvider>
-          <MainLayout />
+          <AppContent />
         </NotesProvider>
       </AuthProvider>
     </ThemeProvider>

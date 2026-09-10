@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
 import { AuthMode } from '../types/note';
 
@@ -27,9 +27,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isGuest, setIsGuest] = useState<boolean>(() => {
-    // Default to guest/demo mode on first load so the app is immediately usable!
-    const saved = localStorage.getItem('notes_auth_guest');
-    return saved !== null ? saved === 'true' : true;
+    return localStorage.getItem('notes_auth_guest') === 'true';
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [authModal, setAuthModal] = useState<AuthMode>(null);
@@ -140,8 +138,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       supabase.auth.signOut();
     }
     setUser(null);
-    setIsGuest(true);
-    localStorage.setItem('notes_auth_guest', 'true');
+    setIsGuest(false);
+    localStorage.removeItem('notes_auth_guest');
   };
 
   return (

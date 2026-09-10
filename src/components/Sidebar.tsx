@@ -6,7 +6,7 @@ import { HomeIcon, ArchiveIcon, TagIcon, ChevronRightIcon, DeleteIcon } from './
 
 export const Sidebar: React.FC = () => {
   const { activeView, setActiveView, allTags, notes } = useNotes();
-  const { isGuest } = useAuth();
+  const { isGuest, user, logout } = useAuth();
 
   const isAllNotesActive = activeView.type === 'all';
   const isArchivedActive = activeView.type === 'archived';
@@ -127,6 +127,41 @@ export const Sidebar: React.FC = () => {
               })
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Bottom User / Cloud Sync Status */}
+      <div className="p-3.5 border-t border-neutral-200 dark:border-neutral-800 shrink-0">
+        <div className="flex items-center justify-between gap-2 px-1">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <div className={`w-2 h-2 rounded-full ${user && !isGuest ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+              <span className="text-xs font-medium text-neutral-900 dark:text-neutral-200 truncate">
+                {user && !isGuest ? user.email : 'Guest Mode'}
+              </span>
+            </div>
+            <span className="text-[10px] text-neutral-500 dark:text-neutral-400 block truncate mt-0.5">
+              {user && !isGuest ? 'Supabase Cloud Synced' : 'Offline Storage'}
+            </span>
+          </div>
+          {user && !isGuest ? (
+            <button
+              type="button"
+              onClick={logout}
+              className="text-xs text-neutral-500 hover:text-red-500 transition-colors cursor-pointer py-1 px-1.5 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              title="Log Out"
+            >
+              Log Out
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => logout()}
+              className="text-xs text-blue-500 hover:underline font-medium cursor-pointer py-1 px-1.5"
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </div>
     </aside>
