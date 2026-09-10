@@ -57,8 +57,15 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return notes.length > 0 ? notes[0].id : null;
   });
 
-  const [activeView, setActiveView] = useState<ActiveView>({ type: 'all' });
+  const [activeView, setActiveViewState] = useState<ActiveView>({ type: 'all' });
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const setActiveView = (view: ActiveView) => {
+    setActiveViewState(view);
+    if (view.type !== 'search') {
+      setSearchQuery('');
+    }
+  };
   const [isCreatingNewNote, setIsCreatingNewNote] = useState<boolean>(false);
   const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'local'>('local');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -119,33 +126,44 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Filter notes according to active view and search query
   const filteredNotes = useMemo(() => {
+    const isSearching = activeView.type === 'search' || searchQuery.trim().length > 0;
+
     return notes.filter((note) => {
-      // Trash filter
-      if (activeView.type === 'trash') {
-        if (!note.isDeleted) return false;
-      } else {
+      // If search is active (either in Search tab or via search input)
+      if (isSearching) {
+        // Search excludes permanently deleted / trash notes
         if (note.isDeleted) return false;
 
-        // Archive filter
-        if (activeView.type === 'archived' && !note.isArchived) return false;
-        if (activeView.type === 'all' && note.isArchived) return false;
-
-        // Tag filter
-        if (activeView.type === 'tag') {
-          if (!note.tags.includes(activeView.tag)) return false;
+        // If a search query is provided, match against title, content, or tags
+        if (searchQuery.trim().length > 0) {
+          const query = searchQuery.toLowerCase();
+          const matchesTitle = note.title.toLowerCase().includes(query);
+          const matchesContent = note.content.toLowerCase().includes(query);
+          const matchesTag = note.tags.some((t) => t.toLowerCase().includes(query));
+          return matchesTitle || matchesContent || matchesTag;
         }
+
+        // On Search view with no query typed yet, return all non-deleted notes
+        return true;
       }
 
-      // Search query filter (matches title, content, or any tag)
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        const matchesTitle = note.title.toLowerCase().includes(query);
-        const matchesContent = note.content.toLowerCase().includes(query);
-        const matchesTag = note.tags.some((t) => t.toLowerCase().includes(query));
-        return matchesTitle || matchesContent || matchesTag;
+      // Regular non-search view filters:
+      if (activeView.type === 'trash') {
+        return Boolean(note.isDeleted);
       }
 
-      return true;
+      if (note.isDeleted) return false;
+
+      if (activeView.type === 'archived') {
+        return Boolean(note.isArchived);
+      }
+
+      if (activeView.type === 'tag') {
+        return !note.isArchived && note.tags.includes(activeView.tag);
+      }
+
+      // Default 'all' view: non-deleted, non-archived notes
+      return !note.isArchived;
     }).sort((a, b) => {
       if (Boolean(a.isPinned) !== Boolean(b.isPinned)) {
         return a.isPinned ? -1 : 1;

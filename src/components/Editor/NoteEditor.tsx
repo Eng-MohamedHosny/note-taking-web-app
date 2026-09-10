@@ -3,7 +3,7 @@ import { useNotes } from '../../context/NotesContext';
 import { formatDate } from '../../utils/formatters';
 import { DeleteModal } from '../Modals/DeleteModal';
 import { ArchiveModal } from '../Modals/ArchiveModal';
-import { ArrowLeftIcon, DeleteIcon, ArchiveIcon, RestoreIcon, TagIcon, ClockIcon } from '../Icons';
+import { ArrowLeftIcon, DeleteIcon, ArchiveIcon, RestoreIcon, TagIcon, ClockIcon, StatusIcon } from '../Icons';
 
 interface NoteEditorProps {
   onBackToList?: () => void;
@@ -187,6 +187,21 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
               className="flex-1 text-sm bg-transparent border-none text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden"
             />
           </div>
+
+          {/* Status Row matching Figma #2173:23752;2171:16917 */}
+          {isArchived && (
+            <div className="flex items-center gap-2">
+              <div className="w-[115px] flex items-center gap-1.5 shrink-0 text-neutral-700 dark:text-neutral-400">
+                <StatusIcon className="w-4 h-4" />
+                <span className="text-sm font-normal">
+                  Status
+                </span>
+              </div>
+              <span className="text-sm font-normal text-neutral-700 dark:text-neutral-400">
+                Archived
+              </span>
+            </div>
+          )}
 
           {/* Last Edited Row */}
           <div className="flex items-center gap-2">
