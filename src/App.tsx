@@ -11,6 +11,7 @@ import { SettingsView } from './components/Settings/SettingsView';
 import { BottomMenuBar } from './components/Navigation/BottomMenuBar';
 import { FloatingActionButton } from './components/Navigation/FloatingActionButton';
 import { TagsModal } from './components/Modals/TagsModal';
+import { FoldersModal } from './components/Modals/FoldersModal';
 import { AuthModal } from './components/Auth/AuthModal';
 import { CommandPalette } from './components/CommandPalette';
 import { ToastContainer } from './components/Toast';
@@ -31,6 +32,7 @@ const MainLayout: React.FC = () => {
 
   const [mobileView, setMobileView] = useState<'list' | 'editor'>('list');
   const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
+  const [isFoldersModalOpen, setIsFoldersModalOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   // Switch to list view whenever active view changes (e.g. clicking Home, Search, Archive)
@@ -102,7 +104,10 @@ const MainLayout: React.FC = () => {
         )}
 
         {/* Mobile & Tablet Bottom Navigation Bar (Figma Tablet & Mobile specs) */}
-        <BottomMenuBar onOpenTagsModal={() => setIsTagsModalOpen(true)} />
+        <BottomMenuBar
+          onOpenTagsModal={() => setIsTagsModalOpen(true)}
+          onOpenFoldersModal={() => setIsFoldersModalOpen(true)}
+        />
 
         {/* Mobile & Tablet Floating Action Button (+ Create Note) */}
         {mobileView === 'list' && (
@@ -114,6 +119,11 @@ const MainLayout: React.FC = () => {
       <TagsModal
         isOpen={isTagsModalOpen}
         onClose={() => setIsTagsModalOpen(false)}
+      />
+
+      <FoldersModal
+        isOpen={isFoldersModalOpen}
+        onClose={() => setIsFoldersModalOpen(false)}
       />
 
       <AuthModal />

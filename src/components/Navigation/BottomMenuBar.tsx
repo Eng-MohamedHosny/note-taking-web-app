@@ -1,19 +1,21 @@
 import React from 'react';
 import { useNotes } from '../../context/NotesContext';
-import { HomeIcon, SearchIcon, ArchiveIcon, TagIcon, SettingsIcon } from '../Icons';
+import { HomeIcon, SearchIcon, ArchiveIcon, TagIcon } from '../Icons';
+import { Folder as FolderIcon } from 'lucide-react';
 
 interface BottomMenuBarProps {
   onOpenTagsModal: () => void;
+  onOpenFoldersModal: () => void;
 }
 
-export const BottomMenuBar: React.FC<BottomMenuBarProps> = ({ onOpenTagsModal }) => {
-  const { activeView, setActiveView, openSettingsTab } = useNotes();
+export const BottomMenuBar: React.FC<BottomMenuBarProps> = ({ onOpenTagsModal, onOpenFoldersModal }) => {
+  const { activeView, setActiveView } = useNotes();
 
   const isHome = activeView.type === 'all';
   const isSearch = activeView.type === 'search';
   const isArchived = activeView.type === 'archived';
   const isTag = activeView.type === 'tag';
-  const isSettings = activeView.type === 'settings';
+  const isFolder = activeView.type === 'folder';
 
   return (
     <nav
@@ -88,18 +90,18 @@ export const BottomMenuBar: React.FC<BottomMenuBarProps> = ({ onOpenTagsModal })
       {/* Divider */}
       <div className="hidden md:block w-px h-6 bg-[#E0E4EA] dark:bg-[#232530] shrink-0" />
 
-      {/* Settings Button matching Figma */}
+      {/* Folders Button (Settings lives in the top bar gear icon) */}
       <button
         type="button"
-        onClick={() => openSettingsTab('color')}
+        onClick={onOpenFoldersModal}
         className={`flex-1 md:w-[80px] md:flex-initial py-1.5 md:py-1 flex flex-col items-center justify-center gap-1 rounded-[4px] transition-colors cursor-pointer ${
-          isSettings
+          isFolder
             ? 'bg-[#EBF1FF] dark:bg-[#2B303B] text-[#335CFF]'
             : 'bg-transparent text-[#525866] dark:text-[#99A0AE] hover:bg-[#F3F5F8] dark:hover:bg-[#232530]/60'
         }`}
       >
-        <SettingsIcon className="w-5 h-5 md:w-5 md:h-5 shrink-0" />
-        <span className="hidden md:block text-[12px] font-normal leading-none tracking-tight">Settings</span>
+        <FolderIcon className="w-5 h-5 md:w-5 md:h-5 shrink-0" />
+        <span className="hidden md:block text-[12px] font-normal leading-none tracking-tight">Folders</span>
       </button>
     </nav>
   );

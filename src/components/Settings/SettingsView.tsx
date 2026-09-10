@@ -156,8 +156,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
       </div>
 
       {/* Main Content Area (528px width in Figma) */}
-      <div className="flex-1 p-6 md:p-8 md:pl-12 overflow-y-auto">
-        <div className="max-w-[528px] w-full flex flex-col gap-6">
+      <div className="flex-1 px-6 pt-6 pb-36 md:px-8 md:pt-8 md:pl-12 lg:pb-12 overflow-y-auto">
+        <div className="max-w-[528px] w-full flex flex-col gap-6 pb-4">
           {/* COLOR THEME TAB */}
           {currentTab === 'color' && (
             <>
@@ -302,11 +302,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
               </div>
 
               {/* Apply Changes Button */}
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end pt-4 pb-2">
                 <button
                   type="button"
                   onClick={handleApplyColor}
-                  className="px-4 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors cursor-pointer shadow-xs"
+                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#335CFF] hover:bg-blue-600 text-white font-medium text-sm transition-colors cursor-pointer shadow-xs active:scale-98"
                 >
                   Apply Changes
                 </button>
@@ -422,11 +422,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
               </div>
 
               {/* Apply Changes Button */}
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end pt-4 pb-2">
                 <button
                   type="button"
                   onClick={handleApplyFont}
-                  className="px-4 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors cursor-pointer shadow-xs"
+                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#335CFF] hover:bg-blue-600 text-white font-medium text-sm transition-colors cursor-pointer shadow-xs active:scale-98"
                 >
                   Apply Changes
                 </button>
@@ -533,11 +533,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
               </div>
 
               {/* Save Password Button */}
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end pt-4 pb-2">
                 <button
                   type="submit"
                   disabled={isSubmittingPassword}
-                  className="px-4 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#335CFF] hover:bg-blue-600 text-white font-medium text-sm transition-colors cursor-pointer shadow-xs disabled:opacity-50 active:scale-98"
                 >
                   {isSubmittingPassword ? 'Saving...' : 'Save Password'}
                 </button>
