@@ -17,7 +17,7 @@ interface AuthContextType {
   loginAsGuest: () => void;
   loginWithEmail: (email: string, password: string) => Promise<{ error?: string }>;
   loginWithGoogle: () => Promise<{ error?: string }>;
-  signUpWithEmail: (email: string, password: string) => Promise<{ error?: string }>;
+  signUpWithEmail: (email: string, password: string) => Promise<{ error?: string; needsConfirmation?: boolean }>;
   resetPassword: (email: string) => Promise<{ error?: string }>;
   updatePassword: (newPassword: string) => Promise<{ error?: string }>;
   logout: () => void;
@@ -115,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return {};
   };
 
-  const signUpWithEmail = async (email: string, password: string): Promise<{ error?: string }> => {
+  const signUpWithEmail = async (email: string, password: string): Promise<{ error?: string; needsConfirmation?: boolean }> => {
     if (!supabase) {
       setUser({ id: 'local-user', email });
       setIsGuest(false);
@@ -124,10 +124,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return {};
     }
 
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+      },
+    });
     if (error) return { error: error.message };
 
-    if (data.user) {
+    // If confirmation is required, Supabase returns a user but session is null
+    if (data.user && !data.session) {
+      return { needsConfirmation: true };
+    }
+
+    if (data.user && data.session) {
       setUser({ id: data.user.id, email: data.user.email || '' });
       setIsGuest(false);
       localStorage.setItem('notes_auth_guest', 'false');

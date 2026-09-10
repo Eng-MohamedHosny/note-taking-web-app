@@ -36,8 +36,14 @@ export const AuthModal: React.FC = () => {
           return;
         }
         const res = await signUpWithEmail(email, password);
-        if (res.error) setError(res.error);
-        else addToast('Account created successfully', 'success');
+        if (res.error) {
+          setError(res.error);
+        } else if (res.needsConfirmation) {
+          addToast('Confirmation link sent! Please check your email inbox and spam folder.', 'info');
+          setAuthModal('login');
+        } else {
+          addToast('Account created successfully', 'success');
+        }
       } else if (authModal === 'forgot-password') {
         const res = await resetPassword(email);
         if (res.error) setError(res.error);

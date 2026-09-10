@@ -46,6 +46,9 @@ export const AuthPage: React.FC = () => {
         const res = await signUpWithEmail(email, password);
         if (res.error) {
           setError(res.error);
+        } else if (res.needsConfirmation) {
+          addToast('Confirmation link sent! Please check your email inbox and spam folder.', 'info');
+          setMode('login');
         } else {
           addToast('Account created! You are now logged in.', 'success');
         }
