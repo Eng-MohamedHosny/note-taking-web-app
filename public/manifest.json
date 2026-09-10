@@ -1,0 +1,29 @@
+{
+  "short_name": "Notes",
+  "name": "Note-Taking Web App",
+  "icons": [
+    {
+      "src": "/assets/images/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/images/favicon-32x32.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/images/favicon-32x32.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#FFFFFF",
+  "theme_color": "#335CFF",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "description": "Full-featured, offline-ready note-taking web application with instant search, rich formatting, and cloud synchronization."
+}

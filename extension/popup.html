@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        width: 320px;
+        padding: 16px;
+        font-family: system-ui, -apple-system, sans-serif;
+        margin: 0;
+        background: #FFFFFF;
+        color: #0E121B;
+      }
+      h2 {
+        font-size: 16px;
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      input, textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 8px 10px;
+        border: 1px solid #E0E4EA;
+        border-radius: 6px;
+        font-size: 13px;
+        margin-bottom: 10px;
+        font-family: inherit;
+      }
+      textarea {
+        height: 100px;
+        resize: none;
+      }
+      input:focus, textarea:focus {
+        outline: none;
+        border-color: #335CFF;
+      }
+      .btn {
+        width: 100%;
+        padding: 8px 12px;
+        background: #335CFF;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: #2547D0;
+      }
+      .status {
+        margin-top: 8px;
+        font-size: 12px;
+        text-align: center;
+        color: #21C16B;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>📝 Notes Quick Capture</h2>
+    <input type="text" id="title" placeholder="Note title..." />
+    <input type="text" id="tags" placeholder="Tags (comma separated)..." />
+    <textarea id="content" placeholder="Type or paste your snippet here..."></textarea>
+    <button class="btn" id="saveBtn">Save Note</button>
+    <div class="status" id="status">✓ Note saved successfully!</div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

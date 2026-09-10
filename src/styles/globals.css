@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-neutral-950: #0E121B;
+  --color-neutral-900: #191B25;
+  --color-neutral-800: #232530;
+  --color-neutral-700: #2B303B;
+  --color-neutral-600: #525866;
+  --color-neutral-500: #717784;
+  --color-neutral-400: #99A0AE;
+  --color-neutral-300: #CACFD8;
+  --color-neutral-200: #E0E4EA;
+  --color-neutral-100: #F3F5F8;
+  --color-neutral-50:  #F5F7FA;
+  --color-white:       #FFFFFF;
+
+  --color-blue-700: #2547D0;
+  --color-blue-500: #335CFF;
+  --color-blue-100: #EBF1FF;
+
+  --color-green-500: #21C16B;
+  --color-green-100: #D1FBE9;
+
+  --color-red-500: #FB3748;
+  --color-red-100: #FFD5D8;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Noto Serif', Georgia, serif;
+  --font-mono: 'Source Code Pro', monospace;
+  --font-logo: 'Pacifico', cursive;
+}
+
+/* Font theme overrides controlled by html[data-font-theme] */
+html[data-font-theme="sans-serif"] {
+  font-family: var(--font-sans);
+}
+
+html[data-font-theme="serif"] {
+  font-family: var(--font-serif);
+}
+
+html[data-font-theme="monospace"] {
+  font-family: var(--font-mono);
+}
+
+/* Custom scrollbar matching Figma sleek design */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CACFD8;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #2B303B;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #99A0AE;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #525866;
+}
+
+/* Focus rings styled cleanly as per Figma */
+*:focus-visible {
+  outline: 2px solid #335CFF;
+  outline-offset: 2px;
+}

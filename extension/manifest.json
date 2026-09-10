@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Notes Quick Capture",
+  "version": "1.0.0",
+  "description": "Quickly capture notes, thoughts, and web snippets directly into your Notes App.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Capture Note"
+  },
+  "permissions": [
+    "storage",
+    "activeTab"
+  ]
+}
