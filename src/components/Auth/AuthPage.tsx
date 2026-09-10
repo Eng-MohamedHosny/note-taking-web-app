@@ -7,6 +7,7 @@ import { GoogleIcon, ShowPasswordIcon, HidePasswordIcon, ArrowLeftIcon } from '.
 export const AuthPage: React.FC = () => {
   const {
     loginWithEmail,
+    loginWithGoogle,
     signUpWithEmail,
     resetPassword,
     updatePassword,
@@ -238,9 +239,12 @@ export const AuthPage: React.FC = () => {
             {/* Google OAuth Button */}
             <button
               type="button"
-              onClick={() => {
-                loginAsGuest();
-                addToast('Signed in with Google (Demo Mode)', 'success');
+              onClick={async () => {
+                setError('');
+                const res = await loginWithGoogle();
+                if (res.error) {
+                  setError(`Google Sign-In: ${res.error}. Please ensure Google Provider is enabled in your Supabase dashboard.`);
+                }
               }}
               className="w-full py-3 px-4 rounded-lg border border-[#E0E4EA] dark:border-[#2B303B] hover:bg-[#F3F5F8] dark:hover:bg-[#232530] text-[#0E121B] dark:text-white font-medium text-sm flex items-center justify-center gap-3 transition-colors cursor-pointer"
             >

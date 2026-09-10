@@ -16,6 +16,7 @@ interface AuthContextType {
   setAuthModal: (mode: AuthMode) => void;
   loginAsGuest: () => void;
   loginWithEmail: (email: string, password: string) => Promise<{ error?: string }>;
+  loginWithGoogle: () => Promise<{ error?: string }>;
   signUpWithEmail: (email: string, password: string) => Promise<{ error?: string }>;
   resetPassword: (email: string) => Promise<{ error?: string }>;
   updatePassword: (newPassword: string) => Promise<{ error?: string }>;
@@ -94,6 +95,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return {};
   };
 
+  const loginWithGoogle = async (): Promise<{ error?: string }> => {
+    if (!supabase) {
+      setUser({ id: 'google-demo-user', email: 'user@gmail.com' });
+      setIsGuest(false);
+      localStorage.setItem('notes_auth_guest', 'false');
+      setAuthModal(null);
+      return {};
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+
+    if (error) return { error: error.message };
+    return {};
+  };
+
   const signUpWithEmail = async (email: string, password: string): Promise<{ error?: string }> => {
     if (!supabase) {
       setUser({ id: 'local-user', email });
@@ -153,6 +174,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthModal,
         loginAsGuest,
         loginWithEmail,
+        loginWithGoogle,
         signUpWithEmail,
         resetPassword,
         updatePassword,
