@@ -1,4 +1,4 @@
-﻿import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { Note } from '../types/note';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
@@ -35,6 +35,7 @@ export async function fetchCloudNotes(userId: string): Promise<Note[]> {
     id: row.id,
     title: row.title,
     tags: Array.isArray(row.tags) ? row.tags : [],
+    folder: row.folder || undefined,
     content: row.content || '',
     lastEdited: row.last_edited,
     isArchived: Boolean(row.is_archived),
@@ -46,7 +47,7 @@ export async function fetchCloudNotes(userId: string): Promise<Note[]> {
 
 export async function upsertCloudNote(note: Note, userId: string): Promise<boolean> {
   if (!supabase) return false;
-  const payload = {
+  const payload: any = {
     id: note.id,
     user_id: userId,
     title: note.title,
@@ -57,8 +58,17 @@ export async function upsertCloudNote(note: Note, userId: string): Promise<boole
     is_pinned: Boolean(note.isPinned),
     is_deleted: Boolean(note.isDeleted),
   };
+  if (note.folder) {
+    payload.folder = note.folder;
+  }
 
-  const { error } = await supabase.from('notes').upsert(payload, { onConflict: 'id' });
+  let { error } = await supabase.from('notes').upsert(payload, { onConflict: 'id' });
+  if (error && (error.message.includes('folder') || error.code === '42703')) {
+    // If folder column doesn't exist on remote table yet, retry without folder
+    delete payload.folder;
+    const retry = await supabase.from('notes').upsert(payload, { onConflict: 'id' });
+    error = retry.error;
+  }
   if (error) {
     console.error('Error syncing note to cloud:', error.message);
     return false;

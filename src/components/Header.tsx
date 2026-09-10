@@ -16,6 +16,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
         return 'All Notes';
       case 'archived':
         return 'Archived Notes';
+      case 'folder':
+        return `Folder: ${activeView.folder}`;
       case 'tag':
         return `Notes Tagged: ${activeView.tag}`;
       case 'settings':

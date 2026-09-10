@@ -7,13 +7,10 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { NoteList } from './components/NoteList';
 import { NoteEditor } from './components/Editor/NoteEditor';
-import { RightSidebar } from './components/RightSidebar';
 import { SettingsView } from './components/Settings/SettingsView';
 import { BottomMenuBar } from './components/Navigation/BottomMenuBar';
 import { FloatingActionButton } from './components/Navigation/FloatingActionButton';
 import { TagsModal } from './components/Modals/TagsModal';
-import { DeleteModal } from './components/Modals/DeleteModal';
-import { ArchiveModal } from './components/Modals/ArchiveModal';
 import { AuthModal } from './components/Auth/AuthModal';
 import { CommandPalette } from './components/CommandPalette';
 import { ToastContainer } from './components/Toast';
@@ -34,8 +31,6 @@ const MainLayout: React.FC = () => {
 
   const [mobileView, setMobileView] = useState<'list' | 'editor'>('list');
   const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
-  const [isRightDeleteOpen, setIsRightDeleteOpen] = useState(false);
-  const [isRightArchiveOpen, setIsRightArchiveOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   // Switch to list view whenever active view changes (e.g. clicking Home, Search, Archive)
@@ -103,21 +98,6 @@ const MainLayout: React.FC = () => {
             >
               <NoteEditor onBackToList={() => setMobileView('list')} />
             </div>
-
-            {/* Right Menu Sidebar (258px in Figma Desktop) */}
-            {selectedNote && !isCreatingNewNote && (
-              <RightSidebar
-                onArchive={() => setIsRightArchiveOpen(true)}
-                onDelete={() => setIsRightDeleteOpen(true)}
-                onRestore={() => {
-                  if (selectedNote.isDeleted) {
-                    restoreNote(selectedNote.id);
-                  } else {
-                    restoreNote(selectedNote.id);
-                  }
-                }}
-              />
-            )}
           </div>
         )}
 
@@ -135,23 +115,6 @@ const MainLayout: React.FC = () => {
         isOpen={isTagsModalOpen}
         onClose={() => setIsTagsModalOpen(false)}
       />
-
-      {selectedNote && (
-        <>
-          <DeleteModal
-            isOpen={isRightDeleteOpen}
-            onClose={() => setIsRightDeleteOpen(false)}
-            onConfirm={() => deleteNote(selectedNote.id)}
-            isPermanent={Boolean(selectedNote.isDeleted)}
-          />
-
-          <ArchiveModal
-            isOpen={isRightArchiveOpen}
-            onClose={() => setIsRightArchiveOpen(false)}
-            onConfirm={() => archiveNote(selectedNote.id)}
-          />
-        </>
-      )}
 
       <AuthModal />
 

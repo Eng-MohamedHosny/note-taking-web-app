@@ -55,7 +55,7 @@ export const NoteGridCard: React.FC<NoteGridCardProps> = ({ note, isSelected, on
             dir="auto"
             className="text-[13px] leading-relaxed text-neutral-600 dark:text-[#99A0AE] line-clamp-3 sm:line-clamp-4 font-normal whitespace-pre-line"
           >
-            {note.content}
+            {note.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}
           </p>
         ) : (
           <p className="text-[12px] italic text-neutral-400 dark:text-neutral-500">

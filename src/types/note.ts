@@ -2,6 +2,7 @@ export interface Note {
   id: string;
   title: string;
   tags: string[];
+  folder?: string;
   content: string;
   lastEdited: string;
   isArchived: boolean;
@@ -19,6 +20,7 @@ export type SettingsTab = 'color' | 'font' | 'password';
 export type ActiveView = 
   | { type: 'all' }
   | { type: 'archived' }
+  | { type: 'folder'; folder: string }
   | { type: 'tag'; tag: string }
   | { type: 'search' }
   | { type: 'settings'; tab: SettingsTab }

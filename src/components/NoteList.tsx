@@ -45,6 +45,8 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
         return 'All Notes';
       case 'archived':
         return 'Archived Notes';
+      case 'folder':
+        return `Folder: ${activeView.folder}`;
       case 'tag':
         return `Notes Tagged: ${activeView.tag}`;
       case 'settings':
@@ -134,6 +136,10 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
           <p className="text-sm text-[#2B303B] dark:text-[#CACFD8] mt-2 mb-2">
             All your archived notes are stored here. You can restore or delete them anytime.
           </p>
+        ) : activeView.type === 'folder' ? (
+          <p className="text-sm text-[#2B303B] dark:text-[#CACFD8] mt-2 mb-2">
+            All notes in folder <span className="text-[#0E121B] dark:text-white font-medium">”{activeView.folder}”</span> are shown here.
+          </p>
         ) : activeView.type === 'tag' ? (
           <p className="text-sm text-[#2B303B] dark:text-[#CACFD8] mt-2 mb-2">
             All notes with the <span className="text-[#0E121B] dark:text-white font-medium">”{activeView.tag}”</span> tag are shown here.
@@ -203,6 +209,10 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
         <div className="hidden lg:block px-4 pt-3 pb-1 text-sm text-[#2B303B] dark:text-[#CACFD8]">
           All your archived notes are stored here. You can restore or delete them anytime.
         </div>
+      ) : activeView.type === 'folder' ? (
+        <div className="hidden lg:block px-4 pt-3 pb-1 text-sm text-[#2B303B] dark:text-[#CACFD8]">
+          All notes in folder <span className="text-[#0E121B] dark:text-white font-medium">”{activeView.folder}”</span> are displayed below.
+        </div>
       ) : activeView.type === 'tag' ? (
         <div className="hidden lg:block px-4 pt-3 pb-1 text-sm text-[#2B303B] dark:text-[#CACFD8]">
           All notes with the <span className="text-[#0E121B] dark:text-white font-medium">”{activeView.tag}”</span> tag are shown here.
@@ -228,6 +238,18 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
             ) : activeView.type === 'archived' ? (
               <>
                 No notes have been archived yet. Move notes here for safekeeping, or{' '}
+                <button
+                  type="button"
+                  onClick={handleCreateNew}
+                  className="underline text-[#0E121B] dark:text-white hover:text-[#335CFF] transition-colors cursor-pointer font-normal"
+                >
+                  create a new note
+                </button>
+                .
+              </>
+            ) : activeView.type === 'folder' ? (
+              <>
+                No notes in folder "{activeView.folder}" yet.{' '}
                 <button
                   type="button"
                   onClick={handleCreateNew}

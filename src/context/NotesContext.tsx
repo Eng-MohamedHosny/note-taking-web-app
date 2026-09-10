@@ -15,6 +15,7 @@ interface NotesContextType {
   syncStatus: 'synced' | 'syncing' | 'local';
   toasts: ToastMessage[];
   allTags: string[];
+  allFolders: string[];
   filteredNotes: Note[];
   
   // Actions
@@ -25,7 +26,9 @@ interface NotesContextType {
   setSearchQuery: (query: string) => void;
   setIsCreatingNewNote: (isCreating: boolean) => void;
   startNewNote: () => void;
-  saveNote: (updated: { title: string; content: string; tags: string[] }) => void;
+  saveNote: (updated: { title: string; content: string; tags: string[]; folder?: string }) => void;
+  createFolder: (name: string) => boolean;
+  deleteFolder: (name: string) => void;
   archiveNote: (id: string) => void;
   restoreNote: (id: string) => void;
   togglePinNote: (id: string) => void;
@@ -135,6 +138,62 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // Custom folders stored in local storage
+  const [customFolders, setCustomFolders] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('notes_app_folders');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to parse folders from localStorage:', e);
+    }
+    return ['Personal', 'Work'];
+  });
+
+  // Unique folders derived from custom list + existing notes
+  const allFolders = useMemo(() => {
+    const folderSet = new Set<string>(customFolders);
+    notes.forEach((note) => {
+      if (!note.isDeleted && note.folder && note.folder.trim()) {
+        folderSet.add(note.folder.trim());
+      }
+    });
+    return Array.from(folderSet).sort((a, b) => a.localeCompare(b));
+  }, [notes, customFolders]);
+
+  const createFolder = (name: string): boolean => {
+    const trimmed = name.trim();
+    if (!trimmed) return false;
+    if (allFolders.some((f) => f.toLowerCase() === trimmed.toLowerCase())) {
+      addToast('Folder already exists', 'error');
+      return false;
+    }
+    setCustomFolders((prev) => {
+      const updated = [...prev, trimmed];
+      localStorage.setItem('notes_app_folders', JSON.stringify(updated));
+      return updated;
+    });
+    addToast(`Folder "${trimmed}" created`, 'success');
+    return true;
+  };
+
+  const deleteFolder = (name: string) => {
+    setCustomFolders((prev) => {
+      const updated = prev.filter((f) => f !== name);
+      localStorage.setItem('notes_app_folders', JSON.stringify(updated));
+      return updated;
+    });
+    setNotes((prev) =>
+      prev.map((n) => (n.folder === name ? { ...n, folder: undefined } : n))
+    );
+    if (activeView.type === 'folder' && activeView.folder === name) {
+      setActiveView({ type: 'all' });
+    }
+    addToast(`Folder "${name}" deleted`, 'info');
+  };
+
   // Extract unique tags alphabetically
   const allTags = useMemo(() => {
     const tagSet = new Set<string>();
@@ -162,9 +221,11 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (searchQuery.trim().length > 0) {
           const query = searchQuery.toLowerCase();
           const matchesTitle = note.title.toLowerCase().includes(query);
-          const matchesContent = note.content.toLowerCase().includes(query);
+          const plainContent = note.content ? note.content.replace(/<[^>]*>/g, ' ').toLowerCase() : '';
+          const matchesContent = plainContent.includes(query) || note.content.toLowerCase().includes(query);
           const matchesTag = note.tags.some((t) => t.toLowerCase().includes(query));
-          return matchesTitle || matchesContent || matchesTag;
+          const matchesFolder = Boolean(note.folder && note.folder.toLowerCase().includes(query));
+          return matchesTitle || matchesContent || matchesTag || matchesFolder;
         }
 
         // On Search view with no query typed yet, return all non-deleted notes
@@ -180,6 +241,10 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       if (activeView.type === 'archived') {
         return Boolean(note.isArchived);
+      }
+
+      if (activeView.type === 'folder') {
+        return !note.isArchived && note.folder === activeView.folder;
       }
 
       if (activeView.type === 'tag') {
@@ -222,8 +287,23 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsCreatingNewNote(false);
   };
 
-  const saveNote = ({ title, content, tags }: { title: string; content: string; tags: string[] }) => {
+  const saveNote = ({
+    title,
+    content,
+    tags,
+    folder,
+  }: {
+    title: string;
+    content: string;
+    tags: string[];
+    folder?: string;
+  }) => {
     const now = new Date().toISOString();
+    const defaultFolder = folder !== undefined
+      ? folder
+      : activeView.type === 'folder'
+      ? activeView.folder
+      : undefined;
 
     if (isCreatingNewNote) {
       const newNote: Note = {
@@ -231,6 +311,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         title: title.trim() || 'Untitled Note',
         content,
         tags: tags.map((t) => t.trim()).filter(Boolean),
+        folder: defaultFolder,
         lastEdited: now,
         isArchived: false,
         isPinned: false,
@@ -255,6 +336,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               title: title.trim() || 'Untitled Note',
               content,
               tags: tags.map((t) => t.trim()).filter(Boolean),
+              folder: folder !== undefined ? folder : note.folder,
               lastEdited: now,
             };
             if (!isGuest && user) {
@@ -364,6 +446,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         syncStatus,
         toasts,
         allTags,
+        allFolders,
         filteredNotes,
         selectNote,
         setActiveView,
@@ -373,6 +456,8 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setIsCreatingNewNote,
         startNewNote,
         saveNote,
+        createFolder,
+        deleteFolder,
         archiveNote,
         restoreNote,
         togglePinNote,
