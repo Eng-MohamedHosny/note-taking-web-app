@@ -134,8 +134,8 @@ const AppContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-[#F3F5F8] dark:bg-[#0E121B]">
-        <div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+      <div className="h-screen w-screen flex items-center justify-center bg-[#0E121B]">
+        <div className="w-8 h-8 rounded-full border-2 border-[#335CFF] border-t-transparent animate-spin" />
       </div>
     );
   }

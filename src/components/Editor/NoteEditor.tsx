@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNotes } from '../../context/NotesContext';
 import { formatDate } from '../../utils/formatters';
 import { DeleteModal } from '../Modals/DeleteModal';
@@ -27,8 +27,6 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
     archiveNote,
     restoreNote,
     deleteNote,
-    selectNote,
-    addToast,
     activeView,
     allFolders,
     createFolder,
@@ -41,27 +39,146 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
 
+  // Auto-save state
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
+  const isDirtyRef = useRef(false);
+  const lastLoadedIdRef = useRef<string | null>(null);
+
   // Modals state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
 
+  // Synchronize state when selectedNote or mode changes
   useEffect(() => {
     if (isCreatingNewNote) {
-      setTitle('');
-      setContent('');
-      setTagsInput('');
-      setFolder(activeView.type === 'folder' ? activeView.folder : '');
-      setIsCreatingFolder(false);
-      setNewFolderName('');
+      if (lastLoadedIdRef.current !== '__new__') {
+        lastLoadedIdRef.current = '__new__';
+        setTitle('');
+        setContent('');
+        setTagsInput('');
+        setFolder(activeView.type === 'folder' ? activeView.folder : '');
+        setIsCreatingFolder(false);
+        setNewFolderName('');
+        isDirtyRef.current = false;
+        setSaveStatus('saved');
+      }
     } else if (selectedNote) {
-      setTitle(selectedNote.title);
-      setContent(selectedNote.content);
-      setTagsInput(selectedNote.tags.join(', '));
-      setFolder(selectedNote.folder || '');
-      setIsCreatingFolder(false);
-      setNewFolderName('');
+      if (lastLoadedIdRef.current !== selectedNote.id) {
+        lastLoadedIdRef.current = selectedNote.id;
+        setTitle(selectedNote.title);
+        setContent(selectedNote.content);
+        setTagsInput(selectedNote.tags.join(', '));
+        setFolder(selectedNote.folder || '');
+        setIsCreatingFolder(false);
+        setNewFolderName('');
+        isDirtyRef.current = false;
+        setSaveStatus('saved');
+      }
     }
   }, [selectedNote, isCreatingNewNote, activeView]);
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    if (!isDirtyRef.current) return;
+
+    const plainText = content.replace(/<[^>]*>/g, '').trim();
+    // In creation mode, do not create a note until the user types something
+    if (isCreatingNewNote && !title.trim() && !plainText) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      const parsedTags = tagsInput
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const savedId = saveNote({
+        title: title.trim() || 'Untitled Note',
+        content,
+        tags: parsedTags,
+        folder: folder.trim() || undefined,
+        silent: true,
+      });
+
+      if (savedId) {
+        lastLoadedIdRef.current = savedId;
+      }
+      isDirtyRef.current = false;
+      setSaveStatus('saved');
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [title, content, tagsInput, folder, isCreatingNewNote, saveNote]);
+
+  const handleTitleChange = (val: string) => {
+    setTitle(val);
+    isDirtyRef.current = true;
+    setSaveStatus('saving');
+  };
+
+  const handleContentChange = (val: string) => {
+    setContent(val);
+    isDirtyRef.current = true;
+    setSaveStatus('saving');
+  };
+
+  const handleTagsChange = (val: string) => {
+    setTagsInput(val);
+    isDirtyRef.current = true;
+    setSaveStatus('saving');
+  };
+
+  const handleFolderChange = (val: string) => {
+    setFolder(val);
+    isDirtyRef.current = true;
+    setSaveStatus('saving');
+  };
+
+  const flushSave = () => {
+    if (!isDirtyRef.current) return;
+    const plainText = content.replace(/<[^>]*>/g, '').trim();
+    if (isCreatingNewNote && !title.trim() && !plainText) return;
+
+    const parsedTags = tagsInput
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    const savedId = saveNote({
+      title: title.trim() || 'Untitled Note',
+      content,
+      tags: parsedTags,
+      folder: folder.trim() || undefined,
+      silent: true,
+    });
+
+    if (savedId) {
+      lastLoadedIdRef.current = savedId;
+    }
+    isDirtyRef.current = false;
+    setSaveStatus('saved');
+  };
+
+  const handleBack = () => {
+    flushSave();
+    if (onBackToList) {
+      onBackToList();
+    }
+  };
+
+  const handleCreateNewFolder = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFolderName.trim()) return;
+    const ok = createFolder(newFolderName.trim());
+    if (ok) {
+      setFolder(newFolderName.trim());
+      setNewFolderName('');
+      setIsCreatingFolder(false);
+      isDirtyRef.current = true;
+      setSaveStatus('saving');
+    }
+  };
 
   if (!selectedNote && !isCreatingNewNote) {
     return (
@@ -76,55 +193,6 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
     );
   }
 
-  const handleSave = () => {
-    const plainText = content.replace(/<[^>]*>/g, '').trim();
-    if (!title.trim() && !plainText) {
-      addToast('Cannot save an empty note', 'error');
-      return;
-    }
-
-    const parsedTags = tagsInput
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
-
-    saveNote({
-      title: title.trim() || 'Untitled Note',
-      content,
-      tags: parsedTags,
-      folder: folder.trim() || undefined,
-    });
-
-    if (onBackToList) {
-      onBackToList();
-    }
-  };
-
-  const handleCancel = () => {
-    if (isCreatingNewNote) {
-      selectNote(null);
-    } else if (selectedNote) {
-      setTitle(selectedNote.title);
-      setContent(selectedNote.content);
-      setTagsInput(selectedNote.tags.join(', '));
-      setFolder(selectedNote.folder || '');
-    }
-    if (onBackToList) {
-      onBackToList();
-    }
-  };
-
-  const handleCreateNewFolder = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFolderName.trim()) return;
-    const ok = createFolder(newFolderName.trim());
-    if (ok) {
-      setFolder(newFolderName.trim());
-      setNewFolderName('');
-      setIsCreatingFolder(false);
-    }
-  };
-
   const isArchived = Boolean(selectedNote?.isArchived);
   const isTrash = Boolean(selectedNote?.isDeleted);
 
@@ -134,14 +202,29 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
       <div className="lg:hidden h-14 px-4 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between gap-3 bg-white dark:bg-neutral-900 shrink-0">
         <button
           type="button"
-          onClick={onBackToList}
+          onClick={handleBack}
           className="flex items-center gap-1 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:text-neutral-950 dark:hover:text-white cursor-pointer"
         >
           <ArrowLeftIcon className="w-4 h-4" />
           <span>Go Back</span>
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Auto-save status */}
+          <div className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 select-none">
+            {saveStatus === 'saving' ? (
+              <>
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span>Saving…</span>
+              </>
+            ) : (
+              <>
+                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Saved</span>
+              </>
+            )}
+          </div>
+
           {selectedNote && (
             <>
               <button
@@ -157,9 +240,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
               <button
                 type="button"
                 onClick={() => {
-                  if (isTrash) {
-                    restoreNote(selectedNote.id);
-                  } else if (isArchived) {
+                  if (isTrash || isArchived) {
                     restoreNote(selectedNote.id);
                   } else {
                     setIsArchiveModalOpen(true);
@@ -177,22 +258,6 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
               </button>
             </>
           )}
-
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white px-2 py-1 cursor-pointer"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="button"
-            onClick={handleSave}
-            className="text-xs font-semibold text-[#335CFF] hover:text-blue-600 px-2 py-1 cursor-pointer"
-          >
-            Save Note
-          </button>
         </div>
       </div>
 
@@ -203,7 +268,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
           <span>
             {selectedNote
               ? `Last edited: ${formatDate(selectedNote.lastEdited)}`
-              : 'New unsaved note'}
+              : 'New note'}
           </span>
           {folder && (
             <>
@@ -216,9 +281,25 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Auto-save status indicator */}
+          <div className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 select-none">
+            {saveStatus === 'saving' ? (
+              <>
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span className="font-medium text-neutral-600 dark:text-neutral-300">Saving…</span>
+              </>
+            ) : (
+              <>
+                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                <span className="font-medium text-neutral-600 dark:text-neutral-300">Saved</span>
+              </>
+            )}
+          </div>
+
           {selectedNote && !isCreatingNewNote && (
             <>
+              <div className="w-px h-4 bg-neutral-200 dark:border-neutral-800 mx-0.5" />
               {isTrash ? (
                 <>
                   <button
@@ -280,25 +361,8 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
                   </button>
                 </>
               )}
-              <div className="w-px h-4 bg-neutral-200 dark:bg-neutral-800 mx-1" />
             </>
           )}
-
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 text-xs font-medium transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="button"
-            onClick={handleSave}
-            className="px-4 py-1.5 rounded-lg bg-[#335CFF] hover:bg-blue-600 text-white text-xs font-semibold transition-colors cursor-pointer shadow-xs"
-          >
-            Save Note
-          </button>
         </div>
       </div>
 
@@ -308,7 +372,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
         <input
           type="text"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => handleTitleChange(e.target.value)}
           placeholder="Enter a title…"
           className="w-full text-2xl font-bold bg-transparent border-none text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden mb-4 tracking-tight"
         />
@@ -354,7 +418,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
               <div className="flex items-center gap-2 flex-wrap">
                 <select
                   value={folder}
-                  onChange={(e) => setFolder(e.target.value)}
+                  onChange={(e) => handleFolderChange(e.target.value)}
                   className="px-2.5 py-1 text-xs rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:outline-hidden focus:border-[#335CFF] cursor-pointer"
                 >
                   <option value="">(No Folder / General)</option>
@@ -386,7 +450,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
             <input
               type="text"
               value={tagsInput}
-              onChange={(e) => setTagsInput(e.target.value)}
+              onChange={(e) => handleTagsChange(e.target.value)}
               placeholder="Add tags separated by commas (e.g. Work, Planning)"
               className="flex-1 text-sm bg-transparent border-none text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden"
             />
@@ -422,27 +486,9 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
         <div className="flex-1 flex flex-col min-h-[360px]">
           <WysiwygEditor
             content={content}
-            onChange={setContent}
+            onChange={handleContentChange}
             placeholder="Start typing your note…"
           />
-        </div>
-
-        {/* 5. Bottom Save & Cancel Bar */}
-        <div className="hidden lg:flex items-center gap-4 pt-6 mt-4 border-t border-neutral-200 dark:border-neutral-800 shrink-0">
-          <button
-            type="button"
-            onClick={handleSave}
-            className="px-5 py-2.5 rounded-lg bg-[#335CFF] hover:bg-blue-600 text-white font-medium text-sm transition-colors cursor-pointer shadow-xs"
-          >
-            Save Note
-          </button>
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="px-4 py-2.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white transition-colors cursor-pointer font-medium text-sm"
-          >
-            Cancel
-          </button>
         </div>
       </div>
 

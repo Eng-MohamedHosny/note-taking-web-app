@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNotes } from '../context/NotesContext';
 import { Logo } from './Logo';
-import { SearchIcon, SettingsIcon, CrossIcon } from './Icons';
+import { SearchIcon, SettingsIcon, CrossIcon, TagIcon } from './Icons';
+import { Folder as FolderIcon } from 'lucide-react';
 
 interface HeaderProps {
   onOpenSettings: () => void;
@@ -10,16 +11,28 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
   const { activeView, searchQuery, setSearchQuery } = useNotes();
 
-  const getHeadingTitle = () => {
+  const renderHeadingTitle = () => {
+    if (activeView.type === 'folder') {
+      return (
+        <span className="inline-flex items-center gap-2.5">
+          <FolderIcon className="w-6 h-6 text-[#335CFF] shrink-0" />
+          <span>{activeView.folder}</span>
+        </span>
+      );
+    }
+    if (activeView.type === 'tag') {
+      return (
+        <span className="inline-flex items-center gap-2.5">
+          <TagIcon className="w-6 h-6 text-[#335CFF] shrink-0" />
+          <span>{activeView.tag}</span>
+        </span>
+      );
+    }
     switch (activeView.type) {
       case 'all':
         return 'All Notes';
       case 'archived':
         return 'Archived Notes';
-      case 'folder':
-        return `Folder: ${activeView.folder}`;
-      case 'tag':
-        return `Notes Tagged: ${activeView.tag}`;
       case 'settings':
         return 'Settings';
       case 'search':
@@ -43,14 +56,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
         </div>
 
         {/* Desktop Page Title matching Figma EL-894ecec4 & EL-ba71f4b7 */}
-        <h1 className="hidden lg:block text-2xl font-bold tracking-tight">
+        <h1 className="hidden lg:flex items-center text-2xl font-bold tracking-tight">
           {isSearching ? (
             <>
               <span className="text-[#525866] dark:text-[#CACFD8]">Showing results for: </span>
               <span className="text-[#0E121B] dark:text-white">{searchQuery}</span>
             </>
           ) : (
-            <span className="text-[#0E121B] dark:text-white">{getHeadingTitle()}</span>
+            <span className="text-[#0E121B] dark:text-white flex items-center">{renderHeadingTitle()}</span>
           )}
         </h1>
       </div>

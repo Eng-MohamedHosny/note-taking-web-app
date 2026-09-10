@@ -26,7 +26,7 @@ interface NotesContextType {
   setSearchQuery: (query: string) => void;
   setIsCreatingNewNote: (isCreating: boolean) => void;
   startNewNote: () => void;
-  saveNote: (updated: { title: string; content: string; tags: string[]; folder?: string }) => void;
+  saveNote: (updated: { title: string; content: string; tags: string[]; folder?: string; silent?: boolean }) => string | undefined;
   createFolder: (name: string) => boolean;
   deleteFolder: (name: string) => void;
   archiveNote: (id: string) => void;
@@ -292,11 +292,13 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     content,
     tags,
     folder,
+    silent = false,
   }: {
     title: string;
     content: string;
     tags: string[];
     folder?: string;
+    silent?: boolean;
   }) => {
     const now = new Date().toISOString();
     const defaultFolder = folder !== undefined
@@ -321,12 +323,15 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setNotes((prev) => [newNote, ...prev]);
       setSelectedNoteId(newNote.id);
       setIsCreatingNewNote(false);
-      addToast('Note created successfully', 'success');
+      if (!silent) {
+        addToast('Note created successfully', 'success');
+      }
 
       if (!isGuest && user) {
         setSyncStatus('syncing');
         upsertCloudNote(newNote, user.id).then(() => setSyncStatus('synced'));
       }
+      return newNote.id;
     } else if (selectedNoteId) {
       setNotes((prev) =>
         prev.map((note) => {
@@ -348,8 +353,12 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return note;
         })
       );
-      addToast('Note saved successfully', 'success');
+      if (!silent) {
+        addToast('Note saved successfully', 'success');
+      }
+      return selectedNoteId;
     }
+    return undefined;
   };
 
   const archiveNote = (id: string) => {

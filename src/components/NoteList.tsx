@@ -2,7 +2,8 @@ import React from 'react';
 import { useNotes } from '../context/NotesContext';
 import { NoteCard } from './NoteCard';
 import { NoteGridCard } from './NoteGridCard';
-import { DeleteIcon, SearchIcon, CrossIcon, GridViewIcon, ListViewIcon } from './Icons';
+import { DeleteIcon, SearchIcon, CrossIcon, GridViewIcon, ListViewIcon, TagIcon } from './Icons';
+import { Folder as FolderIcon } from 'lucide-react';
 
 interface NoteListProps {
   onSelectMobileNote?: () => void;
@@ -39,20 +40,31 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
 
   const isSearching = activeView.type === 'search' || searchQuery.trim().length > 0;
 
-  const getHeadingTitle = () => {
+  const renderHeadingTitle = () => {
+    if (activeView.type === 'search') return 'Search';
+    if (activeView.type === 'folder') {
+      return (
+        <span className="inline-flex items-center gap-2">
+          <FolderIcon className="w-5 h-5 text-[#335CFF] shrink-0" />
+          <span>{activeView.folder}</span>
+        </span>
+      );
+    }
+    if (activeView.type === 'tag') {
+      return (
+        <span className="inline-flex items-center gap-2">
+          <TagIcon className="w-5 h-5 text-[#335CFF] shrink-0" />
+          <span>{activeView.tag}</span>
+        </span>
+      );
+    }
     switch (activeView.type) {
       case 'all':
         return 'All Notes';
       case 'archived':
         return 'Archived Notes';
-      case 'folder':
-        return `Folder: ${activeView.folder}`;
-      case 'tag':
-        return `Notes Tagged: ${activeView.tag}`;
       case 'settings':
         return 'Settings';
-      case 'search':
-        return 'Search';
       case 'trash':
         return 'Trash';
       default:
@@ -65,8 +77,8 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
       {/* 1. Tablet & Mobile Viewport Top Header & Search (#2231:43924 & #2231:43568) */}
       <div className="lg:hidden px-4 pt-5 pb-2 md:px-8 md:pt-6">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold text-[#0E121B] dark:text-white tracking-tight">
-            {activeView.type === 'search' ? 'Search' : getHeadingTitle()}
+          <h1 className="text-2xl font-bold text-[#0E121B] dark:text-white tracking-tight flex items-center">
+            {renderHeadingTitle()}
           </h1>
 
           {/* Grid / List View Toggle for Mobile & Tablet */}
@@ -132,18 +144,6 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
           <p className="text-sm text-[#2B303B] dark:text-[#CACFD8] mt-4 mb-2">
             All notes matching <span className="text-[#0E121B] dark:text-white font-medium">”{searchQuery}”</span> are displayed below.
           </p>
-        ) : activeView.type === 'archived' ? (
-          <p className="text-sm text-[#2B303B] dark:text-[#CACFD8] mt-2 mb-2">
-            All your archived notes are stored here. You can restore or delete them anytime.
-          </p>
-        ) : activeView.type === 'folder' ? (
-          <p className="text-sm text-[#2B303B] dark:text-[#CACFD8] mt-2 mb-2">
-            All notes in folder <span className="text-[#0E121B] dark:text-white font-medium">”{activeView.folder}”</span> are shown here.
-          </p>
-        ) : activeView.type === 'tag' ? (
-          <p className="text-sm text-[#2B303B] dark:text-[#CACFD8] mt-2 mb-2">
-            All notes with the <span className="text-[#0E121B] dark:text-white font-medium">”{activeView.tag}”</span> tag are shown here.
-          </p>
         ) : null}
       </div>
 
@@ -200,22 +200,10 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
         </div>
       </div>
 
-      {/* 3. Desktop Subtitle Description matching Figma EL-235a7561 / EL-137555fe / EL-c4e58cf1 */}
+      {/* 3. Desktop Subtitle Description matching Figma EL-235a7561 */}
       {searchQuery.trim() ? (
         <div className="hidden lg:block px-4 pt-3 pb-1 text-sm text-[#2B303B] dark:text-[#CACFD8]">
           All notes matching <span className="text-[#0E121B] dark:text-white font-medium">”{searchQuery}”</span> are displayed below.
-        </div>
-      ) : activeView.type === 'archived' ? (
-        <div className="hidden lg:block px-4 pt-3 pb-1 text-sm text-[#2B303B] dark:text-[#CACFD8]">
-          All your archived notes are stored here. You can restore or delete them anytime.
-        </div>
-      ) : activeView.type === 'folder' ? (
-        <div className="hidden lg:block px-4 pt-3 pb-1 text-sm text-[#2B303B] dark:text-[#CACFD8]">
-          All notes in folder <span className="text-[#0E121B] dark:text-white font-medium">”{activeView.folder}”</span> are displayed below.
-        </div>
-      ) : activeView.type === 'tag' ? (
-        <div className="hidden lg:block px-4 pt-3 pb-1 text-sm text-[#2B303B] dark:text-[#CACFD8]">
-          All notes with the <span className="text-[#0E121B] dark:text-white font-medium">”{activeView.tag}”</span> tag are shown here.
         </div>
       ) : null}
 
