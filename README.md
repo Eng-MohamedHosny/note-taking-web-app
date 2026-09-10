@@ -2,6 +2,12 @@
 
 A modern, high-performance, pixel-perfect note-taking web application built according to the official **Frontend Mentor** challenge and **Figma design system**. Built with **React 19, TypeScript, Vite, Tailwind CSS v4, Supabase (BaaS)**, and designed for multi-platform access (**Web, PWA for Desktop/Mobile, and Chrome Extension**).
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Cloudflare%20Pages-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://notes-app-hosny.pages.dev)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Eng-MohamedHosny/note-taking-web-app)
+
+- **🌐 Live Demo (Cloudflare Pages):** [https://notes-app-hosny.pages.dev](https://notes-app-hosny.pages.dev)
+- **💻 GitHub Repository:** [https://github.com/Eng-MohamedHosny/note-taking-web-app](https://github.com/Eng-MohamedHosny/note-taking-web-app)
+
 ![Design preview](./preview.jpg)
 
 ---
