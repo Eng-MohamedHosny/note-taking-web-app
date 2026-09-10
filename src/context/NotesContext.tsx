@@ -38,7 +38,7 @@ interface NotesContextType {
 
 const NotesContext = createContext<NotesContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'notes_app_data_v1';
+const LOCAL_STORAGE_KEY = 'notes_app_data_v2';
 
 export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isGuest } = useAuth();
@@ -47,7 +47,11 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // If stored notes are the old dummy dataset, reset to single clean initial note
+          const isOldDataset = parsed.some((n: Note) => n.id === 'note-1' || n.title === 'React Performance Optimization');
+          if (!isOldDataset) return parsed;
+        }
       }
     } catch (e) {
       console.error('Failed to parse notes from localStorage:', e);
@@ -86,25 +90,34 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(notes));
   }, [notes]);
 
-  // Cloud sync effect when user logs in with Supabase
+  // Cloud sync effect when user logs in with Supabase or switches to Guest
   useEffect(() => {
     if (!isGuest && user) {
       setSyncStatus('syncing');
       fetchCloudNotes(user.id).then((cloudNotes) => {
         if (cloudNotes && cloudNotes.length > 0) {
-          setNotes((local) => {
-            const map = new Map<string, Note>();
-            local.forEach((n) => map.set(n.id, n));
-            cloudNotes.forEach((n) => map.set(n.id, n));
-            return Array.from(map.values());
-          });
+          setNotes(cloudNotes);
+          setSelectedNoteId(cloudNotes[0].id);
         } else {
-          notes.forEach((note) => {
+          // New user with 0 notes in Supabase: give them only the single initial welcome note
+          setNotes(INITIAL_NOTES);
+          setSelectedNoteId(INITIAL_NOTES[0].id);
+          INITIAL_NOTES.forEach((note) => {
             upsertCloudNote(note, user.id);
           });
         }
         setSyncStatus('synced');
       });
+    } else if (isGuest) {
+      // Guest mode: ensure single welcome note if prev held old dummy dataset
+      setNotes((prev) => {
+        if (prev.some((n) => n.id === 'note-1' || n.title === 'React Performance Optimization')) {
+          setSelectedNoteId(INITIAL_NOTES[0].id);
+          return INITIAL_NOTES;
+        }
+        return prev;
+      });
+      setSyncStatus('local');
     } else {
       setSyncStatus('local');
     }
