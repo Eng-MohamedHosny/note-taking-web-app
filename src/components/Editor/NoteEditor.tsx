@@ -776,7 +776,15 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
         style={{
           marginBottom: isMobileOrTablet && isToolbarActive ? `${keyboardOffset + 56}px` : '0px',
         }}
-        className={`flex-1 min-h-0 flex flex-col p-4 md:p-6 lg:p-8 overflow-y-auto overscroll-contain ${
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            const editorEl = e.currentTarget.querySelector('.tiptap') as HTMLElement;
+            if (editorEl) {
+              editorEl.focus();
+            }
+          }
+        }}
+        className={`flex-1 min-h-0 flex flex-col p-4 md:p-6 lg:p-8 overflow-y-auto overscroll-contain cursor-text ${
           isFocusMode ? 'max-w-4xl mx-auto w-full' : ''
         }`}
       >

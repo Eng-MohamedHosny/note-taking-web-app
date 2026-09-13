@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -36,7 +37,27 @@ import {
   AlignCenter,
   AlignRight,
   Languages,
+  Type,
+  Palette,
 } from 'lucide-react';
+
+interface SlashCommandItem {
+  id: string;
+  title: string;
+  desc: string;
+  category: string;
+  icon: React.ReactNode;
+  keywords: string[];
+  action: (editor: any, helpers?: { openImageModal: () => void; openColorPicker: () => void }) => void;
+}
+
+interface SlashMenuState {
+  isOpen: boolean;
+  query: string;
+  selectedIndex: number;
+  coords: { top: number; left: number; openUpwards: boolean };
+  range: { from: number; to: number };
+}
 
 const PRESET_COLORS = [
   { name: 'Default Dark', value: '#0E121B' },
@@ -50,6 +71,144 @@ const PRESET_COLORS = [
   { name: 'Indigo', value: '#6366F1' },
   { name: 'Purple', value: '#A855F7' },
   { name: 'Pink', value: '#EC4899' },
+];
+
+const SLASH_COMMANDS: SlashCommandItem[] = [
+  {
+    id: 'text',
+    title: 'Text',
+    desc: 'Just start writing with plain text',
+    category: 'Basic',
+    icon: <Type className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />,
+    keywords: ['text', 'paragraph', 'p', 'plain'],
+    action: (ed) => ed.chain().focus().setParagraph().run(),
+  },
+  {
+    id: 'h1',
+    title: 'Heading 1',
+    desc: 'Large section heading',
+    category: 'Basic',
+    icon: <Heading1 className="w-4 h-4 text-[#335CFF]" />,
+    keywords: ['h1', 'heading', 'title', 'large'],
+    action: (ed) => ed.chain().focus().toggleHeading({ level: 1 }).run(),
+  },
+  {
+    id: 'h2',
+    title: 'Heading 2',
+    desc: 'Medium section heading',
+    category: 'Basic',
+    icon: <Heading2 className="w-4 h-4 text-[#335CFF]" />,
+    keywords: ['h2', 'heading', 'subtitle', 'medium'],
+    action: (ed) => ed.chain().focus().toggleHeading({ level: 2 }).run(),
+  },
+  {
+    id: 'h3',
+    title: 'Heading 3',
+    desc: 'Small sub-heading',
+    category: 'Basic',
+    icon: <Heading3 className="w-4 h-4 text-[#335CFF]" />,
+    keywords: ['h3', 'heading', 'small'],
+    action: (ed) => ed.chain().focus().toggleHeading({ level: 3 }).run(),
+  },
+  {
+    id: 'bullet-list',
+    title: 'Bullet List',
+    desc: 'Simple bulleted list',
+    category: 'Lists',
+    icon: <List className="w-4 h-4 text-emerald-500" />,
+    keywords: ['bullet', 'list', 'ul', 'points'],
+    action: (ed) => ed.chain().focus().toggleBulletList().run(),
+  },
+  {
+    id: 'numbered-list',
+    title: 'Numbered List',
+    desc: 'List with ordered numbers',
+    category: 'Lists',
+    icon: <ListOrdered className="w-4 h-4 text-emerald-500" />,
+    keywords: ['numbered', 'order', 'ol', 'list', '1'],
+    action: (ed) => ed.chain().focus().toggleOrderedList().run(),
+  },
+  {
+    id: 'todo-list',
+    title: 'To-do List',
+    desc: 'Checklist with interactive boxes',
+    category: 'Lists',
+    icon: <CheckSquare className="w-4 h-4 text-emerald-500" />,
+    keywords: ['todo', 'task', 'check', 'checklist', 'box'],
+    action: (ed) => ed.chain().focus().toggleTaskList().run(),
+  },
+  {
+    id: 'quote',
+    title: 'Quote',
+    desc: 'Blockquote for callouts or highlights',
+    category: 'Advanced',
+    icon: <Quote className="w-4 h-4 text-amber-500" />,
+    keywords: ['quote', 'blockquote', 'callout'],
+    action: (ed) => ed.chain().focus().toggleBlockquote().run(),
+  },
+  {
+    id: 'code-block',
+    title: 'Code Block',
+    desc: 'Code snippet with syntax formatting',
+    category: 'Advanced',
+    icon: <Code2 className="w-4 h-4 text-purple-500" />,
+    keywords: ['code', 'pre', 'snippet', 'codeblock'],
+    action: (ed) => ed.chain().focus().toggleCodeBlock().run(),
+  },
+  {
+    id: 'divider',
+    title: 'Divider',
+    desc: 'Horizontal dividing line',
+    category: 'Advanced',
+    icon: <Minus className="w-4 h-4 text-neutral-500" />,
+    keywords: ['divider', 'hr', 'line', 'separator'],
+    action: (ed) => ed.chain().focus().setHorizontalRule().run(),
+  },
+  {
+    id: 'image',
+    title: 'Image',
+    desc: 'Upload or embed image',
+    category: 'Media',
+    icon: <ImageIcon className="w-4 h-4 text-rose-500" />,
+    keywords: ['image', 'photo', 'picture', 'upload', 'img'],
+    action: (_ed, helpers) => helpers?.openImageModal(),
+  },
+  {
+    id: 'color',
+    title: 'Text Color',
+    desc: 'Choose custom text color',
+    category: 'Formatting',
+    icon: <Palette className="w-4 h-4 text-teal-500" />,
+    keywords: ['color', 'font', 'text color', 'highlight'],
+    action: (_ed, helpers) => helpers?.openColorPicker(),
+  },
+  {
+    id: 'align-left',
+    title: 'Align Left',
+    desc: 'Align text to the left',
+    category: 'Formatting',
+    icon: <AlignLeft className="w-4 h-4 text-neutral-500" />,
+    keywords: ['align', 'left', 'text align'],
+    action: (ed) => ed.chain().focus().setTextAlign('left').run(),
+  },
+  {
+    id: 'align-center',
+    title: 'Align Center',
+    desc: 'Center text alignment',
+    category: 'Formatting',
+    icon: <AlignCenter className="w-4 h-4 text-neutral-500" />,
+    keywords: ['align', 'center', 'middle'],
+    action: (ed) => ed.chain().focus().setTextAlign('center').run(),
+  },
+  {
+    id: 'align-right',
+    title: 'Align Right',
+    desc: 'Align text to the right',
+    category: 'Formatting',
+    icon: <AlignRight className="w-4 h-4 text-neutral-500" />,
+    keywords: ['align', 'right', 'rtl'],
+    action: (ed) => ed.chain().focus().setTextAlign('right').run(),
+  },
 ];
 
 const DirectionExtension = Extension.create({
@@ -95,6 +254,113 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   const colorButtonRef = useRef<HTMLButtonElement>(null);
   const keyboardOffsetRef = useRef(0);
   const isMobileOrTabletRef = useRef(false);
+
+  const [slashMenu, setSlashMenu] = useState<SlashMenuState | null>(null);
+  const slashMenuRef = useRef<HTMLDivElement>(null);
+  const slashMenuStateRef = useRef<SlashMenuState | null>(null);
+  slashMenuStateRef.current = slashMenu;
+
+  // Filter commands by query (search in title, category, keywords)
+  const filteredCommands = useMemo(() => {
+    if (!slashMenu) return [];
+    const q = slashMenu.query.toLowerCase().trim();
+    if (!q) return SLASH_COMMANDS;
+    return SLASH_COMMANDS.filter((cmd) => {
+      return (
+        cmd.title.toLowerCase().includes(q) ||
+        cmd.category.toLowerCase().includes(q) ||
+        cmd.keywords.some((k) => k.toLowerCase().includes(q))
+      );
+    });
+  }, [slashMenu?.query]);
+
+  const filteredCommandsRef = useRef(filteredCommands);
+  filteredCommandsRef.current = filteredCommands;
+
+  const editorInstanceRef = useRef<any>(null);
+
+  const executeCommand = (command: SlashCommandItem) => {
+    const ed = editorInstanceRef.current;
+    const currentSlash = slashMenuStateRef.current;
+    if (!ed || !currentSlash) return;
+    const { range } = currentSlash;
+    setSlashMenu(null);
+    ed.chain()
+      .focus()
+      .deleteRange({ from: range.from, to: range.to })
+      .run();
+    command.action(ed, {
+      openImageModal: () => setIsImageModalOpen(true),
+      openColorPicker: () => setIsColorPickerOpen(true),
+    });
+  };
+
+  const executeCommandRef = useRef(executeCommand);
+  executeCommandRef.current = executeCommand;
+
+  const checkSlashCommand = (ed: any) => {
+    if (!ed || !ed.isFocused) {
+      if (slashMenuStateRef.current) setSlashMenu(null);
+      return;
+    }
+
+    const { state } = ed;
+    const { selection } = state;
+    const { $from, empty } = selection;
+
+    if (!empty) {
+      if (slashMenuStateRef.current) setSlashMenu(null);
+      return;
+    }
+
+    // Get text before cursor in current block
+    const textBefore = $from.parent.textBetween(
+      0,
+      $from.parentOffset,
+      undefined,
+      '\ufffc'
+    );
+
+    // Match slash at start of block or preceded by whitespace: e.g. "/" or " /" or "/head"
+    const match = textBefore.match(/(?:^|\s)\/([a-zA-Z0-9_-]*)$/);
+
+    if (!match) {
+      if (slashMenuStateRef.current) setSlashMenu(null);
+      return;
+    }
+
+    const query = match[1];
+    const matchLen =
+      match[0].startsWith(' ') || match[0].startsWith('\t') || match[0].startsWith('\n')
+        ? match[0].length - 1
+        : match[0].length;
+    const slashFrom = $from.pos - matchLen;
+    const slashTo = $from.pos;
+
+    // Get cursor client coordinates
+    const coords = ed.view.coordsAtPos(slashFrom);
+    if (!coords) return;
+
+    // Determine whether to open upwards or downwards
+    const estimatedHeight = 320;
+    const spaceBelow = window.innerHeight - coords.bottom;
+    const openUpwards = spaceBelow < estimatedHeight && coords.top > estimatedHeight;
+
+    const top = openUpwards ? Math.max(16, coords.top - 8) : coords.bottom + 8;
+    const maxLeft = Math.max(16, window.innerWidth - 320);
+    const left = Math.min(Math.max(16, coords.left), maxLeft);
+
+    setSlashMenu((prev) => ({
+      isOpen: true,
+      query,
+      selectedIndex:
+        prev?.query === query
+          ? Math.min(prev.selectedIndex, Math.max(0, filteredCommandsRef.current.length - 1))
+          : 0,
+      coords: { top, left, openUpwards },
+      range: { from: slashFrom, to: slashTo },
+    }));
+  };
 
   useEffect(() => {
     if (!isColorPickerOpen) return;
@@ -235,6 +501,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     onUpdate: ({ editor: ed }) => {
       onChange(ed.getHTML());
       keepCursorVisible();
+      checkSlashCommand(ed);
     },
     onFocus: () => {
       setIsEditorFocused(true);
@@ -248,16 +515,72 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       ) {
         return;
       }
+      if (
+        slashMenuRef.current &&
+        event?.relatedTarget &&
+        slashMenuRef.current.contains(event.relatedTarget as Node)
+      ) {
+        return;
+      }
       setIsEditorFocused(false);
+      setSlashMenu(null);
     },
     onSelectionUpdate: ({ editor: ed }) => {
       if (ed.isFocused) {
         setIsEditorFocused(true);
       }
+      checkSlashCommand(ed);
     },
     editorProps: {
       scrollThreshold: 0,
       scrollMargin: 0,
+      handleKeyDown: (_view, event) => {
+        const currentSlashState = slashMenuStateRef.current;
+        if (!currentSlashState) return false;
+
+        const commands = filteredCommandsRef.current;
+
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          setSlashMenu((prev) => {
+            if (!prev || commands.length === 0) return prev;
+            return {
+              ...prev,
+              selectedIndex: (prev.selectedIndex + 1) % commands.length,
+            };
+          });
+          return true;
+        }
+
+        if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          setSlashMenu((prev) => {
+            if (!prev || commands.length === 0) return prev;
+            return {
+              ...prev,
+              selectedIndex: (prev.selectedIndex - 1 + commands.length) % commands.length,
+            };
+          });
+          return true;
+        }
+
+        if (event.key === 'Enter' || event.key === 'Tab') {
+          if (commands.length > 0) {
+            event.preventDefault();
+            const selected = commands[currentSlashState.selectedIndex] || commands[0];
+            executeCommandRef.current(selected);
+            return true;
+          }
+        }
+
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          setSlashMenu(null);
+          return true;
+        }
+
+        return false;
+      },
       attributes: {
         class:
           'w-full flex-1 min-h-[300px] py-3 text-neutral-800 dark:text-neutral-200 text-sm md:text-base leading-relaxed focus:outline-hidden font-inherit',
@@ -311,6 +634,45 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       },
     },
   });
+
+  editorInstanceRef.current = editor;
+
+  // Keep active slash menu option scrolled into view
+  useEffect(() => {
+    if (slashMenu && slashMenuRef.current) {
+      const activeEl = slashMenuRef.current.querySelector(
+        `[data-index="${slashMenu.selectedIndex}"]`
+      );
+      if (activeEl) {
+        activeEl.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }, [slashMenu?.selectedIndex]);
+
+  // Dismiss slash menu on click outside or document scroll
+  useEffect(() => {
+    if (!slashMenu) return;
+
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (slashMenuRef.current && !slashMenuRef.current.contains(e.target as Node)) {
+        setSlashMenu(null);
+      }
+    };
+
+    const handleScroll = () => {
+      setSlashMenu(null);
+    };
+
+    window.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('touchstart', handleClickOutside);
+    window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
+
+    return () => {
+      window.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('touchstart', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, { capture: true });
+    };
+  }, [slashMenu]);
 
   // Keep editor content in sync when switched externally (e.g. selecting different note or upgraded content)
   useEffect(() => {
@@ -807,23 +1169,144 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       {/* Editor Content Area - Expanded with generous in-flow bottom spacer */}
       <div
         className="flex-1 flex flex-col min-h-full cursor-text"
-        onClick={() => {
-          if (!touchMovedRef.current && editor && !editor.isFocused) {
+        onClick={(e) => {
+          if (touchMovedRef.current || !editor) return;
+          const target = e.target as HTMLElement;
+          if (target.closest('button, a, input, select, [role="button"], [data-prevent-editor-focus]')) {
+            return;
+          }
+          const isDirectText = target.closest('p, h1, h2, h3, li, blockquote, pre');
+          if (!isDirectText || target === e.currentTarget || target.classList.contains('empty-space-spacer')) {
             editor.commands.focus('end');
           }
         }}
       >
         <EditorContent
           editor={editor}
-          className="flex-1 flex flex-col min-h-full [&>.tiptap]:min-h-[300px] [&>.tiptap]:flex-1"
+          className="flex-1 flex flex-col min-h-full [&>.tiptap]:min-h-[300px] [&>.tiptap]:flex-1 cursor-text"
         />
 
         {/* Generous in-flow bottom spacer: 75vh Notion-style scroll-past-end freedom */}
         <div
-          className="w-full shrink-0 min-h-[500px] h-[75vh] select-none pointer-events-none"
+          className="empty-space-spacer w-full shrink-0 min-h-[500px] h-[75vh] select-none cursor-text"
           aria-hidden="true"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!touchMovedRef.current && editor) {
+              editor.commands.focus('end');
+            }
+          }}
         />
       </div>
+
+      {/* Floating Slash Commands Palette */}
+      {slashMenu &&
+        createPortal(
+          <div
+            ref={slashMenuRef}
+            style={{
+              position: 'fixed',
+              top: `${slashMenu.coords.top}px`,
+              left: `${slashMenu.coords.left}px`,
+              transform: slashMenu.coords.openUpwards ? 'translateY(-100%)' : undefined,
+              maxHeight: 'min(340px, calc(100vh - 32px))',
+              zIndex: 9999,
+            }}
+            className="w-72 md:w-80 bg-white/95 dark:bg-[#161822]/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150 text-neutral-900 dark:text-neutral-100 select-none"
+            onPointerDown={(e) => {
+              // Prevent editor blur when clicking inside menu
+              e.stopPropagation();
+            }}
+          >
+            {/* Header / Filter status */}
+            <div className="flex items-center justify-between px-3.5 py-2 border-b border-neutral-100 dark:border-neutral-800/80 text-[11px] font-medium text-neutral-500 dark:text-neutral-400 bg-neutral-50/70 dark:bg-neutral-900/40 shrink-0">
+              <span className="font-semibold uppercase tracking-wider text-[10px] text-neutral-400 dark:text-neutral-500">
+                {slashMenu.query ? `Filter: /${slashMenu.query}` : 'Insert Block'}
+              </span>
+              <span className="text-[10px] text-neutral-400">
+                {filteredCommands.length} {filteredCommands.length === 1 ? 'tool' : 'tools'}
+              </span>
+            </div>
+
+            {/* Scrollable commands list */}
+            <div className="flex-1 overflow-y-auto p-1.5 space-y-0.5 max-h-64 scrollbar-thin">
+              {filteredCommands.length === 0 ? (
+                <div className="py-6 px-4 text-center text-xs text-neutral-400 dark:text-neutral-500">
+                  No matching tools for <span className="font-semibold text-neutral-600 dark:text-neutral-300">"/{slashMenu.query}"</span>
+                </div>
+              ) : (
+                filteredCommands.map((cmd, idx) => {
+                  const isSelected = idx === slashMenu.selectedIndex;
+                  return (
+                    <button
+                      key={cmd.id}
+                      data-index={idx}
+                      type="button"
+                      onMouseEnter={() => {
+                        setSlashMenu((prev) => (prev ? { ...prev, selectedIndex: idx } : null));
+                      }}
+                      onMouseDown={(e) => {
+                        // Prevent editor from losing focus
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        executeCommand(cmd);
+                      }}
+                      className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-left transition-colors cursor-pointer group ${
+                        isSelected
+                          ? 'bg-[#335CFF]/10 dark:bg-[#335CFF]/20 text-[#335CFF]'
+                          : 'hover:bg-neutral-100 dark:hover:bg-neutral-800/70 text-neutral-700 dark:text-neutral-200'
+                      }`}
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                          isSelected
+                            ? 'bg-white dark:bg-[#1E2232] shadow-xs ring-1 ring-[#335CFF]/30'
+                            : 'bg-neutral-100 dark:bg-neutral-800/80 group-hover:bg-white dark:group-hover:bg-[#1C1F2E]'
+                        }`}
+                      >
+                        {cmd.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div
+                          className={`text-xs font-semibold leading-tight truncate ${
+                            isSelected
+                              ? 'text-[#335CFF] dark:text-[#5B7FFF]'
+                              : 'text-neutral-900 dark:text-neutral-100'
+                          }`}
+                        >
+                          {cmd.title}
+                        </div>
+                        <div className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-tight truncate">
+                          {cmd.desc}
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <div className="text-[10px] text-[#335CFF] font-medium hidden sm:block opacity-75">
+                          ↵
+                        </div>
+                      )}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Footer keyboard navigation hint */}
+            <div className="px-3 py-1.5 border-t border-neutral-100 dark:border-neutral-800/80 text-[10px] text-neutral-400 dark:text-neutral-500 bg-neutral-50/50 dark:bg-neutral-900/20 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <span>↑↓ Navigate</span>
+                <span>•</span>
+                <span>↵ Select</span>
+              </div>
+              <span>Esc to dismiss</span>
+            </div>
+          </div>,
+          document.body
+        )}
 
       {/* Image Upload / Insert Modal */}
       <ImageModal
