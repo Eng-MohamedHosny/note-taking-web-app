@@ -13,7 +13,7 @@ import {
   ClockIcon,
   StatusIcon,
 } from '../Icons';
-import { Folder as FolderIcon, Plus, Check, Maximize2, Minimize2, ChevronDown, X, MoreHorizontal, Download, Printer, FileText } from 'lucide-react';
+import { Folder as FolderIcon, Plus, Check, Maximize2, Minimize2, ChevronDown, ChevronRight, X, MoreHorizontal, Download, Printer, FileText } from 'lucide-react';
 
 interface NoteEditorProps {
   onBackToList?: () => void;
@@ -49,12 +49,14 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
 
   // Apple-style Popover Menu state
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isExportSubmenuOpen, setIsExportSubmenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setIsMenuOpen(false);
+        setIsExportSubmenuOpen(false);
       }
     };
     if (isMenuOpen) {
@@ -663,60 +665,89 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
               </button>
             )}
 
-            {/* Export Note Options */}
+            {/* Export Note Options Submenu */}
             {selectedNote && (
               <>
                 <div className="h-[1px] bg-neutral-100 dark:bg-neutral-800/80 my-1.5" />
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400 px-2.5 py-1">
-                  Export Note
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsExportSubmenuOpen((prev) => !prev)}
+                    className={`flex items-center justify-between px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors w-full text-left cursor-pointer ${
+                      isExportSubmenuOpen
+                        ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white font-semibold'
+                        : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-200'
+                    }`}
+                    aria-expanded={isExportSubmenuOpen}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Download className="w-3.5 h-3.5 text-[#335CFF]" />
+                      <span>Export Note</span>
+                    </div>
+                    <ChevronRight
+                      className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
+                        isExportSubmenuOpen ? 'rotate-90' : ''
+                      }`}
+                    />
+                  </button>
+
+                  {/* Submenu Items */}
+                  {isExportSubmenuOpen && (
+                    <div className="mt-1 ml-2.5 pl-2 border-l-2 border-[#335CFF]/40 dark:border-[#335CFF]/50 flex flex-col gap-0.5 py-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          exportToMarkdown(selectedNote);
+                          addToast('Exported as Markdown (.md)', 'success');
+                          setIsMenuOpen(false);
+                          setIsExportSubmenuOpen(false);
+                        }}
+                        className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-emerald-500" />
+                        <span>Markdown (.md)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          exportToTXT(selectedNote);
+                          addToast('Exported as Plain Text (.txt)', 'success');
+                          setIsMenuOpen(false);
+                          setIsExportSubmenuOpen(false);
+                        }}
+                        className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
+                      >
+                        <Download className="w-3.5 h-3.5 text-blue-500" />
+                        <span>Plain Text (.txt)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          exportToJSON(selectedNote, `${selectedNote.title || 'note'}.json`);
+                          addToast('Exported as JSON', 'success');
+                          setIsMenuOpen(false);
+                          setIsExportSubmenuOpen(false);
+                        }}
+                        className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
+                      >
+                        <Download className="w-3.5 h-3.5 text-amber-500" />
+                        <span>JSON File (.json)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          setIsExportSubmenuOpen(false);
+                          exportToPrint(selectedNote);
+                        }}
+                        className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
+                      >
+                        <Printer className="w-3.5 h-3.5 text-neutral-500" />
+                        <span>Print / Save as PDF</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    exportToMarkdown(selectedNote);
-                    addToast('Exported as Markdown (.md)', 'success');
-                    setIsMenuOpen(false);
-                  }}
-                  className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
-                >
-                  <FileText className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>Markdown (.md)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    exportToTXT(selectedNote);
-                    addToast('Exported as Plain Text (.txt)', 'success');
-                    setIsMenuOpen(false);
-                  }}
-                  className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
-                >
-                  <Download className="w-3.5 h-3.5 text-blue-500" />
-                  <span>Plain Text (.txt)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    exportToJSON(selectedNote, `${selectedNote.title || 'note'}.json`);
-                    addToast('Exported as JSON', 'success');
-                    setIsMenuOpen(false);
-                  }}
-                  className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
-                >
-                  <Download className="w-3.5 h-3.5 text-amber-500" />
-                  <span>JSON File (.json)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    exportToPrint(selectedNote);
-                  }}
-                  className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
-                >
-                  <Printer className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>Print / Save as PDF</span>
-                </button>
                 <div className="h-[1px] bg-neutral-100 dark:bg-neutral-800/80 my-1.5" />
               </>
             )}
