@@ -823,8 +823,6 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
                 if (e.key === 'Enter' || e.key === ',') {
                   e.preventDefault();
                   handleAddTag(newTagInput);
-                } else if (e.key === 'Backspace' && !newTagInput && currentTags.length > 0) {
-                  handleRemoveTag(currentTags[currentTags.length - 1]);
                 }
               }}
               onBlur={() => {
