@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CrossIcon } from '../Icons';
 import { Image as ImageIcon, Upload, Link2, Check, AlertCircle } from 'lucide-react';
 
@@ -16,6 +16,19 @@ export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, onInser
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        resetAndClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -80,7 +93,14 @@ export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, onInser
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-neutral-950/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-150">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          resetAndClose();
+        }
+      }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-neutral-950/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-150"
+    >
       <div
         className="w-full sm:max-w-md bg-white dark:bg-neutral-900 rounded-t-2xl sm:rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden flex flex-col"
         role="dialog"

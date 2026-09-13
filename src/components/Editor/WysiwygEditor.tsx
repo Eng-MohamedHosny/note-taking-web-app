@@ -53,11 +53,34 @@ interface SlashCommandItem {
 
 interface SlashMenuState {
   isOpen: boolean;
+  mode?: 'commands' | 'colors';
   query: string;
   selectedIndex: number;
   coords: { top: number; left: number; openUpwards: boolean };
   range: { from: number; to: number };
 }
+
+interface ColorOption {
+  id: string;
+  name: string;
+  value: string;
+  isReset?: boolean;
+}
+
+const COLOR_OPTIONS: ColorOption[] = [
+  { id: 'default', name: 'Default Dark', value: '#0E121B' },
+  { id: 'muted', name: 'Muted Gray', value: '#6B7280' },
+  { id: 'red', name: 'Red', value: '#EF4444' },
+  { id: 'orange', name: 'Orange', value: '#F97316' },
+  { id: 'amber', name: 'Amber', value: '#F59E0B' },
+  { id: 'green', name: 'Green', value: '#10B981' },
+  { id: 'teal', name: 'Teal', value: '#06B6D4' },
+  { id: 'blue', name: 'Blue', value: '#335CFF' },
+  { id: 'indigo', name: 'Indigo', value: '#6366F1' },
+  { id: 'purple', name: 'Purple', value: '#A855F7' },
+  { id: 'pink', name: 'Pink', value: '#EC4899' },
+  { id: 'reset', name: 'Reset Color', value: '', isReset: true },
+];
 
 const PRESET_COLORS = [
   { name: 'Default Dark', value: '#0E121B' },
@@ -262,7 +285,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
 
   // Filter commands by query (search in title, category, keywords)
   const filteredCommands = useMemo(() => {
-    if (!slashMenu) return [];
+    if (!slashMenu || slashMenu.mode === 'colors') return [];
     const q = slashMenu.query.toLowerCase().trim();
     if (!q) return SLASH_COMMANDS;
     return SLASH_COMMANDS.filter((cmd) => {
@@ -272,18 +295,51 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         cmd.keywords.some((k) => k.toLowerCase().includes(q))
       );
     });
-  }, [slashMenu?.query]);
+  }, [slashMenu?.query, slashMenu?.mode]);
 
   const filteredCommandsRef = useRef(filteredCommands);
   filteredCommandsRef.current = filteredCommands;
 
   const editorInstanceRef = useRef<any>(null);
 
+  const applyColor = (colorOption: ColorOption) => {
+    const ed = editorInstanceRef.current;
+    if (!ed) return;
+    setSlashMenu(null);
+    if (colorOption.isReset || !colorOption.value) {
+      ed.chain().focus().unsetColor().run();
+    } else {
+      ed.chain().focus().setColor(colorOption.value).run();
+    }
+  };
+
+  const applyColorRef = useRef(applyColor);
+  applyColorRef.current = applyColor;
+
   const executeCommand = (command: SlashCommandItem) => {
     const ed = editorInstanceRef.current;
     const currentSlash = slashMenuStateRef.current;
     if (!ed || !currentSlash) return;
     const { range } = currentSlash;
+
+    // When selecting 'Text Color', switch the slash menu directly into vertical color picker mode
+    if (command.id === 'color') {
+      ed.chain()
+        .focus()
+        .deleteRange({ from: range.from, to: range.to })
+        .run();
+      setSlashMenu((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          mode: 'colors',
+          query: '',
+          selectedIndex: 0,
+        };
+      });
+      return;
+    }
+
     setSlashMenu(null);
     ed.chain()
       .focus()
@@ -299,6 +355,11 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   executeCommandRef.current = executeCommand;
 
   const checkSlashCommand = (ed: any) => {
+    // If the menu is in colors mode, do not close or re-evaluate slash triggers
+    if (slashMenuStateRef.current?.mode === 'colors') {
+      return;
+    }
+
     if (!ed || !ed.isFocused) {
       if (slashMenuStateRef.current) setSlashMenu(null);
       return;
@@ -352,6 +413,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
 
     setSlashMenu((prev) => ({
       isOpen: true,
+      mode: 'commands',
       query,
       selectedIndex:
         prev?.query === query
@@ -538,15 +600,18 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         const currentSlashState = slashMenuStateRef.current;
         if (!currentSlashState) return false;
 
-        const commands = filteredCommandsRef.current;
+        const isColorMode = currentSlashState.mode === 'colors';
+        const itemsCount = isColorMode
+          ? COLOR_OPTIONS.length
+          : filteredCommandsRef.current.length;
 
         if (event.key === 'ArrowDown') {
           event.preventDefault();
           setSlashMenu((prev) => {
-            if (!prev || commands.length === 0) return prev;
+            if (!prev || itemsCount === 0) return prev;
             return {
               ...prev,
-              selectedIndex: (prev.selectedIndex + 1) % commands.length,
+              selectedIndex: (prev.selectedIndex + 1) % itemsCount,
             };
           });
           return true;
@@ -555,21 +620,28 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         if (event.key === 'ArrowUp') {
           event.preventDefault();
           setSlashMenu((prev) => {
-            if (!prev || commands.length === 0) return prev;
+            if (!prev || itemsCount === 0) return prev;
             return {
               ...prev,
-              selectedIndex: (prev.selectedIndex - 1 + commands.length) % commands.length,
+              selectedIndex: (prev.selectedIndex - 1 + itemsCount) % itemsCount,
             };
           });
           return true;
         }
 
         if (event.key === 'Enter' || event.key === 'Tab') {
-          if (commands.length > 0) {
-            event.preventDefault();
-            const selected = commands[currentSlashState.selectedIndex] || commands[0];
-            executeCommandRef.current(selected);
+          event.preventDefault();
+          if (isColorMode) {
+            const selectedColor = COLOR_OPTIONS[currentSlashState.selectedIndex] || COLOR_OPTIONS[0];
+            applyColorRef.current(selectedColor);
             return true;
+          } else {
+            const commands = filteredCommandsRef.current;
+            if (commands.length > 0) {
+              const selected = commands[currentSlashState.selectedIndex] || commands[0];
+              executeCommandRef.current(selected);
+              return true;
+            }
           }
         }
 
@@ -647,7 +719,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         activeEl.scrollIntoView({ block: 'nearest' });
       }
     }
-  }, [slashMenu?.selectedIndex]);
+  }, [slashMenu?.selectedIndex, slashMenu?.mode]);
 
   // Dismiss slash menu on click outside or external scroll
   useEffect(() => {
@@ -1239,70 +1311,155 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
               e.stopPropagation();
             }}
           >
-            {/* Header / Filter status */}
-            <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-neutral-100 dark:border-neutral-800/80 text-[10px] font-medium text-neutral-400 dark:text-neutral-500 bg-neutral-50/70 dark:bg-neutral-900/40 shrink-0">
-              <span className="font-semibold uppercase tracking-wider text-[9px]">
-                {slashMenu.query ? `/${slashMenu.query}` : 'Tools'}
-              </span>
-              <span className="text-[9px]">{filteredCommands.length}</span>
-            </div>
-
-            {/* Scrollable commands list - simple, without sub text, compact */}
-            <div
-              className="flex-1 overflow-y-auto p-1 space-y-0.5 max-h-56 scrollbar-thin"
-              onWheel={(e) => e.stopPropagation()}
-            >
-              {filteredCommands.length === 0 ? (
-                <div className="py-4 px-3 text-center text-xs text-neutral-400 dark:text-neutral-500">
-                  No tools for <span className="font-semibold text-neutral-600 dark:text-neutral-300">"/{slashMenu.query}"</span>
+            {slashMenu.mode === 'colors' ? (
+              <>
+                {/* Header for Colors Mode */}
+                <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-neutral-100 dark:border-neutral-800/80 text-[10px] font-medium text-neutral-400 dark:text-neutral-500 bg-neutral-50/70 dark:bg-neutral-900/40 shrink-0">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onClick={() => {
+                      setSlashMenu((prev) => (prev ? { ...prev, mode: 'commands', selectedIndex: 0 } : null));
+                    }}
+                    className="hover:text-neutral-700 dark:hover:text-neutral-200 cursor-pointer flex items-center gap-1 font-semibold uppercase tracking-wider text-[9px]"
+                  >
+                    <span>← Tools</span>
+                  </button>
+                  <span className="text-[9px] font-mono text-neutral-400">Esc to close</span>
                 </div>
-              ) : (
-                filteredCommands.map((cmd, idx) => {
-                  const isSelected = idx === slashMenu.selectedIndex;
-                  return (
-                    <button
-                      key={cmd.id}
-                      data-index={idx}
-                      type="button"
-                      onMouseEnter={() => {
-                        setSlashMenu((prev) => (prev ? { ...prev, selectedIndex: idx } : null));
-                      }}
-                      onMouseDown={(e) => {
-                        // Prevent editor from losing focus
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        executeCommand(cmd);
-                      }}
-                      className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-left transition-colors cursor-pointer text-xs ${
-                        isSelected
-                          ? 'bg-[#335CFF]/15 text-[#335CFF] font-semibold dark:bg-[#335CFF]/25'
-                          : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/70'
-                      }`}
-                    >
-                      <div
-                        className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${
+
+                {/* Vertical list of colors under each other */}
+                <div
+                  className="flex-1 overflow-y-auto p-1 space-y-0.5 max-h-60 scrollbar-thin"
+                  onWheel={(e) => e.stopPropagation()}
+                >
+                  {COLOR_OPTIONS.map((c, idx) => {
+                    const isSelected = idx === slashMenu.selectedIndex;
+                    const currentColor = editor?.getAttributes('textStyle').color;
+                    const isCurrentlyApplied = !c.isReset
+                      ? currentColor?.toLowerCase() === c.value.toLowerCase()
+                      : !currentColor;
+
+                    return (
+                      <button
+                        key={c.id}
+                        data-index={idx}
+                        type="button"
+                        onMouseEnter={() => {
+                          setSlashMenu((prev) => (prev ? { ...prev, selectedIndex: idx } : null));
+                        }}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          applyColor(c);
+                        }}
+                        className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-left transition-colors cursor-pointer text-xs ${
                           isSelected
-                            ? 'text-[#335CFF]'
-                            : 'text-neutral-500 dark:text-neutral-400'
+                            ? 'bg-[#335CFF]/15 text-[#335CFF] font-semibold dark:bg-[#335CFF]/25'
+                            : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/70'
                         }`}
                       >
-                        {cmd.icon}
-                      </div>
-                      <span className="flex-1 truncate">{cmd.title}</span>
-                      {isSelected && (
-                        <span className="text-[10px] text-[#335CFF] opacity-60 font-mono">
-                          ↵
-                        </span>
-                      )}
-                    </button>
-                  );
-                })
-              )}
-            </div>
+                        {/* Swatch dot */}
+                        {c.isReset ? (
+                          <div className="w-3.5 h-3.5 rounded-full border border-dashed border-neutral-400 dark:border-neutral-500 flex items-center justify-center shrink-0">
+                            <Minus className="w-2 h-2 text-neutral-400" />
+                          </div>
+                        ) : (
+                          <span
+                            className="w-3.5 h-3.5 rounded-full shrink-0 border border-black/10 dark:border-white/15 shadow-2xs"
+                            style={{ backgroundColor: c.value }}
+                          />
+                        )}
+
+                        <span className="flex-1 truncate">{c.name}</span>
+
+                        {isCurrentlyApplied ? (
+                          <Check className="w-3.5 h-3.5 text-[#335CFF] shrink-0" />
+                        ) : isSelected ? (
+                          <span className="text-[10px] text-[#335CFF] opacity-60 font-mono">
+                            ↵
+                          </span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Header / Filter status */}
+                <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-neutral-100 dark:border-neutral-800/80 text-[10px] font-medium text-neutral-400 dark:text-neutral-500 bg-neutral-50/70 dark:bg-neutral-900/40 shrink-0">
+                  <span className="font-semibold uppercase tracking-wider text-[9px]">
+                    {slashMenu.query ? `/${slashMenu.query}` : 'Tools'}
+                  </span>
+                  <span className="text-[9px]">{filteredCommands.length}</span>
+                </div>
+
+                {/* Scrollable commands list - simple, without sub text, compact */}
+                <div
+                  className="flex-1 overflow-y-auto p-1 space-y-0.5 max-h-56 scrollbar-thin"
+                  onWheel={(e) => e.stopPropagation()}
+                >
+                  {filteredCommands.length === 0 ? (
+                    <div className="py-4 px-3 text-center text-xs text-neutral-400 dark:text-neutral-500">
+                      No tools for <span className="font-semibold text-neutral-600 dark:text-neutral-300">"/{slashMenu.query}"</span>
+                    </div>
+                  ) : (
+                    filteredCommands.map((cmd, idx) => {
+                      const isSelected = idx === slashMenu.selectedIndex;
+                      return (
+                        <button
+                          key={cmd.id}
+                          data-index={idx}
+                          type="button"
+                          onMouseEnter={() => {
+                            setSlashMenu((prev) => (prev ? { ...prev, selectedIndex: idx } : null));
+                          }}
+                          onMouseDown={(e) => {
+                            // Prevent editor from losing focus
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            executeCommand(cmd);
+                          }}
+                          className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-left transition-colors cursor-pointer text-xs ${
+                            isSelected
+                              ? 'bg-[#335CFF]/15 text-[#335CFF] font-semibold dark:bg-[#335CFF]/25'
+                              : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/70'
+                          }`}
+                        >
+                          <div
+                            className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${
+                              isSelected
+                                ? 'text-[#335CFF]'
+                                : 'text-neutral-500 dark:text-neutral-400'
+                            }`}
+                          >
+                            {cmd.icon}
+                          </div>
+                          <span className="flex-1 truncate">{cmd.title}</span>
+                          {isSelected && (
+                            <span className="text-[10px] text-[#335CFF] opacity-60 font-mono">
+                              ↵
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </>
+            )}
           </div>,
           document.body
         )}
