@@ -11,7 +11,7 @@ export interface Note {
   user_id?: string;
 }
 
-export type ColorTheme = 'light' | 'dark' | 'extra-dark' | 'system';
+export type ColorTheme = 'light' | 'dark' | 'extra-dark' | 'notion-dark' | 'system';
 export type FontTheme = 'sans-serif' | 'serif' | 'monospace';
 export type ViewMode = 'list' | 'grid';
 

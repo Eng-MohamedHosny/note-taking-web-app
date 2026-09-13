@@ -16,7 +16,8 @@ import {
   LogOut, 
   LogIn,
   Eye,
-  EyeOff
+  EyeOff,
+  Sparkles
 } from 'lucide-react';
 import { exportToJSON } from '../../utils/formatters';
 
@@ -83,6 +84,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
       label: 'Dark Mode',
       desc: 'Select a sleek dark theme easy on the eyes.',
       icon: <Moon className="w-5 h-5 text-neutral-600 dark:text-neutral-300" />,
+    },
+    {
+      id: 'notion-dark',
+      label: 'Notion Dark Mode',
+      desc: 'Warm charcoal aesthetic (#191919) inspired by Notion.',
+      icon: <Sparkles className="w-5 h-5 text-neutral-600 dark:text-neutral-300" />,
+    },
+    {
+      id: 'extra-dark',
+      label: 'Extra Dark Mode (OLED)',
+      desc: 'High-contrast pitch black theme with sleek dark cards.',
+      icon: <Moon className="w-5 h-5 text-blue-500" />,
     },
     {
       id: 'system',

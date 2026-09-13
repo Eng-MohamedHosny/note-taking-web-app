@@ -269,6 +269,47 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                   </div>
                 </div>
 
+                {/* Notion Dark Mode Option */}
+                <div
+                  onClick={() => setSelectedColor('notion-dark')}
+                  className={`h-18 px-4 flex items-center gap-4 rounded-xl border transition-all cursor-pointer ${
+                    selectedColor === 'notion-dark'
+                      ? 'bg-neutral-100 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700 shadow-xs'
+                      : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[#191919] border border-[#2F2F2F] flex items-center justify-center shrink-0 text-white shadow-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-neutral-200">
+                      <rect x="3" y="3" width="18" height="18" rx="3" />
+                      <path d="M8 8v8" />
+                      <path d="M8 8l8 8" />
+                      <path d="M16 8v8" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-neutral-950 dark:text-white">
+                        Notion Dark Mode
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 border border-neutral-300 dark:border-neutral-600">
+                        Charcoal #191919
+                      </span>
+                    </div>
+                    <span className="text-xs text-neutral-700 dark:text-neutral-400">
+                      Warm dark aesthetic inspired by Notion's iconic canvas
+                    </span>
+                  </div>
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                    selectedColor === 'notion-dark'
+                      ? 'border-blue-500 dark:border-blue-500'
+                      : 'border-neutral-300 dark:border-neutral-600'
+                  }`}>
+                    {selectedColor === 'notion-dark' && (
+                      <div className="w-2 h-2 rounded-full bg-blue-500" />
+                    )}
+                  </div>
+                </div>
+
                 {/* System Option */}
                 <div
                   onClick={() => setSelectedColor('system')}

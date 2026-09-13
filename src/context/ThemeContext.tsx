@@ -28,7 +28,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const applyTheme = () => {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const isExtra = colorTheme === 'extra-dark';
-      const shouldBeDark = colorTheme === 'dark' || isExtra || (colorTheme === 'system' && prefersDark);
+      const isNotion = colorTheme === 'notion-dark';
+      const shouldBeDark = colorTheme === 'dark' || isExtra || isNotion || (colorTheme === 'system' && prefersDark);
       
       setIsDark(shouldBeDark);
       if (shouldBeDark) {
@@ -41,6 +42,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         root.classList.add('extra-dark');
       } else {
         root.classList.remove('extra-dark');
+      }
+
+      if (isNotion) {
+        root.classList.add('notion-dark');
+      } else {
+        root.classList.remove('notion-dark');
       }
     };
 

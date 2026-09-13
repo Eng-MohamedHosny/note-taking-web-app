@@ -122,6 +122,58 @@ html.extra-dark .dark\:hover\:bg-\[\#232530\]:hover {
   background-color: #26262A !important;
 }
 
+/* Notion Dark Mode (Warm Charcoal #191919) */
+html.notion-dark {
+  --color-neutral-950: #191919;
+  --color-neutral-900: #202020;
+  --color-neutral-800: #262626;
+  --color-neutral-700: #333333;
+  background-color: #191919;
+}
+
+html.notion-dark body {
+  background-color: #191919;
+}
+
+html.notion-dark .bg-neutral-950,
+html.notion-dark .dark\:bg-neutral-950,
+html.notion-dark .dark\:bg-\[\#0E1117\],
+html.notion-dark .dark\:bg-\[\#0E121B\] {
+  background-color: #191919 !important;
+}
+
+html.notion-dark .bg-neutral-900,
+html.notion-dark .dark\:bg-neutral-900 {
+  background-color: #202020 !important;
+}
+
+html.notion-dark .border-\[\#232530\],
+html.notion-dark .dark\:border-\[\#232530\],
+html.notion-dark .dark\:border-neutral-800,
+html.notion-dark .dark\:border-neutral-700 {
+  border-color: #2F2F2F !important;
+}
+
+html.notion-dark .dark\:bg-\[\#1A1D24\],
+html.notion-dark .dark\:bg-\[\#191B25\],
+html.notion-dark .dark\:bg-\[\#181B26\],
+html.notion-dark .dark\:bg-neutral-800 {
+  background-color: #252525 !important;
+  border-color: #2F2F2F !important;
+}
+
+html.notion-dark .dark\:bg-\[\#12141D\]\/95,
+html.notion-dark .dark\:bg-\[\#161822\]\/90 {
+  background-color: rgba(32, 32, 32, 0.95) !important;
+  border-color: #2F2F2F !important;
+}
+
+html.notion-dark .dark\:hover\:bg-\[\#232530\]:hover,
+html.notion-dark .dark\:hover\:bg-neutral-800:hover,
+html.notion-dark .dark\:hover\:bg-neutral-800\/40:hover {
+  background-color: #2D2D2D !important;
+}
+
 /* TipTap WYSIWYG Editor Styles */
 .ProseMirror {
   outline: none;
