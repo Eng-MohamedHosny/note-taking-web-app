@@ -144,8 +144,8 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         toolbarTop = window.visualViewport.offsetTop + window.visualViewport.height;
       }
 
-      // Keep safe clearance of 60px above toolbar
-      const safeBottom = toolbarTop - 60;
+      // Keep safe clearance of 90px above toolbar
+      const safeBottom = toolbarTop - 90;
 
       const cursorBottom = hasValidRect
         ? rect.bottom
@@ -155,12 +155,13 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         : (targetEl?.getBoundingClientRect().top ?? 0);
 
       const scrollContainer =
+        document.getElementById('note-editor-scroll-container') ||
         toolbarRef.current?.closest('.overflow-y-auto') ||
         document.querySelector('.overflow-y-auto');
 
       if (scrollContainer) {
         if (cursorBottom > safeBottom && cursorBottom > 0) {
-          const scrollNeeded = cursorBottom - safeBottom + 30;
+          const scrollNeeded = cursorBottom - safeBottom + 40;
           scrollContainer.scrollBy({ top: scrollNeeded, behavior: 'instant' as ScrollBehavior });
         } else if (cursorTop < 70 && cursorTop > 0) {
           const scrollNeeded = cursorTop - 80;
@@ -779,9 +780,9 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         </div>
       )}
 
-      {/* Editor Content Area - Expanded to full page height */}
+      {/* Editor Content Area - Expanded with generous in-flow bottom spacer */}
       <div
-        className="flex-1 flex flex-col h-full min-h-full cursor-text"
+        className="flex-1 flex flex-col min-h-full cursor-text"
         onClick={() => {
           if (editor && !editor.isFocused) {
             editor.commands.focus('end');
@@ -790,7 +791,18 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       >
         <EditorContent
           editor={editor}
-          className="flex-1 flex flex-col h-full min-h-full [&>.tiptap]:h-full [&>.tiptap]:min-h-full [&>.tiptap]:flex-1"
+          className="flex-1 flex flex-col min-h-full [&>.tiptap]:min-h-[300px] [&>.tiptap]:flex-1"
+        />
+
+        {/* Generous in-flow bottom spacer guaranteeing scroll space below the last line in all browsers */}
+        <div
+          className="w-full shrink-0 min-h-[350px] h-[50vh] cursor-text select-none"
+          aria-hidden="true"
+          onClick={() => {
+            if (editor) {
+              editor.commands.focus('end');
+            }
+          }}
         />
       </div>
 
