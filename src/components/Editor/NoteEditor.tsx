@@ -451,11 +451,11 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
             )}
           </div>
 
-          {/* Expand / Focus Mode Button */}
+          {/* Expand / Focus Mode Button (Desktop only) */}
           <button
             type="button"
             onClick={toggleFocusMode}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-medium transition-colors cursor-pointer select-none ${
+            className={`hidden lg:flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-medium transition-colors cursor-pointer select-none ${
               isFocusMode
                 ? 'bg-[#335CFF] text-white border-[#335CFF]'
                 : 'border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-200'
@@ -621,14 +621,14 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
 
           {/* Action List */}
           <div className="flex flex-col gap-0.5">
-            {/* Toggle Focus Mode */}
+            {/* Toggle Focus Mode (Desktop only) */}
             <button
               type="button"
               onClick={() => {
                 toggleFocusMode();
                 setIsMenuOpen(false);
               }}
-              className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
+              className="hidden lg:flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
             >
               {isFocusMode ? <Minimize2 className="w-3.5 h-3.5 text-[#335CFF]" /> : <Maximize2 className="w-3.5 h-3.5 text-[#335CFF]" />}
               <span>{isFocusMode ? 'Exit Full Screen' : 'Full Screen Focus'}</span>
