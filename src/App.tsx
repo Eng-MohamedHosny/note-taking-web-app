@@ -74,17 +74,19 @@ const MainLayout: React.FC = () => {
 
       {/* 2. Main Work Area */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* Top Header (81px height in Figma) */}
+        {/* Top Header (81px height in Figma) - Hidden on mobile/tablet when editing note to maximize space */}
         {!isFocusMode && (
-          <Header
-            onOpenSettings={() => {
-              if (isSettingsView) {
-                setActiveView({ type: 'all' });
-              } else {
-                openSettingsTab('color');
-              }
-            }}
-          />
+          <div className={mobileView === 'editor' ? 'hidden lg:block' : 'block'}>
+            <Header
+              onOpenSettings={() => {
+                if (isSettingsView) {
+                  setActiveView({ type: 'all' });
+                } else {
+                  openSettingsTab('color');
+                }
+              }}
+            />
+          </div>
         )}
 
         {/* Dynamic Body: Either Settings View OR Notes Split View */}

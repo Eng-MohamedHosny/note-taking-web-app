@@ -119,21 +119,52 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   const keepCursorVisible = () => {
     requestAnimationFrame(() => {
       const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        if (rect.height === 0 && rect.width === 0 && rect.top === 0) return;
-        const currentKb = keyboardOffsetRef.current;
-        const toolbarHeight = isMobileOrTabletRef.current ? 56 : 0;
-        const safeBottom = window.innerHeight - currentKb - toolbarHeight - 28;
-        if (rect.bottom > safeBottom) {
-          const scrollContainer =
-            toolbarRef.current?.closest('.overflow-y-auto') ||
-            document.querySelector('.overflow-y-auto');
-          if (scrollContainer) {
-            const scrollNeeded = rect.bottom - safeBottom + 32;
-            scrollContainer.scrollBy({ top: scrollNeeded, behavior: 'smooth' });
-          }
+      if (!selection || selection.rangeCount === 0) return;
+
+      const range = selection.getRangeAt(0);
+      let targetEl: HTMLElement | null = null;
+      if (range.commonAncestorContainer) {
+        targetEl =
+          range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+            ? (range.commonAncestorContainer as HTMLElement)
+            : range.commonAncestorContainer.parentElement;
+      }
+
+      const rect = range.getBoundingClientRect();
+      const hasValidRect = rect.height > 0 || rect.width > 0 || rect.top > 0;
+
+      // Calculate toolbar top barrier
+      let toolbarTop = window.innerHeight;
+      if (isMobileOrTabletRef.current && toolbarRef.current) {
+        const tbRect = toolbarRef.current.getBoundingClientRect();
+        if (tbRect.top > 0) {
+          toolbarTop = tbRect.top;
+        }
+      } else if (window.visualViewport) {
+        toolbarTop = window.visualViewport.offsetTop + window.visualViewport.height;
+      }
+
+      // Keep safe clearance of 60px above toolbar
+      const safeBottom = toolbarTop - 60;
+
+      const cursorBottom = hasValidRect
+        ? rect.bottom
+        : (targetEl?.getBoundingClientRect().bottom ?? 0);
+      const cursorTop = hasValidRect
+        ? rect.top
+        : (targetEl?.getBoundingClientRect().top ?? 0);
+
+      const scrollContainer =
+        toolbarRef.current?.closest('.overflow-y-auto') ||
+        document.querySelector('.overflow-y-auto');
+
+      if (scrollContainer) {
+        if (cursorBottom > safeBottom && cursorBottom > 0) {
+          const scrollNeeded = cursorBottom - safeBottom + 30;
+          scrollContainer.scrollBy({ top: scrollNeeded, behavior: 'instant' as ScrollBehavior });
+        } else if (cursorTop < 70 && cursorTop > 0) {
+          const scrollNeeded = cursorTop - 80;
+          scrollContainer.scrollBy({ top: scrollNeeded, behavior: 'instant' as ScrollBehavior });
         }
       }
     });
@@ -291,6 +322,9 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
       setKeyboardOffset(offset);
       keyboardOffsetRef.current = offset;
+      if (editor?.isFocused) {
+        setTimeout(keepCursorVisible, 80);
+      }
     };
 
     vv.addEventListener('resize', handleViewportChange);
