@@ -133,6 +133,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
   const isTrashActive = activeView.type === 'trash';
   const trashCount = notes.filter((n) => n.isDeleted).length;
 
+  const clearFolder = () => {
+    if (activeTag) {
+      setActiveView({ type: 'tag', tag: activeTag });
+    } else {
+      setActiveView({ type: 'all' });
+    }
+  };
+
+  const clearTag = () => {
+    if (activeFolder) {
+      setActiveView({ type: 'folder', folder: activeFolder });
+    } else {
+      setActiveView({ type: 'all' });
+    }
+  };
+
   return (
     <aside
       className={
@@ -459,6 +475,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                         </div>
 
                         <div className="flex items-center gap-0.5 shrink-0">
+                          {isFolderActive && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                clearFolder();
+                              }}
+                              className="p-1 rounded text-blue-500 hover:text-red-500 hover:bg-neutral-200/60 dark:hover:bg-neutral-700 transition-colors cursor-pointer mr-0.5"
+                              title={`Clear "${f}" folder filter`}
+                              aria-label={`Clear "${f}" folder filter`}
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                           {folderCount > 0 && (
                             <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-neutral-200/70 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-normal mr-0.5">
                               {folderCount}
@@ -598,6 +628,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                           <span className="truncate">{tag}</span>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
+                          {isTagActive && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                clearTag();
+                              }}
+                              className="p-1 rounded text-purple-500 hover:text-red-500 hover:bg-neutral-200/60 dark:hover:bg-neutral-700 transition-colors cursor-pointer mr-0.5"
+                              title={`Clear "#${tag}" tag filter`}
+                              aria-label={`Clear "#${tag}" tag filter`}
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                           {tagCount > 0 && (
                             <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-neutral-200/70 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-normal">
                               {tagCount}

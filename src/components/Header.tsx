@@ -10,7 +10,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar }) => {
-  const { activeView, searchQuery, setSearchQuery } = useNotes();
+  const { activeView, setActiveView, searchQuery, setSearchQuery } = useNotes();
 
   const activeFolder =
     activeView.type === 'folder'
@@ -26,6 +26,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar })
       ? activeView.tag
       : undefined;
 
+  const clearFolder = () => {
+    if (activeTag) {
+      setActiveView({ type: 'tag', tag: activeTag });
+    } else {
+      setActiveView({ type: 'all' });
+    }
+  };
+
+  const clearTag = () => {
+    if (activeFolder) {
+      setActiveView({ type: 'folder', folder: activeFolder });
+    } else {
+      setActiveView({ type: 'all' });
+    }
+  };
+
   const renderHeadingTitle = () => {
     if (activeView.type === 'search') return 'Search';
     if (activeView.type === 'trash') return 'Trash';
@@ -34,30 +50,74 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar })
 
     if (activeFolder && activeTag) {
       return (
-        <span className="inline-flex items-center gap-2.5">
-          <FolderIcon className="w-6 h-6 text-[#335CFF] shrink-0" />
-          <span>{activeFolder}</span>
+        <span className="inline-flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-lg font-semibold border border-blue-200 dark:border-blue-900/50">
+            <FolderIcon className="w-4 h-4 text-[#335CFF] shrink-0" />
+            <span>{activeFolder}</span>
+            <button
+              type="button"
+              onClick={clearFolder}
+              className="ml-1 p-0.5 rounded hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-500 hover:text-red-500 transition-colors cursor-pointer"
+              title={`Remove folder "${activeFolder}" filter`}
+              aria-label={`Remove folder "${activeFolder}" filter`}
+            >
+              <CrossIcon className="w-3.5 h-3.5" />
+            </button>
+          </span>
           <span className="text-neutral-400 dark:text-neutral-500 font-normal">/</span>
-          <TagIcon className="w-5 h-5 text-purple-500 shrink-0" />
-          <span>#{activeTag}</span>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 text-lg font-semibold border border-purple-200 dark:border-purple-900/50">
+            <TagIcon className="w-4 h-4 text-purple-500 shrink-0" />
+            <span>#{activeTag}</span>
+            <button
+              type="button"
+              onClick={clearTag}
+              className="ml-1 p-0.5 rounded hover:bg-purple-200 dark:hover:bg-purple-800 text-purple-500 hover:text-red-500 transition-colors cursor-pointer"
+              title={`Remove tag "#${activeTag}" filter`}
+              aria-label={`Remove tag "#${activeTag}" filter`}
+            >
+              <CrossIcon className="w-3.5 h-3.5" />
+            </button>
+          </span>
         </span>
       );
     }
 
     if (activeFolder) {
       return (
-        <span className="inline-flex items-center gap-2.5">
-          <FolderIcon className="w-6 h-6 text-[#335CFF] shrink-0" />
-          <span>{activeFolder}</span>
+        <span className="inline-flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-lg font-semibold border border-blue-200 dark:border-blue-900/50">
+            <FolderIcon className="w-4 h-4 text-[#335CFF] shrink-0" />
+            <span>{activeFolder}</span>
+            <button
+              type="button"
+              onClick={clearFolder}
+              className="ml-1 p-0.5 rounded hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-500 hover:text-red-500 transition-colors cursor-pointer"
+              title={`Remove folder "${activeFolder}" filter`}
+              aria-label={`Remove folder "${activeFolder}" filter`}
+            >
+              <CrossIcon className="w-3.5 h-3.5" />
+            </button>
+          </span>
         </span>
       );
     }
 
     if (activeTag) {
       return (
-        <span className="inline-flex items-center gap-2.5">
-          <TagIcon className="w-6 h-6 text-[#335CFF] shrink-0" />
-          <span>#{activeTag}</span>
+        <span className="inline-flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 text-lg font-semibold border border-purple-200 dark:border-purple-900/50">
+            <TagIcon className="w-4 h-4 text-purple-500 shrink-0" />
+            <span>#{activeTag}</span>
+            <button
+              type="button"
+              onClick={clearTag}
+              className="ml-1 p-0.5 rounded hover:bg-purple-200 dark:hover:bg-purple-800 text-purple-500 hover:text-red-500 transition-colors cursor-pointer"
+              title={`Remove tag "#${activeTag}" filter`}
+              aria-label={`Remove tag "#${activeTag}" filter`}
+            >
+              <CrossIcon className="w-3.5 h-3.5" />
+            </button>
+          </span>
         </span>
       );
     }
