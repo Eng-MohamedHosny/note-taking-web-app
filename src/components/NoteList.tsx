@@ -265,15 +265,16 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
             )}
           </div>
         ) : viewMode === 'grid' ? (
-          /* Grid View Layout (2 columns mobile matching user screenshot, 2-3 cols tablet, 1 col in 290px desktop) */
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-1 gap-2.5 sm:gap-3 py-1">
+          /* Masonry Grid View Layout (Each card has dynamic content-based height) */
+          <div className="columns-2 md:columns-3 lg:columns-1 gap-2.5 sm:gap-3 py-1 [column-fill:_balance]">
             {filteredNotes.map((note) => (
-              <NoteGridCard
-                key={note.id}
-                note={note}
-                isSelected={!isCreatingNewNote && selectedNoteId === note.id}
-                onSelect={() => handleSelect(note.id)}
-              />
+              <div key={note.id} className="break-inside-avoid mb-2.5 sm:mb-3 inline-block w-full">
+                <NoteGridCard
+                  note={note}
+                  isSelected={!isCreatingNewNote && selectedNoteId === note.id}
+                  onSelect={() => handleSelect(note.id)}
+                />
+              </div>
             ))}
           </div>
         ) : (

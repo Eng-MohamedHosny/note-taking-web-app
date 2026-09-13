@@ -29,7 +29,7 @@ export const NoteGridCard: React.FC<NoteGridCardProps> = ({ note, isSelected, on
           onSelect();
         }
       }}
-      className={`group relative p-3.5 sm:p-4 rounded-[18px] transition-all duration-150 cursor-pointer flex flex-col justify-between select-none text-left min-h-[148px] border ${
+      className={`group relative p-3.5 sm:p-4 rounded-[18px] transition-all duration-150 cursor-pointer flex flex-col select-none text-left border ${
         isSelected
           ? 'ring-2 ring-[#335CFF] border-transparent bg-[#EBF1FF]/40 dark:bg-[#232530]'
           : 'bg-[#F3F5F8] dark:bg-[#1A1D24] dark:hover:bg-[#232530] hover:bg-[#EBF1FF]/30 border-[#E0E4EA] dark:border-[#272B35]'
@@ -40,7 +40,7 @@ export const NoteGridCard: React.FC<NoteGridCardProps> = ({ note, isSelected, on
       }}
     >
       {/* Card Content Top */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex flex-col min-w-0">
         {/* Title matching screenshot */}
         <h3
           dir="auto"
