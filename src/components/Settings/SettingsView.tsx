@@ -17,6 +17,7 @@ import {
   InfoIcon,
   HidePasswordIcon,
   ShowPasswordIcon,
+  ArrowLeftIcon,
 } from '../Icons';
 import { Database } from 'lucide-react';
 import { DataManagementTab } from './DataManagementTab';
@@ -92,6 +93,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
     <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden bg-white dark:bg-neutral-950">
       {/* Middle Column: Settings Menu (258px width in Figma) */}
       <div className="w-full md:w-64.5 border-r border-neutral-200 dark:border-neutral-800 p-5 md:py-5 md:pl-8 md:pr-4 flex flex-col gap-2 shrink-0 bg-white dark:bg-neutral-900">
+        {/* Mobile & Tablet Back Button */}
+        <div className="md:hidden pb-3 mb-1 border-b border-neutral-200 dark:border-neutral-800">
+          <button
+            type="button"
+            onClick={() => setActiveView({ type: 'all' })}
+            className="flex items-center gap-1.5 text-sm font-semibold text-[#335CFF] hover:opacity-80 transition-opacity cursor-pointer active:scale-95"
+          >
+            <ArrowLeftIcon className="w-4 h-4" />
+            <span>Back to Notes</span>
+          </button>
+        </div>
+
         <button
           onClick={() => handleTabChange('color')}
           className={`w-full flex items-center justify-between p-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${

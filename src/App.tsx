@@ -86,6 +86,10 @@ const MainLayout: React.FC = () => {
                   openSettingsTab('color');
                 }
               }}
+              onBackToHome={() => {
+                setActiveView({ type: 'all' });
+                setMobileView('list');
+              }}
             />
           </div>
         )}

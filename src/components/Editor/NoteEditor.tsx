@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNotes } from '../../context/NotesContext';
 import { formatDate, exportToMarkdown, exportToTXT, exportToJSON, exportToPrint } from '../../utils/formatters';
 import { DeleteModal } from '../Modals/DeleteModal';
@@ -28,6 +28,9 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
     restoreNote,
     deleteNote,
     activeView,
+    activeFolder,
+    activeTag,
+    selectNote,
     allFolders,
     createFolder,
     isFocusMode,
@@ -220,8 +223,19 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
     setSaveStatus('saved');
   };
 
+  const parentTitle = useMemo(() => {
+    if (activeFolder) return activeFolder;
+    if (activeTag) return `#${activeTag}`;
+    if (activeView.type === 'archived') return 'Archive';
+    if (activeView.type === 'trash') return 'Trash';
+    return 'All Notes';
+  }, [activeFolder, activeTag, activeView.type]);
+
   const handleBack = () => {
     flushSave();
+    if (isCreatingNewNote) {
+      selectNote(null);
+    }
     if (isFocusMode) {
       setFocusMode(false);
     }
@@ -291,10 +305,12 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
           <button
             type="button"
             onClick={handleBack}
-            className="flex items-center gap-1 text-sm font-medium text-[#335CFF] hover:opacity-80 cursor-pointer shrink-0"
+            className="flex items-center gap-1.5 text-sm font-semibold text-[#335CFF] hover:opacity-80 cursor-pointer shrink-0 py-1 px-1.5 -ml-1 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors active:scale-95"
+            title={`Back to ${parentTitle}`}
+            aria-label={`Back to ${parentTitle}`}
           >
             <ArrowLeftIcon className="w-4 h-4" />
-            <span>Notes</span>
+            <span className="truncate max-w-[120px] sm:max-w-[160px]">{parentTitle}</span>
           </button>
 
           {/* Breadcrumb Folder Pill in Mobile Top Bar */}

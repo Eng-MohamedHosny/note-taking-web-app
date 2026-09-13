@@ -1,15 +1,16 @@
 import React from 'react';
 import { useNotes } from '../context/NotesContext';
 import { Logo } from './Logo';
-import { SearchIcon, SettingsIcon, CrossIcon, TagIcon } from './Icons';
+import { SearchIcon, SettingsIcon, CrossIcon, TagIcon, ArrowLeftIcon } from './Icons';
 import { Folder as FolderIcon, Menu } from 'lucide-react';
 
 interface HeaderProps {
   onOpenSettings: () => void;
   onOpenSidebar?: () => void;
+  onBackToHome?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar, onBackToHome }) => {
   const {
     activeView,
     activeFolder,
@@ -18,6 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar })
     clearTag,
     searchQuery,
     setSearchQuery,
+    setActiveView,
   } = useNotes();
 
   const renderHeadingTitle = () => {
@@ -105,24 +107,63 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar })
 
   const isSearching = searchQuery.trim().length > 0;
 
+  const isNotRoot =
+    activeView.type !== 'all' ||
+    Boolean(activeFolder) ||
+    Boolean(activeTag) ||
+    isSearching;
+
+  const handleBackToRoot = () => {
+    clearFolder();
+    clearTag();
+    setSearchQuery('');
+    if (onBackToHome) {
+      onBackToHome();
+    } else {
+      setActiveView({ type: 'all' });
+    }
+  };
+
   return (
     <header className="h-[54px] md:h-[74px] lg:h-[81px] px-4 md:px-8 border-b border-[#E0E4EA] dark:border-[#232530] bg-white dark:bg-[#0E121B] flex items-center justify-between gap-4 shrink-0">
       {/* Left: Heading Title (Desktop) or Brand Logo (Mobile/Tablet) */}
       <div className="flex items-center gap-3">
-        {/* Mobile/Tablet Menu Button & Logo */}
+        {/* Mobile/Tablet Menu Button, Back Button & Logo */}
         <div className="flex items-center gap-2 lg:hidden">
           {onOpenSidebar && (
             <button
               type="button"
               onClick={onOpenSidebar}
-              className="p-1.5 -ml-1 text-[#525866] dark:text-[#99A0AE] hover:text-[#0E121B] dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg cursor-pointer transition-colors"
+              className="p-1.5 -ml-1 text-[#525866] dark:text-[#99A0AE] hover:text-[#0E121B] dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg cursor-pointer transition-colors shrink-0"
               aria-label="Open sidebar menu"
               title="Menu & Folders"
             >
               <Menu className="w-5 h-5" />
             </button>
           )}
-          <Logo className="h-6 w-auto" />
+
+          {isNotRoot && (
+            <button
+              type="button"
+              onClick={handleBackToRoot}
+              className="flex items-center gap-1.5 py-1 px-2.5 text-xs sm:text-sm font-semibold text-[#335CFF] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 border border-blue-200/70 dark:border-blue-800/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-lg transition-colors cursor-pointer shrink-0 active:scale-95"
+              title="Back to All Notes (Root Page)"
+              aria-label="Back to All Notes"
+            >
+              <ArrowLeftIcon className="w-3.5 h-3.5" />
+              <span>All Notes</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={handleBackToRoot}
+            className="cursor-pointer hover:opacity-80 transition-opacity focus:outline-hidden"
+            title="Go to All Notes"
+            aria-label="Go to All Notes"
+          >
+            <Logo className="h-6 w-auto" />
+          </button>
         </div>
 
         {/* Desktop Page Title matching Figma EL-894ecec4 & EL-ba71f4b7 */}
