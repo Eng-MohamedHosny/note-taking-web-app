@@ -77,12 +77,14 @@ interface WysiwygEditorProps {
   content: string;
   onChange: (html: string) => void;
   placeholder?: string;
+  onFocusChange?: (active: boolean) => void;
 }
 
 export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   content,
   onChange,
   placeholder = 'Start typing your note…',
+  onFocusChange,
 }) => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
@@ -160,11 +162,14 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         document.querySelector('.overflow-y-auto');
 
       if (scrollContainer) {
+        const containerRect = scrollContainer.getBoundingClientRect();
+        const safeBottom = containerRect.bottom - 40;
+
         if (cursorBottom > safeBottom && cursorBottom > 0) {
           const scrollNeeded = cursorBottom - safeBottom + 40;
           scrollContainer.scrollBy({ top: scrollNeeded, behavior: 'instant' as ScrollBehavior });
-        } else if (cursorTop < 70 && cursorTop > 0) {
-          const scrollNeeded = cursorTop - 80;
+        } else if (cursorTop < containerRect.top + 20 && cursorTop > 0) {
+          const scrollNeeded = cursorTop - (containerRect.top + 40);
           scrollContainer.scrollBy({ top: scrollNeeded, behavior: 'instant' as ScrollBehavior });
         }
       }
@@ -389,6 +394,10 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   const showMobileToolbar = isEditorFocused || isImageModalOpen || isColorPickerOpen;
   const isToolbarVisible = !isMobileOrTablet || showMobileToolbar;
 
+  useEffect(() => {
+    onFocusChange?.(showMobileToolbar);
+  }, [showMobileToolbar, onFocusChange]);
+
   return (
     <div className="flex flex-col w-full h-full flex-1 relative">
       {/* Formatting Toolbar: On desktop sticky top, on phones/tablets active ONLY when cursor is focused and docked on top of keyboard */}
@@ -403,7 +412,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
             isInteractingWithToolbarRef.current = false;
           }, 300);
         }}
-        className={`fixed lg:sticky z-40 lg:z-10 items-center gap-1.5 lg:gap-0.5 px-3 py-2 lg:py-1.5 bg-white/95 dark:bg-[#12141D]/95 lg:bg-neutral-50/90 lg:dark:bg-[#161822]/90 backdrop-blur-md lg:backdrop-blur-xs border-t lg:border border-neutral-200 dark:border-neutral-800 lg:rounded-lg mb-0 lg:mb-3 shadow-lg lg:shadow-2xs overflow-x-auto lg:overflow-x-visible lg:flex-wrap scrollbar-none touch-pan-x select-none ${
+        className={`fixed lg:sticky z-40 lg:z-10 h-[50px] items-center gap-1.5 lg:gap-0.5 px-3 py-1.5 bg-white/95 dark:bg-[#12141D]/95 lg:bg-neutral-50/90 lg:dark:bg-[#161822]/90 backdrop-blur-md lg:backdrop-blur-xs border-t lg:border border-neutral-200 dark:border-neutral-800 lg:rounded-lg mb-0 lg:mb-3 shadow-lg lg:shadow-2xs overflow-x-auto lg:overflow-x-visible lg:flex-wrap scrollbar-none touch-pan-x select-none ${
           isToolbarVisible ? 'flex bottom-0 lg:top-0 left-0 right-0' : 'hidden'
         }`}
       >

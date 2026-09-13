@@ -73,6 +73,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
   // Virtual keyboard and responsive tracking for scroll padding
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
+  const [isToolbarActive, setIsToolbarActive] = useState(false);
 
   useEffect(() => {
     const checkWidth = () => {
@@ -685,10 +686,10 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
       <div
         id="note-editor-scroll-container"
         style={{
-          scrollPaddingBottom: isMobileOrTablet ? `${keyboardOffset + 140}px` : '120px',
-          paddingBottom: isMobileOrTablet ? `${Math.max(300, keyboardOffset + 260)}px` : '160px',
+          marginBottom: isMobileOrTablet && isToolbarActive ? `${keyboardOffset + 50}px` : '0px',
+          scrollPaddingBottom: isMobileOrTablet ? '100px' : '60px',
         }}
-        className={`flex-1 flex flex-col p-4 md:p-6 lg:p-8 overflow-y-auto transition-all h-full ${
+        className={`flex-1 flex flex-col p-4 md:p-6 lg:p-8 overflow-y-auto transition-[margin] duration-100 h-full ${
           isFocusMode ? 'max-w-4xl mx-auto w-full' : ''
         }`}
       >
@@ -764,6 +765,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
           <WysiwygEditor
             content={content}
             onChange={handleContentChange}
+            onFocusChange={setIsToolbarActive}
             placeholder="Start typing your note…"
           />
         </div>
