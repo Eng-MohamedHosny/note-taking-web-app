@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNotes } from '../context/NotesContext';
 import { NoteCard } from './NoteCard';
 import { NoteGridCard } from './NoteGridCard';
@@ -16,7 +16,6 @@ import {
   ChevronDown,
   Plus,
   Pin,
-  CheckSquare,
   Download,
   Trash2,
 } from 'lucide-react';
@@ -78,16 +77,6 @@ export const NoteList: React.FC<NoteListProps> = ({
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
   const [isBulkExportOpen, setIsBulkExportOpen] = useState(false);
 
-  // Collapsing header state on scroll
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const lastScrollTop = useRef(0);
-
-  // Reset collapse on view change
-  useEffect(() => {
-    setIsCollapsed(false);
-  }, [activeView, activeFolder, activeTag]);
-
   // Escape key cancels selection mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -112,7 +101,7 @@ export const NoteList: React.FC<NoteListProps> = ({
     }
   };
 
-  // Long press on mobile touch screen triggers selection mode!
+  // Long press on mobile touch screen triggers selection mode
   const handleLongPress = (id: string) => {
     setIsSelectionMode(true);
     toggleSelectNote(id);
@@ -140,28 +129,6 @@ export const NoteList: React.FC<NoteListProps> = ({
     const ids = Array.from(selectedIds);
     batchDeleteNotes(ids);
     clearSelection();
-  };
-
-  // Scroll listener for collapsing header animation
-  const handleNotesScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const current = e.currentTarget.scrollTop;
-    const diff = current - lastScrollTop.current;
-
-    // Keep header visible while user is actively typing in search
-    if (isSearchFocused) {
-      lastScrollTop.current = current;
-      return;
-    }
-
-    if (current > 25 && diff > 4) {
-      // User is scrolling down past threshold -> compress smoothly
-      setIsCollapsed(true);
-    } else if (current < 15 || diff < -8) {
-      // User scrolled up or reached the top -> expand smoothly
-      setIsCollapsed(false);
-    }
-
-    lastScrollTop.current = current;
   };
 
   const isSearching = activeView.type === 'search' || searchQuery.trim().length > 0;
@@ -209,17 +176,101 @@ export const NoteList: React.FC<NoteListProps> = ({
   return (
     <div className="w-full lg:w-[290px] border-r-0 lg:border-r border-[#E0E4EA] dark:border-[#232530] bg-white dark:bg-[#0E121B] flex flex-col h-full shrink-0 overflow-hidden relative">
       {/* ========================================================================= */}
-      {/* 1. Tablet & Mobile Viewport Top Header & Collapsing Animation              */}
+      {/* 1. Desktop Top Actions (+ Create Note / Empty Trash + View Mode Toggle)    */}
       {/* ========================================================================= */}
-      <div className="lg:hidden shrink-0">
-        {/* Collapsible Section: Title + Mode toggle + Search input */}
-        <div
-          className={`transition-all duration-300 ease-out overflow-hidden px-4 md:px-8 ${
-            isCollapsed
-              ? 'max-h-0 opacity-0 -translate-y-3 pointer-events-none pt-0 pb-0'
-              : 'max-h-56 opacity-100 translate-y-0 pt-5 pb-1 md:pt-6'
-          }`}
-        >
+      <div className="hidden lg:flex items-center justify-between p-4 border-b border-[#E0E4EA] dark:border-[#232530] gap-2 shrink-0">
+        {activeView.type === 'trash' ? (
+          <button
+            type="button"
+            onClick={emptyTrash}
+            disabled={filteredNotes.length === 0}
+            className="flex-1 h-[44px] px-3 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+          >
+            <DeleteIcon className="w-4 h-4" />
+            <span>Empty Trash</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleCreateNew}
+            className="flex-1 h-[44px] px-4 rounded-lg bg-[#335CFF] hover:bg-blue-600 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+          >
+            <span>+ Create New Note</span>
+          </button>
+        )}
+
+        {/* Desktop Grid / List View Toggle */}
+        <div className="flex items-center p-0.5 rounded-lg border border-[#E0E4EA] dark:border-[#2B303B] bg-[#F3F5F8] dark:bg-[#1A1D24] shrink-0">
+          <button
+            type="button"
+            onClick={() => setViewMode('list')}
+            className={`p-1.5 rounded-md transition-all cursor-pointer ${
+              viewMode === 'list'
+                ? 'bg-white dark:bg-[#232530] text-[#335CFF] shadow-xs font-semibold'
+                : 'text-[#525866] dark:text-[#99A0AE] hover:text-[#0E121B] dark:hover:text-white'
+            }`}
+            title="List view"
+            aria-label="List view"
+          >
+            <ListViewIcon className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('grid')}
+            className={`p-1.5 rounded-md transition-all cursor-pointer ${
+              viewMode === 'grid'
+                ? 'bg-white dark:bg-[#232530] text-[#335CFF] shadow-xs font-semibold'
+                : 'text-[#525866] dark:text-[#99A0AE] hover:text-[#0E121B] dark:hover:text-white'
+            }`}
+            title="Grid view"
+            aria-label="Grid view"
+          >
+            <GridViewIcon className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop Search Query Info */}
+      {searchQuery.trim() ? (
+        <div className="hidden lg:block px-4 pt-3 pb-1 text-sm text-[#2B303B] dark:text-[#CACFD8] shrink-0">
+          All notes matching <span className="text-[#0E121B] dark:text-white font-medium">”{searchQuery}”</span> are displayed below.
+        </div>
+      ) : null}
+
+      {/* Selection Mode Top Banner */}
+      {isSelectionMode && (
+        <div className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 lg:px-4 py-2 bg-blue-50/90 dark:bg-blue-950/80 backdrop-blur-md border-b border-blue-200/60 dark:border-blue-800/60 text-xs text-blue-900 dark:text-blue-200 shrink-0 select-none animate-in fade-in duration-150">
+          <span className="font-semibold">
+            {selectedIds.size} of {filteredNotes.length} selected
+          </span>
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={handleToggleSelectAll}
+              className="font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+            >
+              {selectedIds.size === filteredNotes.length && filteredNotes.length > 0
+                ? 'Deselect All'
+                : 'Select All'}
+            </button>
+            <span className="text-neutral-300 dark:text-neutral-700">|</span>
+            <button
+              type="button"
+              onClick={clearSelection}
+              className="font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 2. Unified Scroll Container (Buttery-smooth, Apple Notes style)            */}
+      {/* ========================================================================= */}
+      <div className="flex-1 overflow-y-auto overscroll-contain">
+        {/* Mobile / Tablet Collapsible Top Section: Title & Search bar */}
+        <div className="lg:hidden px-4 pt-5 pb-2 md:px-8 md:pt-6">
           <div className="flex items-center justify-between gap-3">
             <h1 className="text-2xl font-bold text-[#0E121B] dark:text-white tracking-tight flex items-center">
               {renderHeadingTitle()}
@@ -267,8 +318,6 @@ export const NoteList: React.FC<NoteListProps> = ({
               <input
                 type="text"
                 value={searchQuery}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by title, content, or tags…"
                 className="w-full h-[44px] pl-10 pr-9 py-2.5 text-sm rounded-lg border border-[#E0E4EA] dark:border-[#2B303B] bg-white dark:bg-[#0E121B] text-[#0E121B] dark:text-white placeholder:text-[#525866] dark:placeholder:text-[#99A0AE] focus:outline-hidden focus:border-[#335CFF] shadow-xs transition-colors"
@@ -287,30 +336,10 @@ export const NoteList: React.FC<NoteListProps> = ({
           )}
         </div>
 
-        {/* Action Chips Bar (Pins right against the header when title & search compress) */}
-        <div
-          className={`px-4 md:px-8 py-2.5 transition-all duration-200 border-b ${
-            isCollapsed
-              ? 'bg-white/95 dark:bg-[#0E121B]/95 backdrop-blur-md border-neutral-200/80 dark:border-neutral-800 shadow-xs'
-              : 'bg-transparent border-transparent'
-          }`}
-        >
+        {/* Mobile / Tablet Sticky Action Chips Bar */}
+        {/* As the user scrolls down, this bar naturally glides to the top and stays pinned at top: 0! */}
+        <div className="lg:hidden sticky top-0 z-20 px-4 md:px-8 py-2.5 backdrop-blur-md bg-white/95 dark:bg-[#0E121B]/95 border-b border-neutral-200/80 dark:border-neutral-800 shadow-xs transition-shadow">
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-none select-none">
-            {/* Quick Title Indicator when collapsed */}
-            {isCollapsed && (
-              <span className="text-xs font-bold text-neutral-900 dark:text-white shrink-0 pr-1 truncate max-w-[110px]">
-                {activeView.type === 'search'
-                  ? 'Search'
-                  : activeFolder
-                  ? activeFolder
-                  : activeTag
-                  ? `#${activeTag}`
-                  : activeView.type === 'archived'
-                  ? 'Archive'
-                  : 'All Notes'}
-              </span>
-            )}
-
             {/* All Notes Pill */}
             <button
               type="button"
@@ -508,172 +537,93 @@ export const NoteList: React.FC<NoteListProps> = ({
         </div>
 
         {/* Search Query Info */}
-        {searchQuery.trim() && !isCollapsed ? (
-          <p className="px-4 md:px-8 text-sm text-[#2B303B] dark:text-[#CACFD8] mt-2 mb-1">
+        {searchQuery.trim() ? (
+          <p className="px-4 md:px-8 lg:hidden text-sm text-[#2B303B] dark:text-[#CACFD8] mt-2 mb-1">
             All notes matching <span className="text-[#0E121B] dark:text-white font-medium">”{searchQuery}”</span> are displayed below.
           </p>
         ) : null}
-      </div>
 
-      {/* ========================================================================= */}
-      {/* 2. Desktop Top Actions (+ Create Note / Empty Trash + Select + View Mode)   */}
-      {/* ========================================================================= */}
-      <div className="hidden lg:flex items-center justify-between p-4 border-b border-[#E0E4EA] dark:border-[#232530] gap-2 shrink-0">
-        {activeView.type === 'trash' ? (
-          <button
-            type="button"
-            onClick={emptyTrash}
-            disabled={filteredNotes.length === 0}
-            className="flex-1 h-[44px] px-3 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
-          >
-            <DeleteIcon className="w-4 h-4" />
-            <span>Empty Trash</span>
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleCreateNew}
-            className="flex-1 h-[44px] px-4 rounded-lg bg-[#335CFF] hover:bg-blue-600 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
-          >
-            <span>+ Create New Note</span>
-          </button>
-        )}
-
-        {/* Desktop Grid / List View Toggle */}
-        <div className="flex items-center p-0.5 rounded-lg border border-[#E0E4EA] dark:border-[#2B303B] bg-[#F3F5F8] dark:bg-[#1A1D24] shrink-0">
-          <button
-            type="button"
-            onClick={() => setViewMode('list')}
-            className={`p-1.5 rounded-md transition-all cursor-pointer ${
-              viewMode === 'list'
-                ? 'bg-white dark:bg-[#232530] text-[#335CFF] shadow-xs font-semibold'
-                : 'text-[#525866] dark:text-[#99A0AE] hover:text-[#0E121B] dark:hover:text-white'
-            }`}
-            title="List view"
-            aria-label="List view"
-          >
-            <ListViewIcon className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('grid')}
-            className={`p-1.5 rounded-md transition-all cursor-pointer ${
-              viewMode === 'grid'
-                ? 'bg-white dark:bg-[#232530] text-[#335CFF] shadow-xs font-semibold'
-                : 'text-[#525866] dark:text-[#99A0AE] hover:text-[#0E121B] dark:hover:text-white'
-            }`}
-            title="Grid view"
-            aria-label="Grid view"
-          >
-            <GridViewIcon className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Desktop Search Query Info */}
-      {searchQuery.trim() ? (
-        <div className="hidden lg:block px-4 pt-3 pb-1 text-sm text-[#2B303B] dark:text-[#CACFD8] shrink-0">
-          All notes matching <span className="text-[#0E121B] dark:text-white font-medium">”{searchQuery}”</span> are displayed below.
-        </div>
-      ) : null}
-
-      {/* Selection Mode Top Banner */}
-      {isSelectionMode && (
-        <div className="flex items-center justify-between px-4 md:px-8 lg:px-4 py-2 bg-blue-50/80 dark:bg-blue-950/40 border-b border-blue-200/60 dark:border-blue-800/60 text-xs text-blue-900 dark:text-blue-200 animate-in fade-in duration-150 shrink-0 select-none">
-          <span className="font-semibold">
-            {selectedIds.size} of {filteredNotes.length} selected
-          </span>
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={handleToggleSelectAll}
-              className="font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-            >
-              {selectedIds.size === filteredNotes.length && filteredNotes.length > 0
-                ? 'Deselect All'
-                : 'Select All'}
-            </button>
-            <span className="text-neutral-300 dark:text-neutral-700">|</span>
-            <button
-              type="button"
-              onClick={clearSelection}
-              className="font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 cursor-pointer"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* 3. Scrollable Notes List / Grid (Listens to onScroll for collapsing)      */}
-      {/* ========================================================================= */}
-      <div
-        onScroll={handleNotesScroll}
-        className="flex-1 overflow-y-auto px-4 md:px-8 lg:px-4 py-2 pb-36 lg:pb-24"
-      >
-        {filteredNotes.length === 0 ? (
-          <div className="p-2 rounded-lg border border-[#E0E4EA] dark:border-[#2B303B] bg-[#F3F5F8] dark:bg-[#232530] text-sm text-[#0E121B] dark:text-[#CACFD8] my-2">
-            {isSearching ? (
-              <>
-                No notes match your search. Try a different keyword or{' '}
-                <button
-                  type="button"
-                  onClick={handleCreateNew}
-                  className="underline text-[#0E121B] dark:text-white hover:text-[#335CFF] transition-colors cursor-pointer font-normal"
-                >
-                  create a new note
-                </button>
-                .
-              </>
-            ) : activeView.type === 'archived' ? (
-              <>
-                No notes have been archived yet. Move notes here for safekeeping, or{' '}
-                <button
-                  type="button"
-                  onClick={handleCreateNew}
-                  className="underline text-[#0E121B] dark:text-white hover:text-[#335CFF] transition-colors cursor-pointer font-normal"
-                >
-                  create a new note
-                </button>
-                .
-              </>
-            ) : activeView.type === 'folder' ? (
-              <>
-                No notes in folder "{activeView.folder}" yet.{' '}
-                <button
-                  type="button"
-                  onClick={handleCreateNew}
-                  className="underline text-[#0E121B] dark:text-white hover:text-[#335CFF] transition-colors cursor-pointer font-normal"
-                >
-                  create a new note
-                </button>
-                .
-              </>
-            ) : activeView.type === 'tag' ? (
-              <>
-                No notes found with tag "{activeView.tag}". Try a different tag or{' '}
-                <button
-                  type="button"
-                  onClick={handleCreateNew}
-                  className="underline text-[#0E121B] dark:text-white hover:text-[#335CFF] transition-colors cursor-pointer font-normal"
-                >
-                  create a new note
-                </button>
-                .
-              </>
-            ) : activeView.type === 'trash' ? (
-              'Trash is empty. Deleted notes will appear here.'
-            ) : (
-              'You don’t have any notes yet. Start a new note to capture your thoughts and ideas.'
-            )}
-          </div>
-        ) : viewMode === 'grid' ? (
-          /* Masonry Grid View */
-          <div className="columns-2 md:columns-3 lg:columns-1 gap-2.5 sm:gap-3 py-1 [column-fill:_balance]">
-            {filteredNotes.map((note) => (
-              <div key={note.id} className="break-inside-avoid mb-2.5 sm:mb-3 inline-block w-full">
-                <NoteGridCard
+        {/* Notes Grid / List */}
+        <div className="px-4 md:px-8 lg:px-4 py-2 pb-36 lg:pb-24">
+          {filteredNotes.length === 0 ? (
+            <div className="p-2 rounded-lg border border-[#E0E4EA] dark:border-[#2B303B] bg-[#F3F5F8] dark:bg-[#232530] text-sm text-[#0E121B] dark:text-[#CACFD8] my-2">
+              {isSearching ? (
+                <>
+                  No notes match your search. Try a different keyword or{' '}
+                  <button
+                    type="button"
+                    onClick={handleCreateNew}
+                    className="underline text-[#0E121B] dark:text-white hover:text-[#335CFF] transition-colors cursor-pointer font-normal"
+                  >
+                    create a new note
+                  </button>
+                  .
+                </>
+              ) : activeView.type === 'archived' ? (
+                <>
+                  No notes have been archived yet. Move notes here for safekeeping, or{' '}
+                  <button
+                    type="button"
+                    onClick={handleCreateNew}
+                    className="underline text-[#0E121B] dark:text-white hover:text-[#335CFF] transition-colors cursor-pointer font-normal"
+                  >
+                    create a new note
+                  </button>
+                  .
+                </>
+              ) : activeView.type === 'folder' ? (
+                <>
+                  No notes in folder "{activeView.folder}" yet.{' '}
+                  <button
+                    type="button"
+                    onClick={handleCreateNew}
+                    className="underline text-[#0E121B] dark:text-white hover:text-[#335CFF] transition-colors cursor-pointer font-normal"
+                  >
+                    create a new note
+                  </button>
+                  .
+                </>
+              ) : activeView.type === 'tag' ? (
+                <>
+                  No notes found with tag "{activeView.tag}". Try a different tag or{' '}
+                  <button
+                    type="button"
+                    onClick={handleCreateNew}
+                    className="underline text-[#0E121B] dark:text-white hover:text-[#335CFF] transition-colors cursor-pointer font-normal"
+                  >
+                    create a new note
+                  </button>
+                  .
+                </>
+              ) : activeView.type === 'trash' ? (
+                'Trash is empty. Deleted notes will appear here.'
+              ) : (
+                'You don’t have any notes yet. Start a new note to capture your thoughts and ideas.'
+              )}
+            </div>
+          ) : viewMode === 'grid' ? (
+            /* Masonry Grid View */
+            <div className="columns-2 md:columns-3 lg:columns-1 gap-2.5 sm:gap-3 py-1 [column-fill:_balance]">
+              {filteredNotes.map((note) => (
+                <div key={note.id} className="break-inside-avoid mb-2.5 sm:mb-3 inline-block w-full">
+                  <NoteGridCard
+                    note={note}
+                    isSelected={!isCreatingNewNote && selectedNoteId === note.id}
+                    onSelect={() => handleSelect(note.id)}
+                    isSelectionMode={isSelectionMode}
+                    isChecked={selectedIds.has(note.id)}
+                    onToggleCheck={() => toggleSelectNote(note.id)}
+                    onLongPress={() => handleLongPress(note.id)}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* Card List View */
+            <div className="flex flex-col gap-2.5 py-1">
+              {filteredNotes.map((note) => (
+                <NoteCard
+                  key={note.id}
                   note={note}
                   isSelected={!isCreatingNewNote && selectedNoteId === note.id}
                   onSelect={() => handleSelect(note.id)}
@@ -682,30 +632,14 @@ export const NoteList: React.FC<NoteListProps> = ({
                   onToggleCheck={() => toggleSelectNote(note.id)}
                   onLongPress={() => handleLongPress(note.id)}
                 />
-              </div>
-            ))}
-          </div>
-        ) : (
-          /* Card List View */
-          <div className="flex flex-col gap-2.5 py-1">
-            {filteredNotes.map((note) => (
-              <NoteCard
-                key={note.id}
-                note={note}
-                isSelected={!isCreatingNewNote && selectedNoteId === note.id}
-                onSelect={() => handleSelect(note.id)}
-                isSelectionMode={isSelectionMode}
-                isChecked={selectedIds.has(note.id)}
-                onToggleCheck={() => toggleSelectNote(note.id)}
-                onLongPress={() => handleLongPress(note.id)}
-              />
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 4. Floating Bulk Action Dock Bar (Visible when Selection Mode is Active)  */}
+      {/* 3. Floating Bulk Action Dock Bar (Visible when Selection Mode is Active)  */}
       {/* ========================================================================= */}
       {isSelectionMode && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-[95vw] sm:max-w-max bg-white/95 dark:bg-[#1C222B]/95 backdrop-blur-md border border-neutral-200 dark:border-neutral-700 shadow-2xl rounded-2xl px-3 sm:px-4 py-2 flex items-center gap-1.5 sm:gap-2.5 animate-in slide-in-from-bottom-5 duration-200 select-none">
@@ -783,7 +717,7 @@ export const NoteList: React.FC<NoteListProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* 5. Modals for Bulk Operations                                             */}
+      {/* 4. Modals for Bulk Operations                                             */}
       {/* ========================================================================= */}
       <BulkTagModal
         isOpen={isBulkTagOpen}
