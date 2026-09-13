@@ -91,6 +91,8 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   const toolbarRef = useRef<HTMLDivElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const colorButtonRef = useRef<HTMLButtonElement>(null);
+  const keyboardOffsetRef = useRef(0);
+  const isMobileOrTabletRef = useRef(false);
 
   useEffect(() => {
     if (!isColorPickerOpen) return;
@@ -113,6 +115,29 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       document.removeEventListener('pointerdown', handleClickOutside);
     };
   }, [isColorPickerOpen]);
+
+  const keepCursorVisible = () => {
+    requestAnimationFrame(() => {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        if (rect.height === 0 && rect.width === 0 && rect.top === 0) return;
+        const currentKb = keyboardOffsetRef.current;
+        const toolbarHeight = isMobileOrTabletRef.current ? 56 : 0;
+        const safeBottom = window.innerHeight - currentKb - toolbarHeight - 28;
+        if (rect.bottom > safeBottom) {
+          const scrollContainer =
+            toolbarRef.current?.closest('.overflow-y-auto') ||
+            document.querySelector('.overflow-y-auto');
+          if (scrollContainer) {
+            const scrollNeeded = rect.bottom - safeBottom + 32;
+            scrollContainer.scrollBy({ top: scrollNeeded, behavior: 'smooth' });
+          }
+        }
+      }
+    });
+  };
 
   const editor = useEditor({
     extensions: [
@@ -152,9 +177,11 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     content: content || '',
     onUpdate: ({ editor: ed }) => {
       onChange(ed.getHTML());
+      keepCursorVisible();
     },
     onFocus: () => {
       setIsEditorFocused(true);
+      keepCursorVisible();
     },
     onBlur: ({ event }) => {
       if (isInteractingWithToolbarRef.current || isColorPickerOpen) return;
@@ -170,12 +197,13 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     onSelectionUpdate: ({ editor: ed }) => {
       if (ed.isFocused) {
         setIsEditorFocused(true);
+        keepCursorVisible();
       }
     },
     editorProps: {
       attributes: {
         class:
-          'w-full flex-1 min-h-full py-3 pb-32 text-neutral-800 dark:text-neutral-200 text-sm md:text-base leading-relaxed focus:outline-hidden font-inherit',
+          'w-full flex-1 min-h-[300px] py-3 text-neutral-800 dark:text-neutral-200 text-sm md:text-base leading-relaxed focus:outline-hidden font-inherit',
       },
       handlePaste: (view, event) => {
         const items = Array.from(event.clipboardData?.items || []);
@@ -241,7 +269,9 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
 
   useEffect(() => {
     const checkWidth = () => {
-      setIsMobileOrTablet(window.innerWidth < 1024);
+      const isMob = window.innerWidth < 1024;
+      setIsMobileOrTablet(isMob);
+      isMobileOrTabletRef.current = isMob;
     };
     checkWidth();
     window.addEventListener('resize', checkWidth);
@@ -255,10 +285,12 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     const handleViewportChange = () => {
       if (window.innerWidth >= 1024) {
         setKeyboardOffset(0);
+        keyboardOffsetRef.current = 0;
         return;
       }
       const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
       setKeyboardOffset(offset);
+      keyboardOffsetRef.current = offset;
     };
 
     vv.addEventListener('resize', handleViewportChange);
