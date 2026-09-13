@@ -23,6 +23,12 @@ export const NoteList: React.FC<NoteListProps> = ({
     startNewNote,
     isCreatingNewNote,
     activeView,
+    activeFolder,
+    activeTag,
+    selectFolder,
+    selectTag,
+    clearFolder,
+    clearTag,
     setActiveView,
     allFolders,
     allTags,
@@ -47,36 +53,6 @@ export const NoteList: React.FC<NoteListProps> = ({
     startNewNote();
     if (onSelectMobileNote) {
       onSelectMobileNote();
-    }
-  };
-
-  const activeFolder =
-    activeView.type === 'folder'
-      ? activeView.folder
-      : 'folder' in activeView
-      ? activeView.folder
-      : undefined;
-
-  const activeTag =
-    activeView.type === 'tag'
-      ? activeView.tag
-      : 'tag' in activeView
-      ? activeView.tag
-      : undefined;
-
-  const clearFolder = () => {
-    if (activeTag) {
-      setActiveView({ type: 'tag', tag: activeTag });
-    } else {
-      setActiveView({ type: 'all' });
-    }
-  };
-
-  const clearTag = () => {
-    if (activeFolder) {
-      setActiveView({ type: 'folder', folder: activeFolder });
-    } else {
-      setActiveView({ type: 'all' });
     }
   };
 
@@ -303,7 +279,7 @@ export const NoteList: React.FC<NoteListProps> = ({
                   if (isActive) {
                     clearFolder();
                   } else {
-                    setActiveView({ type: 'folder', folder: f });
+                    selectFolder(f);
                   }
                 }}
                 className={`px-2.5 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
@@ -343,7 +319,7 @@ export const NoteList: React.FC<NoteListProps> = ({
                   if (isActive) {
                     clearTag();
                   } else {
-                    setActiveView({ type: 'tag', tag: t });
+                    selectTag(t);
                   }
                 }}
                 className={`px-2.5 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${

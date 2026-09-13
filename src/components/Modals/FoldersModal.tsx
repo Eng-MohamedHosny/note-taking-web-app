@@ -13,7 +13,8 @@ export const FoldersModal: React.FC<FoldersModalProps> = ({ isOpen, onClose }) =
     allFolders,
     notes,
     activeView,
-    setActiveView,
+    selectFolder,
+    clearFolder,
     createFolder,
     renameFolder,
     deleteFolder,
@@ -180,14 +181,9 @@ export const FoldersModal: React.FC<FoldersModalProps> = ({ isOpen, onClose }) =
                   <button
                     onClick={() => {
                       if (isSelected) {
-                        const currentTag = 'tag' in activeView ? activeView.tag : undefined;
-                        if (currentTag) {
-                          setActiveView({ type: 'tag', tag: currentTag });
-                        } else {
-                          setActiveView({ type: 'all' });
-                        }
+                        clearFolder();
                       } else {
-                        setActiveView({ type: 'folder', folder });
+                        selectFolder(folder);
                       }
                       onClose();
                     }}

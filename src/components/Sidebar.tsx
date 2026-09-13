@@ -26,6 +26,12 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }) => {
   const {
     activeView,
+    activeFolder,
+    activeTag,
+    selectFolder: rawSelectFolder,
+    selectTag: rawSelectTag,
+    clearFolder,
+    clearTag,
     setActiveView: rawSetActiveView,
     allTags,
     allFolders,
@@ -41,6 +47,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
 
   const setActiveView = (view: Parameters<typeof rawSetActiveView>[0]) => {
     rawSetActiveView(view);
+    if (isMobile && onNavigate) {
+      onNavigate();
+    }
+  };
+
+  const selectFolder = (folder: string) => {
+    rawSelectFolder(folder);
+    if (isMobile && onNavigate) {
+      onNavigate();
+    }
+  };
+
+  const selectTag = (tag: string) => {
+    rawSelectTag(tag);
     if (isMobile && onNavigate) {
       onNavigate();
     }
@@ -116,38 +136,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
   };
 
   const effectiveCollapsed = isMobile ? false : isCollapsed;
-  const activeFolder =
-    activeView.type === 'folder'
-      ? activeView.folder
-      : 'folder' in activeView
-      ? activeView.folder
-      : undefined;
-  const activeTag =
-    activeView.type === 'tag'
-      ? activeView.tag
-      : 'tag' in activeView
-      ? activeView.tag
-      : undefined;
   const isAllNotesActive = activeView.type === 'all' && !activeFolder && !activeTag;
   const isArchivedActive = activeView.type === 'archived';
   const isTrashActive = activeView.type === 'trash';
   const trashCount = notes.filter((n) => n.isDeleted).length;
-
-  const clearFolder = () => {
-    if (activeTag) {
-      setActiveView({ type: 'tag', tag: activeTag });
-    } else {
-      setActiveView({ type: 'all' });
-    }
-  };
-
-  const clearTag = () => {
-    if (activeFolder) {
-      setActiveView({ type: 'folder', folder: activeFolder });
-    } else {
-      setActiveView({ type: 'all' });
-    }
-  };
 
   return (
     <aside
@@ -455,13 +447,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                         }`}
                         onClick={() => {
                           if (isFolderActive) {
-                            if (activeTag) {
-                              setActiveView({ type: 'tag', tag: activeTag });
-                            } else {
-                              setActiveView({ type: 'all' });
-                            }
+                            clearFolder();
                           } else {
-                            setActiveView({ type: 'folder', folder: f });
+                            selectFolder(f);
                           }
                         }}
                       >
@@ -602,13 +590,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                         type="button"
                         onClick={() => {
                           if (isTagActive) {
-                            if (activeFolder) {
-                              setActiveView({ type: 'folder', folder: activeFolder });
-                            } else {
-                              setActiveView({ type: 'all' });
-                            }
+                            clearTag();
                           } else {
-                            setActiveView({ type: 'tag', tag });
+                            selectTag(tag);
                           }
                         }}
                         className={`group w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${

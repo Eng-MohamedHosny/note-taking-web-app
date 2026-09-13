@@ -20,11 +20,17 @@ interface NotesContextType {
   pinnedTags: string[];
   filteredNotes: Note[];
   isFocusMode: boolean;
+  activeFolder?: string;
+  activeTag?: string;
   
   // Actions
   toggleFocusMode: () => void;
   setFocusMode: (val: boolean) => void;
   selectNote: (id: string | null) => void;
+  selectFolder: (folder: string) => void;
+  selectTag: (tag: string) => void;
+  clearFolder: () => void;
+  clearTag: () => void;
   setActiveView: (view: ActiveView) => void;
   setViewMode: (mode: ViewMode) => void;
   openSettingsTab: (tab?: SettingsTab) => void;
@@ -89,28 +95,56 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [activeView, setActiveViewState] = useState<ActiveView>({ type: 'all' });
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const setActiveView = (view: ActiveView) => {
-    let finalView = view;
+  const activeFolder =
+    activeView.type === 'folder'
+      ? activeView.folder
+      : 'folder' in activeView
+      ? activeView.folder
+      : undefined;
 
-    // Compound filtering logic:
-    if (view.type === 'folder') {
-      const currentTag = 'tag' in activeView ? activeView.tag : undefined;
-      if (currentTag && !view.tag) {
-        finalView = { ...view, tag: currentTag };
-      }
-    } else if (view.type === 'tag') {
-      const currentFolder =
-        activeView.type === 'folder'
-          ? activeView.folder
-          : 'folder' in activeView
-          ? activeView.folder
-          : undefined;
-      if (currentFolder && !view.folder) {
-        finalView = { ...view, folder: currentFolder };
-      }
+  const activeTag =
+    activeView.type === 'tag'
+      ? activeView.tag
+      : 'tag' in activeView
+      ? activeView.tag
+      : undefined;
+
+  const selectFolder = (folder: string) => {
+    if (activeTag) {
+      setActiveViewState({ type: 'folder', folder, tag: activeTag });
+    } else {
+      setActiveViewState({ type: 'folder', folder });
     }
+    setSearchQuery('');
+  };
 
-    setActiveViewState(finalView);
+  const selectTag = (tag: string) => {
+    if (activeFolder) {
+      setActiveViewState({ type: 'tag', tag, folder: activeFolder });
+    } else {
+      setActiveViewState({ type: 'tag', tag });
+    }
+    setSearchQuery('');
+  };
+
+  const clearFolder = () => {
+    if (activeTag) {
+      setActiveViewState({ type: 'tag', tag: activeTag });
+    } else {
+      setActiveViewState({ type: 'all' });
+    }
+  };
+
+  const clearTag = () => {
+    if (activeFolder) {
+      setActiveViewState({ type: 'folder', folder: activeFolder });
+    } else {
+      setActiveViewState({ type: 'all' });
+    }
+  };
+
+  const setActiveView = (view: ActiveView) => {
+    setActiveViewState(view);
     if (view.type !== 'search') {
       setSearchQuery('');
     }
@@ -667,9 +701,15 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         pinnedTags,
         filteredNotes,
         isFocusMode,
+        activeFolder,
+        activeTag,
         toggleFocusMode,
         setFocusMode: setIsFocusMode,
         selectNote,
+        selectFolder,
+        selectTag,
+        clearFolder,
+        clearTag,
         setActiveView,
         setViewMode,
         openSettingsTab,

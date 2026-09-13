@@ -10,37 +10,15 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar }) => {
-  const { activeView, setActiveView, searchQuery, setSearchQuery } = useNotes();
-
-  const activeFolder =
-    activeView.type === 'folder'
-      ? activeView.folder
-      : 'folder' in activeView
-      ? activeView.folder
-      : undefined;
-
-  const activeTag =
-    activeView.type === 'tag'
-      ? activeView.tag
-      : 'tag' in activeView
-      ? activeView.tag
-      : undefined;
-
-  const clearFolder = () => {
-    if (activeTag) {
-      setActiveView({ type: 'tag', tag: activeTag });
-    } else {
-      setActiveView({ type: 'all' });
-    }
-  };
-
-  const clearTag = () => {
-    if (activeFolder) {
-      setActiveView({ type: 'folder', folder: activeFolder });
-    } else {
-      setActiveView({ type: 'all' });
-    }
-  };
+  const {
+    activeView,
+    activeFolder,
+    activeTag,
+    clearFolder,
+    clearTag,
+    searchQuery,
+    setSearchQuery,
+  } = useNotes();
 
   const renderHeadingTitle = () => {
     if (activeView.type === 'search') return 'Search';

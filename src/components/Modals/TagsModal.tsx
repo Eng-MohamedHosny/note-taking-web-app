@@ -9,7 +9,7 @@ interface TagsModalProps {
 }
 
 export const TagsModal: React.FC<TagsModalProps> = ({ isOpen, onClose }) => {
-  const { allTags, activeView, setActiveView, pinnedTags, togglePinTag } = useNotes();
+  const { allTags, activeView, selectTag, clearTag, pinnedTags, togglePinTag } = useNotes();
 
   if (!isOpen) return null;
 
@@ -61,19 +61,9 @@ export const TagsModal: React.FC<TagsModalProps> = ({ isOpen, onClose }) => {
                   <button
                     onClick={() => {
                       if (isSelected) {
-                        const currentFolder =
-                          activeView.type === 'folder'
-                            ? activeView.folder
-                            : 'folder' in activeView
-                            ? activeView.folder
-                            : undefined;
-                        if (currentFolder) {
-                          setActiveView({ type: 'folder', folder: currentFolder });
-                        } else {
-                          setActiveView({ type: 'all' });
-                        }
+                        clearTag();
                       } else {
-                        setActiveView({ type: 'tag', tag });
+                        selectTag(tag);
                       }
                       onClose();
                     }}
