@@ -520,6 +520,45 @@ html.notion-dark .dark\:hover\:bg-neutral-800\/40:hover {
   will-change: transform, opacity, filter;
 }
 
+/* Dynamic Black/White text adaptation between Light Mode and Dark Mode */
+.dark .tiptap [style*="color: #0E121B" i],
+.dark .tiptap [style*="color: #0e121b" i],
+.dark .tiptap [style*="color: #000000" i],
+.dark .tiptap [style*="color: #000" i],
+.dark .tiptap [style*="color: black" i],
+.dark .tiptap [style*="color: rgb(14, 18, 27)" i],
+.dark .tiptap [style*="color: rgb(0, 0, 0)" i],
+.dark .tiptap [style*="color: #111827" i],
+.dark .tiptap [style*="color: #191B25" i],
+.dark .tiptap [style*="color: #232530" i],
+.dark .ProseMirror [style*="color: #0E121B" i],
+.dark .ProseMirror [style*="color: #0e121b" i],
+.dark .ProseMirror [style*="color: #000000" i],
+.dark .ProseMirror [style*="color: #000" i],
+.dark .ProseMirror [style*="color: black" i],
+.dark .ProseMirror [style*="color: rgb(14, 18, 27)" i],
+.dark .ProseMirror [style*="color: rgb(0, 0, 0)" i],
+.dark .ProseMirror [style*="color: #111827" i],
+.dark .ProseMirror [style*="color: #191B25" i],
+.dark .ProseMirror [style*="color: #232530" i] {
+  color: #F3F5F8 !important;
+}
+
+html:not(.dark) .tiptap [style*="color: #FFFFFF" i],
+html:not(.dark) .tiptap [style*="color: #ffffff" i],
+html:not(.dark) .tiptap [style*="color: #fff" i],
+html:not(.dark) .tiptap [style*="color: white" i],
+html:not(.dark) .tiptap [style*="color: rgb(255, 255, 255)" i],
+html:not(.dark) .tiptap [style*="color: #F3F5F8" i],
+html:not(.dark) .ProseMirror [style*="color: #FFFFFF" i],
+html:not(.dark) .ProseMirror [style*="color: #ffffff" i],
+html:not(.dark) .ProseMirror [style*="color: #fff" i],
+html:not(.dark) .ProseMirror [style*="color: white" i],
+html:not(.dark) .ProseMirror [style*="color: rgb(255, 255, 255)" i],
+html:not(.dark) .ProseMirror [style*="color: #F3F5F8" i] {
+  color: #0E121B !important;
+}
+
 /* Print optimization: only note title and content, deep black text, preserved colors, zero clutter */
 @media print {
   @page {

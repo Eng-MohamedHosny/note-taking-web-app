@@ -67,8 +67,14 @@ interface ColorOption {
   isReset?: boolean;
 }
 
+interface PresetColor {
+  name: string;
+  value: string;
+  isReset?: boolean;
+}
+
 const COLOR_OPTIONS: ColorOption[] = [
-  { id: 'default', name: 'Default Dark', value: '#0E121B' },
+  { id: 'default', name: 'Default (Auto)', value: '', isReset: true },
   { id: 'muted', name: 'Muted Gray', value: '#6B7280' },
   { id: 'red', name: 'Red', value: '#EF4444' },
   { id: 'orange', name: 'Orange', value: '#F97316' },
@@ -82,8 +88,8 @@ const COLOR_OPTIONS: ColorOption[] = [
   { id: 'reset', name: 'Reset Color', value: '', isReset: true },
 ];
 
-const PRESET_COLORS = [
-  { name: 'Default Dark', value: '#0E121B' },
+const PRESET_COLORS: PresetColor[] = [
+  { name: 'Default (Auto)', value: '', isReset: true },
   { name: 'Muted Gray', value: '#6B7280' },
   { name: 'Red', value: '#EF4444' },
   { name: 'Orange', value: '#F97316' },
@@ -204,6 +210,15 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     icon: <Palette className="w-4 h-4 text-teal-500" />,
     keywords: ['color', 'font', 'text color', 'highlight', 'palette', 'colours'],
     action: (_ed, helpers) => helpers?.openColorPicker(),
+  },
+  {
+    id: 'color-default',
+    title: 'Default / Auto Color',
+    desc: 'Adapts text color (Dark in light mode, White in dark mode)',
+    category: 'Formatting',
+    icon: <span className="w-3.5 h-3.5 rounded-full bg-neutral-900 dark:bg-neutral-100 shrink-0 shadow-2xs border border-neutral-300 dark:border-neutral-600" />,
+    keywords: ['default', 'auto', 'reset', 'black', 'white', 'normal', 'dark'],
+    action: (ed) => (ed as any)?.__applyColorDirectly?.('', true),
   },
   {
     id: 'color-red',
@@ -374,8 +389,8 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     const { range } = currentSlash;
 
     // Attach direct color applicator onto editor instance
-    ed.__applyColorDirectly = (colorVal: string) => {
-      applyColorDirectly(ed, colorVal);
+    ed.__applyColorDirectly = (colorVal: string, isReset?: boolean) => {
+      applyColorDirectly(ed, colorVal, isReset);
     };
 
     // When selecting 'Text Color', switch the slash menu directly into vertical color picker mode
@@ -1293,25 +1308,45 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
           <div className="grid grid-cols-4 gap-2.5 mb-3">
             {PRESET_COLORS.map((preset) => {
               const currentColor = editor.getAttributes('textStyle').color;
-              const isSelected = currentColor?.toLowerCase() === preset.value.toLowerCase();
+              const isSelected = preset.isReset
+                ? !currentColor
+                : currentColor?.toLowerCase() === preset.value.toLowerCase();
               return (
                 <button
-                  key={preset.value}
+                  key={preset.name}
                   type="button"
                   onPointerDown={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    handleSelectColor(preset.value);
+                    if (preset.isReset) {
+                      handleResetColor();
+                    } else {
+                      handleSelectColor(preset.value);
+                    }
                   }}
-                  onClick={() => handleSelectColor(preset.value)}
+                  onClick={() => {
+                    if (preset.isReset) {
+                      handleResetColor();
+                    } else {
+                      handleSelectColor(preset.value);
+                    }
+                  }}
                   title={preset.name}
                   className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-110 active:scale-90 cursor-pointer relative shadow-sm shrink-0 ${
                     isSelected ? 'ring-2 ring-offset-2 ring-[#335CFF] dark:ring-offset-[#1C1F2E]' : ''
+                  } ${
+                    preset.isReset
+                      ? 'bg-neutral-900 dark:bg-neutral-100 border border-neutral-300 dark:border-neutral-600'
+                      : ''
                   }`}
-                  style={{ backgroundColor: preset.value }}
+                  style={preset.isReset ? undefined : { backgroundColor: preset.value }}
                 >
                   {isSelected && (
-                    <Check className="w-4 h-4 text-white drop-shadow-sm" />
+                    <Check
+                      className={`w-4 h-4 ${
+                        preset.isReset ? 'text-white dark:text-neutral-900' : 'text-white'
+                      } drop-shadow-sm`}
+                    />
                   )}
                 </button>
               );
@@ -1451,7 +1486,11 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
                         }`}
                       >
                         {/* Swatch dot */}
-                        {c.isReset ? (
+                        {c.id === 'default' ? (
+                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 dark:bg-neutral-100 border border-neutral-300 dark:border-neutral-600 flex items-center justify-center shrink-0 shadow-2xs">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white dark:bg-neutral-900" />
+                          </div>
+                        ) : c.isReset ? (
                           <div className="w-3.5 h-3.5 rounded-full border border-dashed border-neutral-400 dark:border-neutral-500 flex items-center justify-center shrink-0">
                             <Minus className="w-2 h-2 text-neutral-400" />
                           </div>

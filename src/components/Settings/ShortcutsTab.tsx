@@ -127,6 +127,14 @@ const SLASH_GUIDE_ITEMS: SlashGuideItem[] = [
     description: 'Open vertical color palette for keyboard selection',
   },
   {
+    id: 'color-default',
+    name: 'Default / Auto Color',
+    triggers: ['/default', '/auto', '/black', '/white'],
+    category: 'Formatting',
+    icon: <span className="w-3 h-3 rounded-full bg-neutral-900 dark:bg-neutral-100 shrink-0 inline-block border border-neutral-300 dark:border-neutral-600" />,
+    description: 'Auto-adapts text (dark in light mode, white in dark mode)',
+  },
+  {
     id: 'color-red',
     name: 'Red Text',
     triggers: ['/red'],
