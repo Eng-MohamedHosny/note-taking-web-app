@@ -199,11 +199,56 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
   {
     id: 'color',
     title: 'Text Color',
-    desc: 'Choose custom text color',
+    desc: 'Choose custom text color from palette',
     category: 'Formatting',
     icon: <Palette className="w-4 h-4 text-teal-500" />,
-    keywords: ['color', 'font', 'text color', 'highlight'],
+    keywords: ['color', 'font', 'text color', 'highlight', 'palette', 'colours'],
     action: (_ed, helpers) => helpers?.openColorPicker(),
+  },
+  {
+    id: 'color-red',
+    title: 'Red Text',
+    desc: 'Format text in red',
+    category: 'Formatting',
+    icon: <span className="w-3.5 h-3.5 rounded-full bg-[#EF4444] shrink-0 shadow-2xs border border-black/10 dark:border-white/15" />,
+    keywords: ['red', 'color red', 'danger', 'alert'],
+    action: (ed) => (ed as any)?.__applyColorDirectly?.('#EF4444'),
+  },
+  {
+    id: 'color-blue',
+    title: 'Blue Text',
+    desc: 'Format text in blue',
+    category: 'Formatting',
+    icon: <span className="w-3.5 h-3.5 rounded-full bg-[#335CFF] shrink-0 shadow-2xs border border-black/10 dark:border-white/15" />,
+    keywords: ['blue', 'color blue', 'primary', 'accent', 'info'],
+    action: (ed) => (ed as any)?.__applyColorDirectly?.('#335CFF'),
+  },
+  {
+    id: 'color-green',
+    title: 'Green Text',
+    desc: 'Format text in green',
+    category: 'Formatting',
+    icon: <span className="w-3.5 h-3.5 rounded-full bg-[#10B981] shrink-0 shadow-2xs border border-black/10 dark:border-white/15" />,
+    keywords: ['green', 'color green', 'success'],
+    action: (ed) => (ed as any)?.__applyColorDirectly?.('#10B981'),
+  },
+  {
+    id: 'color-orange',
+    title: 'Orange Text',
+    desc: 'Format text in orange',
+    category: 'Formatting',
+    icon: <span className="w-3.5 h-3.5 rounded-full bg-[#F97316] shrink-0 shadow-2xs border border-black/10 dark:border-white/15" />,
+    keywords: ['orange', 'color orange', 'warning'],
+    action: (ed) => (ed as any)?.__applyColorDirectly?.('#F97316'),
+  },
+  {
+    id: 'color-purple',
+    title: 'Purple Text',
+    desc: 'Format text in purple',
+    category: 'Formatting',
+    icon: <span className="w-3.5 h-3.5 rounded-full bg-[#A855F7] shrink-0 shadow-2xs border border-black/10 dark:border-white/15" />,
+    keywords: ['purple', 'color purple', 'violet'],
+    action: (ed) => (ed as any)?.__applyColorDirectly?.('#A855F7'),
   },
   {
     id: 'align-left',
@@ -302,15 +347,56 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
 
   const editorInstanceRef = useRef<any>(null);
 
+  const applyColorDirectly = (ed: any, colorValue: string, isReset?: boolean) => {
+    if (!ed) return;
+    const { state } = ed;
+    const { selection } = state;
+    const { $from, empty } = selection;
+
+    if (isReset || !colorValue) {
+      if (!empty) {
+        ed.chain().focus().unsetColor().run();
+      } else {
+        const blockStart = $from.start();
+        const blockEnd = $from.end();
+        if (blockEnd > blockStart) {
+          ed.chain()
+            .focus()
+            .setTextSelection({ from: blockStart, to: blockEnd })
+            .unsetColor()
+            .setTextSelection($from.pos)
+            .run();
+        } else {
+          ed.chain().focus().unsetColor().run();
+        }
+      }
+    } else {
+      if (!empty) {
+        ed.chain().focus().setColor(colorValue).run();
+      } else {
+        const blockStart = $from.start();
+        const blockEnd = $from.end();
+        if (blockEnd > blockStart) {
+          ed.chain()
+            .focus()
+            .setTextSelection({ from: blockStart, to: blockEnd })
+            .setColor(colorValue)
+            .setTextSelection($from.pos)
+            .setColor(colorValue)
+            .run();
+        } else {
+          ed.chain().focus().setColor(colorValue).run();
+        }
+      }
+    }
+  };
+
   const applyColor = (colorOption: ColorOption) => {
     const ed = editorInstanceRef.current;
     if (!ed) return;
+    slashMenuStateRef.current = null;
     setSlashMenu(null);
-    if (colorOption.isReset || !colorOption.value) {
-      ed.chain().focus().unsetColor().run();
-    } else {
-      ed.chain().focus().setColor(colorOption.value).run();
-    }
+    applyColorDirectly(ed, colorOption.value, colorOption.isReset);
   };
 
   const applyColorRef = useRef(applyColor);
@@ -322,24 +408,33 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     if (!ed || !currentSlash) return;
     const { range } = currentSlash;
 
+    // Attach direct color applicator onto editor instance
+    ed.__applyColorDirectly = (colorVal: string) => {
+      applyColorDirectly(ed, colorVal);
+    };
+
     // When selecting 'Text Color', switch the slash menu directly into vertical color picker mode
     if (command.id === 'color') {
+      const nextMenuState: SlashMenuState = {
+        isOpen: true,
+        mode: 'colors',
+        query: '',
+        selectedIndex: 0,
+        coords: currentSlash.coords,
+        range: { from: range.from, to: range.from },
+      };
+      // CRITICAL: Update slashMenuStateRef synchronously BEFORE deleteRange so checkSlashCommand won't wipe the menu!
+      slashMenuStateRef.current = nextMenuState;
+      setSlashMenu(nextMenuState);
+
       ed.chain()
         .focus()
         .deleteRange({ from: range.from, to: range.to })
         .run();
-      setSlashMenu((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          mode: 'colors',
-          query: '',
-          selectedIndex: 0,
-        };
-      });
       return;
     }
 
+    slashMenuStateRef.current = null;
     setSlashMenu(null);
     ed.chain()
       .focus()
@@ -607,25 +702,19 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
 
         if (event.key === 'ArrowDown') {
           event.preventDefault();
-          setSlashMenu((prev) => {
-            if (!prev || itemsCount === 0) return prev;
-            return {
-              ...prev,
-              selectedIndex: (prev.selectedIndex + 1) % itemsCount,
-            };
-          });
+          const nextIndex = itemsCount > 0 ? (currentSlashState.selectedIndex + 1) % itemsCount : 0;
+          const nextState: SlashMenuState = { ...currentSlashState, selectedIndex: nextIndex };
+          slashMenuStateRef.current = nextState;
+          setSlashMenu(nextState);
           return true;
         }
 
         if (event.key === 'ArrowUp') {
           event.preventDefault();
-          setSlashMenu((prev) => {
-            if (!prev || itemsCount === 0) return prev;
-            return {
-              ...prev,
-              selectedIndex: (prev.selectedIndex - 1 + itemsCount) % itemsCount,
-            };
-          });
+          const nextIndex = itemsCount > 0 ? (currentSlashState.selectedIndex - 1 + itemsCount) % itemsCount : 0;
+          const nextState: SlashMenuState = { ...currentSlashState, selectedIndex: nextIndex };
+          slashMenuStateRef.current = nextState;
+          setSlashMenu(nextState);
           return true;
         }
 
@@ -645,8 +734,34 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
           }
         }
 
+        // Return to commands list with ArrowLeft or Backspace when in colors mode
+        if (isColorMode && (event.key === 'ArrowLeft' || event.key === 'Backspace')) {
+          event.preventDefault();
+          const backState: SlashMenuState = {
+            ...currentSlashState,
+            mode: 'commands',
+            query: '',
+            selectedIndex: 0,
+          };
+          slashMenuStateRef.current = backState;
+          setSlashMenu(backState);
+          return true;
+        }
+
+        // Open colors submenu with ArrowRight when highlighting Text Color in commands mode
+        if (!isColorMode && event.key === 'ArrowRight') {
+          const commands = filteredCommandsRef.current;
+          const selected = commands[currentSlashState.selectedIndex] || commands[0];
+          if (selected?.id === 'color') {
+            event.preventDefault();
+            executeCommandRef.current(selected);
+            return true;
+          }
+        }
+
         if (event.key === 'Escape') {
           event.preventDefault();
+          slashMenuStateRef.current = null;
           setSlashMenu(null);
           return true;
         }
@@ -1322,7 +1437,9 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
                       e.stopPropagation();
                     }}
                     onClick={() => {
-                      setSlashMenu((prev) => (prev ? { ...prev, mode: 'commands', selectedIndex: 0 } : null));
+                      const backState: SlashMenuState = { ...slashMenu, mode: 'commands', query: '', selectedIndex: 0 };
+                      slashMenuStateRef.current = backState;
+                      setSlashMenu(backState);
                     }}
                     className="hover:text-neutral-700 dark:hover:text-neutral-200 cursor-pointer flex items-center gap-1 font-semibold uppercase tracking-wider text-[9px]"
                   >
@@ -1349,7 +1466,9 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
                         data-index={idx}
                         type="button"
                         onMouseEnter={() => {
-                          setSlashMenu((prev) => (prev ? { ...prev, selectedIndex: idx } : null));
+                          const updated = slashMenu ? { ...slashMenu, selectedIndex: idx } : null;
+                          slashMenuStateRef.current = updated;
+                          setSlashMenu(updated);
                         }}
                         onMouseDown={(e) => {
                           e.preventDefault();
