@@ -27,7 +27,12 @@ export const FoldersModal: React.FC<FoldersModalProps> = ({ isOpen, onClose }) =
 
   if (!isOpen) return null;
 
-  const currentFolder = activeView.type === 'folder' ? activeView.folder : null;
+  const currentFolder =
+    activeView.type === 'folder'
+      ? activeView.folder
+      : 'folder' in activeView
+      ? activeView.folder
+      : null;
 
   const handleAddFolderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,7 +179,16 @@ export const FoldersModal: React.FC<FoldersModalProps> = ({ isOpen, onClose }) =
                 >
                   <button
                     onClick={() => {
-                      setActiveView({ type: 'folder', folder });
+                      if (isSelected) {
+                        const currentTag = 'tag' in activeView ? activeView.tag : undefined;
+                        if (currentTag) {
+                          setActiveView({ type: 'tag', tag: currentTag });
+                        } else {
+                          setActiveView({ type: 'all' });
+                        }
+                      } else {
+                        setActiveView({ type: 'folder', folder });
+                      }
                       onClose();
                     }}
                     className="flex items-center gap-3 flex-1 min-w-0 text-left cursor-pointer"

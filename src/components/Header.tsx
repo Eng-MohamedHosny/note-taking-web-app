@@ -12,37 +12,57 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar }) => {
   const { activeView, searchQuery, setSearchQuery } = useNotes();
 
+  const activeFolder =
+    activeView.type === 'folder'
+      ? activeView.folder
+      : 'folder' in activeView
+      ? activeView.folder
+      : undefined;
+
+  const activeTag =
+    activeView.type === 'tag'
+      ? activeView.tag
+      : 'tag' in activeView
+      ? activeView.tag
+      : undefined;
+
   const renderHeadingTitle = () => {
-    if (activeView.type === 'folder') {
+    if (activeView.type === 'search') return 'Search';
+    if (activeView.type === 'trash') return 'Trash';
+    if (activeView.type === 'settings') return 'Settings';
+    if (activeView.type === 'archived') return 'Archived Notes';
+
+    if (activeFolder && activeTag) {
       return (
         <span className="inline-flex items-center gap-2.5">
           <FolderIcon className="w-6 h-6 text-[#335CFF] shrink-0" />
-          <span>{activeView.folder}</span>
+          <span>{activeFolder}</span>
+          <span className="text-neutral-400 dark:text-neutral-500 font-normal">/</span>
+          <TagIcon className="w-5 h-5 text-purple-500 shrink-0" />
+          <span>#{activeTag}</span>
         </span>
       );
     }
-    if (activeView.type === 'tag') {
+
+    if (activeFolder) {
+      return (
+        <span className="inline-flex items-center gap-2.5">
+          <FolderIcon className="w-6 h-6 text-[#335CFF] shrink-0" />
+          <span>{activeFolder}</span>
+        </span>
+      );
+    }
+
+    if (activeTag) {
       return (
         <span className="inline-flex items-center gap-2.5">
           <TagIcon className="w-6 h-6 text-[#335CFF] shrink-0" />
-          <span>{activeView.tag}</span>
+          <span>#{activeTag}</span>
         </span>
       );
     }
-    switch (activeView.type) {
-      case 'all':
-        return 'All Notes';
-      case 'archived':
-        return 'Archived Notes';
-      case 'settings':
-        return 'Settings';
-      case 'search':
-        return 'Search';
-      case 'trash':
-        return 'Trash';
-      default:
-        return 'All Notes';
-    }
+
+    return 'All Notes';
   };
 
   const isSearching = searchQuery.trim().length > 0;

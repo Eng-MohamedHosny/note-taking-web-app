@@ -13,7 +13,12 @@ export const TagsModal: React.FC<TagsModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  const currentTag = activeView.type === 'tag' ? activeView.tag : null;
+  const currentTag =
+    activeView.type === 'tag'
+      ? activeView.tag
+      : 'tag' in activeView
+      ? activeView.tag
+      : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-neutral-950/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-150">
@@ -55,7 +60,21 @@ export const TagsModal: React.FC<TagsModalProps> = ({ isOpen, onClose }) => {
                 >
                   <button
                     onClick={() => {
-                      setActiveView({ type: 'tag', tag });
+                      if (isSelected) {
+                        const currentFolder =
+                          activeView.type === 'folder'
+                            ? activeView.folder
+                            : 'folder' in activeView
+                            ? activeView.folder
+                            : undefined;
+                        if (currentFolder) {
+                          setActiveView({ type: 'folder', folder: currentFolder });
+                        } else {
+                          setActiveView({ type: 'all' });
+                        }
+                      } else {
+                        setActiveView({ type: 'tag', tag });
+                      }
                       onClose();
                     }}
                     className="flex items-center gap-3 flex-1 min-w-0 text-left cursor-pointer"

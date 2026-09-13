@@ -90,7 +90,27 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const setActiveView = (view: ActiveView) => {
-    setActiveViewState(view);
+    let finalView = view;
+
+    // Compound filtering logic:
+    if (view.type === 'folder') {
+      const currentTag = 'tag' in activeView ? activeView.tag : undefined;
+      if (currentTag && !view.tag) {
+        finalView = { ...view, tag: currentTag };
+      }
+    } else if (view.type === 'tag') {
+      const currentFolder =
+        activeView.type === 'folder'
+          ? activeView.folder
+          : 'folder' in activeView
+          ? activeView.folder
+          : undefined;
+      if (currentFolder && !view.folder) {
+        finalView = { ...view, folder: currentFolder };
+      }
+    }
+
+    setActiveViewState(finalView);
     if (view.type !== 'search') {
       setSearchQuery('');
     }
@@ -411,16 +431,33 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return Boolean(note.isArchived);
       }
 
-      if (activeView.type === 'folder') {
-        return !note.isArchived && note.folder === activeView.folder;
+      // Notes in regular active views must not be archived
+      if (note.isArchived) return false;
+
+      // Extract active folder and active tag from compound view
+      const activeFolder =
+        activeView.type === 'folder'
+          ? activeView.folder
+          : 'folder' in activeView
+          ? activeView.folder
+          : undefined;
+
+      const activeTag =
+        activeView.type === 'tag'
+          ? activeView.tag
+          : 'tag' in activeView
+          ? activeView.tag
+          : undefined;
+
+      if (activeFolder && note.folder !== activeFolder) {
+        return false;
       }
 
-      if (activeView.type === 'tag') {
-        return !note.isArchived && note.tags.includes(activeView.tag);
+      if (activeTag && !note.tags.includes(activeTag)) {
+        return false;
       }
 
-      // Default 'all' view: non-deleted, non-archived notes
-      return !note.isArchived;
+      return true;
     }).sort((a, b) => {
       if (Boolean(a.isPinned) !== Boolean(b.isPinned)) {
         return a.isPinned ? -1 : 1;
@@ -469,11 +506,13 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     silent?: boolean;
   }) => {
     const now = new Date().toISOString();
-    const defaultFolder = folder !== undefined
-      ? folder
-      : activeView.type === 'folder'
-      ? activeView.folder
-      : undefined;
+    const activeFolder =
+      activeView.type === 'folder'
+        ? activeView.folder
+        : 'folder' in activeView
+        ? activeView.folder
+        : undefined;
+    const defaultFolder = folder !== undefined ? folder : activeFolder;
 
     if (isCreatingNewNote) {
       const newNote: Note = {

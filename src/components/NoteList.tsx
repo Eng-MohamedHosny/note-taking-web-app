@@ -50,38 +50,75 @@ export const NoteList: React.FC<NoteListProps> = ({
     }
   };
 
+  const activeFolder =
+    activeView.type === 'folder'
+      ? activeView.folder
+      : 'folder' in activeView
+      ? activeView.folder
+      : undefined;
+
+  const activeTag =
+    activeView.type === 'tag'
+      ? activeView.tag
+      : 'tag' in activeView
+      ? activeView.tag
+      : undefined;
+
+  const clearFolder = () => {
+    if (activeTag) {
+      setActiveView({ type: 'tag', tag: activeTag });
+    } else {
+      setActiveView({ type: 'all' });
+    }
+  };
+
+  const clearTag = () => {
+    if (activeFolder) {
+      setActiveView({ type: 'folder', folder: activeFolder });
+    } else {
+      setActiveView({ type: 'all' });
+    }
+  };
+
   const isSearching = activeView.type === 'search' || searchQuery.trim().length > 0;
 
   const renderHeadingTitle = () => {
     if (activeView.type === 'search') return 'Search';
-    if (activeView.type === 'folder') {
+    if (activeView.type === 'trash') return 'Trash';
+    if (activeView.type === 'settings') return 'Settings';
+    if (activeView.type === 'archived') return 'Archived Notes';
+
+    if (activeFolder && activeTag) {
       return (
         <span className="inline-flex items-center gap-2">
           <FolderIcon className="w-5 h-5 text-[#335CFF] shrink-0" />
-          <span>{activeView.folder}</span>
+          <span>{activeFolder}</span>
+          <span className="text-neutral-400 dark:text-neutral-500 font-normal">/</span>
+          <TagIcon className="w-4 h-4 text-purple-500 shrink-0" />
+          <span>#{activeTag}</span>
         </span>
       );
     }
-    if (activeView.type === 'tag') {
+
+    if (activeFolder) {
+      return (
+        <span className="inline-flex items-center gap-2">
+          <FolderIcon className="w-5 h-5 text-[#335CFF] shrink-0" />
+          <span>{activeFolder}</span>
+        </span>
+      );
+    }
+
+    if (activeTag) {
       return (
         <span className="inline-flex items-center gap-2">
           <TagIcon className="w-5 h-5 text-[#335CFF] shrink-0" />
-          <span>{activeView.tag}</span>
+          <span>#{activeTag}</span>
         </span>
       );
     }
-    switch (activeView.type) {
-      case 'all':
-        return 'All Notes';
-      case 'archived':
-        return 'Archived Notes';
-      case 'settings':
-        return 'Settings';
-      case 'trash':
-        return 'Trash';
-      default:
-        return 'All Notes';
-    }
+
+    return 'All Notes';
   };
 
   return (
@@ -157,7 +194,7 @@ export const NoteList: React.FC<NoteListProps> = ({
             type="button"
             onClick={() => setActiveView({ type: 'all' })}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-              activeView.type === 'all'
+              activeView.type === 'all' && !activeFolder && !activeTag
                 ? 'bg-[#335CFF] text-white shadow-xs'
                 : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700/60'
             }`}
@@ -169,7 +206,7 @@ export const NoteList: React.FC<NoteListProps> = ({
           {/* Folders Dropdown / Modal Trigger */}
           {(() => {
             const isUnpinnedFolderActive =
-              activeView.type === 'folder' && !pinnedFolders.includes(activeView.folder);
+              Boolean(activeFolder && !pinnedFolders.includes(activeFolder));
             return (
               <button
                 type="button"
@@ -181,12 +218,12 @@ export const NoteList: React.FC<NoteListProps> = ({
                 }`}
               >
                 <FolderIcon className="w-3.5 h-3.5 text-blue-500" />
-                <span>{isUnpinnedFolderActive ? activeView.folder : 'Folders'}</span>
+                <span>{isUnpinnedFolderActive ? activeFolder : 'Folders'}</span>
                 {isUnpinnedFolderActive ? (
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
-                      setActiveView({ type: 'all' });
+                      clearFolder();
                     }}
                     className="hover:text-red-500 p-0.5 ml-0.5 font-bold"
                   >
@@ -202,7 +239,7 @@ export const NoteList: React.FC<NoteListProps> = ({
           {/* Tags Dropdown / Modal Trigger */}
           {(() => {
             const isUnpinnedTagActive =
-              activeView.type === 'tag' && !pinnedTags.includes(activeView.tag);
+              Boolean(activeTag && !pinnedTags.includes(activeTag));
             return (
               <button
                 type="button"
@@ -214,12 +251,12 @@ export const NoteList: React.FC<NoteListProps> = ({
                 }`}
               >
                 <TagIcon className="w-3.5 h-3.5 text-purple-500" />
-                <span>{isUnpinnedTagActive ? `#${activeView.tag}` : 'Tags'}</span>
+                <span>{isUnpinnedTagActive ? `#${activeTag}` : 'Tags'}</span>
                 {isUnpinnedTagActive ? (
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
-                      setActiveView({ type: 'all' });
+                      clearTag();
                     }}
                     className="hover:text-red-500 p-0.5 ml-0.5 font-bold"
                   >
@@ -257,14 +294,14 @@ export const NoteList: React.FC<NoteListProps> = ({
 
           {/* Pinned Folders Chips */}
           {pinnedFolders.map((f) => {
-            const isActive = activeView.type === 'folder' && activeView.folder === f;
+            const isActive = activeFolder === f;
             return (
               <button
                 key={`pinned-folder-${f}`}
                 type="button"
                 onClick={() => {
                   if (isActive) {
-                    setActiveView({ type: 'all' });
+                    clearFolder();
                   } else {
                     setActiveView({ type: 'folder', folder: f });
                   }
@@ -283,7 +320,7 @@ export const NoteList: React.FC<NoteListProps> = ({
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
-                      setActiveView({ type: 'all' });
+                      clearFolder();
                     }}
                     className="hover:text-red-500 p-0.5 ml-0.5 font-bold"
                     title="Clear filter"
@@ -297,14 +334,14 @@ export const NoteList: React.FC<NoteListProps> = ({
 
           {/* Pinned Tags Chips */}
           {pinnedTags.map((t) => {
-            const isActive = activeView.type === 'tag' && activeView.tag === t;
+            const isActive = activeTag === t;
             return (
               <button
                 key={`pinned-tag-${t}`}
                 type="button"
                 onClick={() => {
                   if (isActive) {
-                    setActiveView({ type: 'all' });
+                    clearTag();
                   } else {
                     setActiveView({ type: 'tag', tag: t });
                   }
@@ -323,7 +360,7 @@ export const NoteList: React.FC<NoteListProps> = ({
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
-                      setActiveView({ type: 'all' });
+                      clearTag();
                     }}
                     className="hover:text-red-500 p-0.5 ml-0.5 font-bold"
                     title="Clear filter"

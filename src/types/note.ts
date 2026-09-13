@@ -18,12 +18,12 @@ export type ViewMode = 'list' | 'grid';
 export type SettingsTab = 'color' | 'font' | 'password';
 
 export type ActiveView = 
-  | { type: 'all' }
-  | { type: 'archived' }
-  | { type: 'folder'; folder: string }
-  | { type: 'tag'; tag: string }
+  | { type: 'all'; folder?: string; tag?: string }
+  | { type: 'archived'; folder?: string; tag?: string }
+  | { type: 'folder'; folder: string; tag?: string }
+  | { type: 'tag'; tag: string; folder?: string }
   | { type: 'search' }
-  | { type: 'settings'; tab: SettingsTab }
+  | { type: 'settings'; tab?: SettingsTab }
   | { type: 'trash' };
 
 export type AuthMode = 'login' | 'signup' | 'forgot-password' | 'reset-password' | null;

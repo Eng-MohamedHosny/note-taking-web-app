@@ -116,7 +116,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
   };
 
   const effectiveCollapsed = isMobile ? false : isCollapsed;
-  const isAllNotesActive = activeView.type === 'all';
+  const activeFolder =
+    activeView.type === 'folder'
+      ? activeView.folder
+      : 'folder' in activeView
+      ? activeView.folder
+      : undefined;
+  const activeTag =
+    activeView.type === 'tag'
+      ? activeView.tag
+      : 'tag' in activeView
+      ? activeView.tag
+      : undefined;
+  const isAllNotesActive = activeView.type === 'all' && !activeFolder && !activeTag;
   const isArchivedActive = activeView.type === 'archived';
   const isTrashActive = activeView.type === 'trash';
   const trashCount = notes.filter((n) => n.isDeleted).length;
@@ -374,8 +386,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                   <p className="px-3 py-1.5 text-xs text-neutral-400 italic">No folders yet</p>
                 ) : (
                   allFolders.map((f) => {
-                    const isFolderActive =
-                      activeView.type === 'folder' && activeView.folder === f;
+                    const isFolderActive = activeFolder === f;
                     const isCurrentlyEditing = editingFolder === f;
                     const folderCount = notes.filter(
                       (n) => !n.isDeleted && !n.isArchived && n.folder === f
@@ -426,7 +437,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                             ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-950 dark:text-white font-semibold'
                             : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
                         }`}
-                        onClick={() => setActiveView({ type: 'folder', folder: f })}
+                        onClick={() => {
+                          if (isFolderActive) {
+                            if (activeTag) {
+                              setActiveView({ type: 'tag', tag: activeTag });
+                            } else {
+                              setActiveView({ type: 'all' });
+                            }
+                          } else {
+                            setActiveView({ type: 'folder', folder: f });
+                          }
+                        }}
                       >
                         <div className="flex items-center gap-2.5 truncate">
                           {isFolderActive ? (
@@ -540,8 +561,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                   <p className="px-3 py-1.5 text-xs text-neutral-400 italic">No tags yet</p>
                 ) : (
                   allTags.map((tag) => {
-                    const isTagActive =
-                      activeView.type === 'tag' && activeView.tag === tag;
+                    const isTagActive = activeTag === tag;
                     const tagCount = notes.filter(
                       (n) => !n.isDeleted && !n.isArchived && n.tags.includes(tag)
                     ).length;
@@ -550,7 +570,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                       <button
                         key={tag}
                         type="button"
-                        onClick={() => setActiveView({ type: 'tag', tag })}
+                        onClick={() => {
+                          if (isTagActive) {
+                            if (activeFolder) {
+                              setActiveView({ type: 'folder', folder: activeFolder });
+                            } else {
+                              setActiveView({ type: 'all' });
+                            }
+                          } else {
+                            setActiveView({ type: 'tag', tag });
+                          }
+                        }}
                         className={`group w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                           isTagActive
                             ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-950 dark:text-white font-semibold'
