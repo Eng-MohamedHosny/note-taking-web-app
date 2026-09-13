@@ -7,6 +7,8 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Link from '@tiptap/extension-link';
 import TiptapImage from '@tiptap/extension-image';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
 import { ImageModal } from '../Modals/ImageModal';
 import {
   Bold,
@@ -27,7 +29,23 @@ import {
   RotateCw,
   RemoveFormatting,
   Image as ImageIcon,
+  Check,
 } from 'lucide-react';
+
+const PRESET_COLORS = [
+  { name: 'Default Dark', value: '#0E121B' },
+  { name: 'Muted Gray', value: '#6B7280' },
+  { name: 'Red', value: '#EF4444' },
+  { name: 'Orange', value: '#F97316' },
+  { name: 'Amber', value: '#F59E0B' },
+  { name: 'Green', value: '#10B981' },
+  { name: 'Teal', value: '#06B6D4' },
+  { name: 'Blue', value: '#335CFF' },
+  { name: 'Indigo', value: '#6366F1' },
+  { name: 'Purple', value: '#A855F7' },
+  { name: 'Pink', value: '#EC4899' },
+  { name: 'Rose', value: '#F43F5E' },
+];
 
 interface WysiwygEditorProps {
   content: string;
@@ -41,9 +59,29 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   placeholder = 'Start typing your note…',
 }) => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const [isEditorFocused, setIsEditorFocused] = useState(false);
   const isInteractingWithToolbarRef = useRef(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
+  const colorPickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isColorPickerOpen) return;
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target as Node)
+      ) {
+        setIsColorPickerOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isColorPickerOpen]);
 
   const editor = useEditor({
     extensions: [
@@ -53,6 +91,8 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         },
       }),
       Underline,
+      TextStyle,
+      Color,
       TaskList,
       TaskItem.configure({
         nested: true,
@@ -82,7 +122,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       setIsEditorFocused(true);
     },
     onBlur: ({ event }) => {
-      if (isInteractingWithToolbarRef.current) return;
+      if (isInteractingWithToolbarRef.current || isColorPickerOpen) return;
       if (
         toolbarRef.current &&
         event?.relatedTarget &&
@@ -210,7 +250,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700'
     }`;
 
-  const showMobileToolbar = isEditorFocused || isImageModalOpen;
+  const showMobileToolbar = isEditorFocused || isImageModalOpen || isColorPickerOpen;
   const isToolbarVisible = !isMobileOrTablet || showMobileToolbar;
 
   return (
@@ -340,6 +380,109 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         >
           <Code className="w-4 h-4 lg:w-3.5 lg:h-3.5 shrink-0" />
         </button>
+
+        {/* Color Circle Button & Palette */}
+        <div className="relative shrink-0 flex items-center" ref={colorPickerRef}>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setIsColorPickerOpen((prev) => !prev)}
+            className={`p-2 lg:p-1.5 rounded-lg lg:rounded-md transition-colors cursor-pointer text-xs flex items-center justify-center shrink-0 select-none ${
+              isColorPickerOpen || editor.getAttributes('textStyle').color
+                ? 'bg-[#335CFF]/15 text-[#335CFF] font-semibold dark:bg-[#335CFF]/25 dark:text-[#335CFF]'
+                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800'
+            }`}
+            title="Text Color"
+          >
+            <span className="relative flex items-center justify-center w-4 h-4 lg:w-3.5 lg:h-3.5">
+              {editor.getAttributes('textStyle').color ? (
+                <span
+                  className="w-3.5 h-3.5 lg:w-3 lg:h-3 rounded-full border border-black/20 dark:border-white/20 shadow-xs"
+                  style={{ backgroundColor: editor.getAttributes('textStyle').color }}
+                />
+              ) : (
+                <span
+                  className="w-3.5 h-3.5 lg:w-3 lg:h-3 rounded-full border border-neutral-300 dark:border-neutral-600 shadow-xs"
+                  style={{
+                    background:
+                      'conic-gradient(from 0deg, #ef4444, #f97316, #eab308, #22c55e, #06b6d4, #3b82f6, #a855f7, #ec4899, #ef4444)',
+                  }}
+                />
+              )}
+            </span>
+          </button>
+
+          {/* Color Palette Popover */}
+          {isColorPickerOpen && (
+            <div
+              onPointerDown={(e) => {
+                isInteractingWithToolbarRef.current = true;
+                e.preventDefault();
+              }}
+              className="absolute z-50 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 bottom-full mb-2 lg:bottom-auto lg:top-full lg:mt-2 p-3 bg-white dark:bg-[#1C1F2E] border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-xl w-60 select-none"
+            >
+              <div className="flex items-center justify-between pb-2 mb-2 border-b border-neutral-100 dark:border-neutral-800">
+                <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+                  Text Color
+                </span>
+                {editor.getAttributes('textStyle').color && (
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      editor.chain().focus().unsetColor().run();
+                      setIsColorPickerOpen(false);
+                    }}
+                    className="text-[11px] text-neutral-500 hover:text-red-500 dark:hover:text-red-400 font-medium transition-colors cursor-pointer"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+
+              {/* Grid of preset color circles */}
+              <div className="grid grid-cols-4 gap-2 mb-3">
+                {PRESET_COLORS.map((preset) => {
+                  const currentColor = editor.getAttributes('textStyle').color;
+                  const isSelected = currentColor?.toLowerCase() === preset.value.toLowerCase();
+                  return (
+                    <button
+                      key={preset.value}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        editor.chain().focus().setColor(preset.value).run();
+                        setIsColorPickerOpen(false);
+                      }}
+                      title={preset.name}
+                      className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform hover:scale-110 active:scale-95 cursor-pointer relative shadow-xs ${
+                        isSelected ? 'ring-2 ring-offset-2 ring-[#335CFF] dark:ring-offset-[#1C1F2E]' : ''
+                      }`}
+                      style={{ backgroundColor: preset.value }}
+                    >
+                      {isSelected && (
+                        <Check className="w-3.5 h-3.5 text-white drop-shadow-sm" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Custom Color Picker input */}
+              <label className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700/80 hover:bg-neutral-50 dark:hover:bg-neutral-800/60 cursor-pointer text-xs text-neutral-600 dark:text-neutral-300 transition-colors">
+                <input
+                  type="color"
+                  value={editor.getAttributes('textStyle').color || '#335CFF'}
+                  onChange={(e) => {
+                    editor.chain().focus().setColor(e.target.value).run();
+                  }}
+                  className="w-5 h-5 rounded-full border-0 p-0 cursor-pointer bg-transparent"
+                />
+                <span className="font-medium text-[11px]">Custom Color</span>
+              </label>
+            </div>
+          )}
+        </div>
 
         <div className="w-px h-5 lg:h-4 bg-neutral-200 dark:bg-neutral-800 shrink-0 mx-1" />
 
