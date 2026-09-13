@@ -349,45 +349,10 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
 
   const applyColorDirectly = (ed: any, colorValue: string, isReset?: boolean) => {
     if (!ed) return;
-    const { state } = ed;
-    const { selection } = state;
-    const { $from, empty } = selection;
-
     if (isReset || !colorValue) {
-      if (!empty) {
-        ed.chain().focus().unsetColor().run();
-      } else {
-        const blockStart = $from.start();
-        const blockEnd = $from.end();
-        if (blockEnd > blockStart) {
-          ed.chain()
-            .focus()
-            .setTextSelection({ from: blockStart, to: blockEnd })
-            .unsetColor()
-            .setTextSelection($from.pos)
-            .run();
-        } else {
-          ed.chain().focus().unsetColor().run();
-        }
-      }
+      ed.chain().focus().unsetColor().run();
     } else {
-      if (!empty) {
-        ed.chain().focus().setColor(colorValue).run();
-      } else {
-        const blockStart = $from.start();
-        const blockEnd = $from.end();
-        if (blockEnd > blockStart) {
-          ed.chain()
-            .focus()
-            .setTextSelection({ from: blockStart, to: blockEnd })
-            .setColor(colorValue)
-            .setTextSelection($from.pos)
-            .setColor(colorValue)
-            .run();
-        } else {
-          ed.chain().focus().setColor(colorValue).run();
-        }
-      }
+      ed.chain().focus().setColor(colorValue).run();
     }
   };
 
