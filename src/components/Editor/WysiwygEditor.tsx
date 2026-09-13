@@ -163,13 +163,16 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
 
       if (scrollContainer) {
         const containerRect = scrollContainer.getBoundingClientRect();
-        const safeBottom = containerRect.bottom - 40;
+        // Notion-style centered typing: keeps active line at ~40% of visible container height
+        // leaving the lower ~60% as a massive empty cushion below the typing line!
+        const targetY = containerRect.top + containerRect.height * 0.40;
+        const safeBottom = containerRect.top + containerRect.height * 0.52;
 
         if (cursorBottom > safeBottom && cursorBottom > 0) {
-          const scrollNeeded = cursorBottom - safeBottom + 40;
+          const scrollNeeded = cursorBottom - targetY;
           scrollContainer.scrollBy({ top: scrollNeeded, behavior: 'instant' as ScrollBehavior });
-        } else if (cursorTop < containerRect.top + 20 && cursorTop > 0) {
-          const scrollNeeded = cursorTop - (containerRect.top + 40);
+        } else if (cursorTop < containerRect.top + 25 && cursorTop > 0) {
+          const scrollNeeded = cursorTop - (containerRect.top + 50);
           scrollContainer.scrollBy({ top: scrollNeeded, behavior: 'instant' as ScrollBehavior });
         }
       }
@@ -803,9 +806,9 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
           className="flex-1 flex flex-col min-h-full [&>.tiptap]:min-h-[300px] [&>.tiptap]:flex-1"
         />
 
-        {/* Generous in-flow bottom spacer guaranteeing scroll space below the last line in all browsers */}
+        {/* Generous in-flow bottom spacer: 75vh Notion-style scroll-past-end freedom */}
         <div
-          className="w-full shrink-0 min-h-[350px] h-[50vh] cursor-text select-none"
+          className="w-full shrink-0 min-h-[500px] h-[75vh] cursor-text select-none"
           aria-hidden="true"
           onClick={() => {
             if (editor) {
