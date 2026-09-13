@@ -3,7 +3,7 @@ import { useNotes } from '../context/NotesContext';
 import { NoteCard } from './NoteCard';
 import { NoteGridCard } from './NoteGridCard';
 import { DeleteIcon, SearchIcon, CrossIcon, GridViewIcon, ListViewIcon, TagIcon, ArchiveIcon } from './Icons';
-import { Folder as FolderIcon, ChevronDown, Plus } from 'lucide-react';
+import { Folder as FolderIcon, ChevronDown, Plus, Pin } from 'lucide-react';
 
 interface NoteListProps {
   onSelectMobileNote?: () => void;
@@ -26,6 +26,8 @@ export const NoteList: React.FC<NoteListProps> = ({
     setActiveView,
     allFolders,
     allTags,
+    pinnedFolders,
+    pinnedTags,
     notes,
     searchQuery,
     setSearchQuery,
@@ -241,18 +243,64 @@ export const NoteList: React.FC<NoteListProps> = ({
             )}
           </button>
 
-          {/* Quick Folder Pills if available */}
-          {allFolders.map((f) => {
-            if (activeView.type === 'folder' && activeView.folder === f) return null;
+          {/* Pinned Folders Chips */}
+          {pinnedFolders.map((f) => {
+            const isActive = activeView.type === 'folder' && activeView.folder === f;
             return (
               <button
-                key={f}
+                key={`pinned-folder-${f}`}
                 type="button"
-                onClick={() => setActiveView({ type: 'folder', folder: f })}
-                className="px-2.5 py-1.5 rounded-full text-xs font-normal transition-all shrink-0 flex items-center gap-1.5 bg-neutral-100/70 dark:bg-neutral-800/60 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer border border-neutral-200/40 dark:border-neutral-700/40"
+                onClick={() => {
+                  if (isActive) {
+                    setActiveView({ type: 'all' });
+                  } else {
+                    setActiveView({ type: 'folder', folder: f });
+                  }
+                }}
+                className={`px-2.5 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                  isActive
+                    ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/40 shadow-xs'
+                    : 'bg-neutral-100/80 dark:bg-neutral-800/80 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700/60'
+                }`}
+                title={isActive ? `Folder "${f}" is active (Click to clear)` : `Folder "${f}" (Pinned)`}
               >
-                <FolderIcon className="w-3 h-3 text-neutral-400" />
+                <Pin className="w-3 h-3 text-amber-500 fill-amber-500 rotate-45 shrink-0" />
+                <FolderIcon className="w-3 h-3 text-blue-500 shrink-0" />
                 <span>{f}</span>
+                {isActive && (
+                  <span className="hover:text-red-500 p-0.5 ml-0.5 font-bold">✕</span>
+                )}
+              </button>
+            );
+          })}
+
+          {/* Pinned Tags Chips */}
+          {pinnedTags.map((t) => {
+            const isActive = activeView.type === 'tag' && activeView.tag === t;
+            return (
+              <button
+                key={`pinned-tag-${t}`}
+                type="button"
+                onClick={() => {
+                  if (isActive) {
+                    setActiveView({ type: 'all' });
+                  } else {
+                    setActiveView({ type: 'tag', tag: t });
+                  }
+                }}
+                className={`px-2.5 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                  isActive
+                    ? 'bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/40 shadow-xs'
+                    : 'bg-neutral-100/80 dark:bg-neutral-800/80 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700/60'
+                }`}
+                title={isActive ? `Tag "#${t}" is active (Click to clear)` : `Tag "#${t}" (Pinned)`}
+              >
+                <Pin className="w-3 h-3 text-amber-500 fill-amber-500 rotate-45 shrink-0" />
+                <TagIcon className="w-3 h-3 text-purple-500 shrink-0" />
+                <span>#{t}</span>
+                {isActive && (
+                  <span className="hover:text-red-500 p-0.5 ml-0.5 font-bold">✕</span>
+                )}
               </button>
             );
           })}

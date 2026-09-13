@@ -16,6 +16,8 @@ interface NotesContextType {
   toasts: ToastMessage[];
   allTags: string[];
   allFolders: string[];
+  pinnedFolders: string[];
+  pinnedTags: string[];
   filteredNotes: Note[];
   isFocusMode: boolean;
   
@@ -33,6 +35,8 @@ interface NotesContextType {
   createFolder: (name: string) => boolean;
   renameFolder: (oldName: string, newName: string) => boolean;
   deleteFolder: (name: string) => void;
+  togglePinFolder: (folder: string) => void;
+  togglePinTag: (tag: string) => void;
   archiveNote: (id: string) => void;
   restoreNote: (id: string) => void;
   togglePinNote: (id: string) => void;
@@ -206,6 +210,54 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return ['Personal', 'Work'];
   });
 
+  // Pinned folders stored in local storage for quick access chips
+  const [pinnedFolders, setPinnedFolders] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('notes_pinned_folders');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to parse pinned folders from localStorage:', e);
+    }
+    return [];
+  });
+
+  // Pinned tags stored in local storage for quick access chips
+  const [pinnedTags, setPinnedTags] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('notes_pinned_tags');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to parse pinned tags from localStorage:', e);
+    }
+    return [];
+  });
+
+  const togglePinFolder = (folder: string) => {
+    setPinnedFolders((prev) => {
+      const exists = prev.includes(folder);
+      const updated = exists ? prev.filter((f) => f !== folder) : [...prev, folder];
+      localStorage.setItem('notes_pinned_folders', JSON.stringify(updated));
+      addToast(exists ? `Unpinned "${folder}"` : `Pinned "${folder}" to quick bar`, 'info');
+      return updated;
+    });
+  };
+
+  const togglePinTag = (tag: string) => {
+    setPinnedTags((prev) => {
+      const exists = prev.includes(tag);
+      const updated = exists ? prev.filter((t) => t !== tag) : [...prev, tag];
+      localStorage.setItem('notes_pinned_tags', JSON.stringify(updated));
+      addToast(exists ? `Unpinned tag "#${tag}"` : `Pinned tag "#${tag}" to quick bar`, 'info');
+      return updated;
+    });
+  };
+
   // Unique folders derived from custom list + existing notes
   const allFolders = useMemo(() => {
     const folderSet = new Set<string>(customFolders);
@@ -237,6 +289,11 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setCustomFolders((prev) => {
       const updated = prev.filter((f) => f !== name);
       localStorage.setItem('notes_app_folders', JSON.stringify(updated));
+      return updated;
+    });
+    setPinnedFolders((prev) => {
+      const updated = prev.filter((f) => f !== name);
+      localStorage.setItem('notes_pinned_folders', JSON.stringify(updated));
       return updated;
     });
     setNotes((prev) =>
@@ -275,6 +332,12 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updated.push(trimmedNew);
       }
       localStorage.setItem('notes_app_folders', JSON.stringify(updated));
+      return updated;
+    });
+
+    setPinnedFolders((prev) => {
+      const updated = prev.map((f) => (f === trimmedOld ? trimmedNew : f));
+      localStorage.setItem('notes_pinned_folders', JSON.stringify(updated));
       return updated;
     });
 
@@ -561,6 +624,8 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toasts,
         allTags,
         allFolders,
+        pinnedFolders,
+        pinnedTags,
         filteredNotes,
         isFocusMode,
         toggleFocusMode,
@@ -576,6 +641,8 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         createFolder,
         renameFolder,
         deleteFolder,
+        togglePinFolder,
+        togglePinTag,
         archiveNote,
         restoreNote,
         togglePinNote,

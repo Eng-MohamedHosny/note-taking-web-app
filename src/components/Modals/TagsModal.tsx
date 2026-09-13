@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNotes } from '../../context/NotesContext';
 import { TagIcon, CrossIcon } from '../Icons';
+import { Pin } from 'lucide-react';
 
 interface TagsModalProps {
   isOpen: boolean;
@@ -8,7 +9,7 @@ interface TagsModalProps {
 }
 
 export const TagsModal: React.FC<TagsModalProps> = ({ isOpen, onClose }) => {
-  const { allTags, activeView, setActiveView } = useNotes();
+  const { allTags, activeView, setActiveView, pinnedTags, togglePinTag } = useNotes();
 
   if (!isOpen) return null;
 
@@ -42,29 +43,54 @@ export const TagsModal: React.FC<TagsModalProps> = ({ isOpen, onClose }) => {
           ) : (
             allTags.map((tag) => {
               const isSelected = currentTag === tag;
+              const isPinned = pinnedTags.includes(tag);
               return (
-                <button
+                <div
                   key={tag}
-                  onClick={() => {
-                    setActiveView({ type: 'tag', tag });
-                    onClose();
-                  }}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                     isSelected
                       ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-950 dark:text-white font-semibold'
                       : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <TagIcon className={`w-4 h-4 ${isSelected ? 'text-blue-500' : 'text-neutral-500 dark:text-neutral-400'}`} />
-                    <span>{tag}</span>
+                  <button
+                    onClick={() => {
+                      setActiveView({ type: 'tag', tag });
+                      onClose();
+                    }}
+                    className="flex items-center gap-3 flex-1 min-w-0 text-left cursor-pointer"
+                  >
+                    <TagIcon
+                      className={`w-4 h-4 shrink-0 ${
+                        isSelected ? 'text-purple-500' : 'text-neutral-500 dark:text-neutral-400'
+                      }`}
+                    />
+                    <span className="truncate">#{tag}</span>
+                  </button>
+
+                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                    {isSelected && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500 text-white font-medium">
+                        Active
+                      </span>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        togglePinTag(tag);
+                      }}
+                      className={`p-1 rounded cursor-pointer transition-colors ${
+                        isPinned
+                          ? 'text-amber-500 hover:text-amber-600 bg-amber-500/10'
+                          : 'text-neutral-400 hover:text-amber-500 hover:bg-neutral-200/60 dark:hover:bg-neutral-700'
+                      }`}
+                      aria-label={isPinned ? `Unpin tag #${tag}` : `Pin tag #${tag}`}
+                      title={isPinned ? 'Unpin from quick bar' : 'Pin to quick bar'}
+                    >
+                      <Pin className={`w-4 h-4 ${isPinned ? 'fill-amber-500 rotate-45' : ''}`} />
+                    </button>
                   </div>
-                  {isSelected && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500 text-white font-medium">
-                      Active
-                    </span>
-                  )}
-                </button>
+                </div>
               );
             })
           )}

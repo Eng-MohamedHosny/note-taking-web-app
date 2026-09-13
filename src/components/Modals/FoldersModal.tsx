@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNotes } from '../../context/NotesContext';
 import { CrossIcon } from '../Icons';
-import { Folder as FolderIcon, Plus, Check, X, Trash2, Pencil } from 'lucide-react';
+import { Folder as FolderIcon, Plus, Check, X, Trash2, Pencil, Pin } from 'lucide-react';
 
 interface FoldersModalProps {
   isOpen: boolean;
@@ -9,7 +9,17 @@ interface FoldersModalProps {
 }
 
 export const FoldersModal: React.FC<FoldersModalProps> = ({ isOpen, onClose }) => {
-  const { allFolders, notes, activeView, setActiveView, createFolder, renameFolder, deleteFolder } = useNotes();
+  const {
+    allFolders,
+    notes,
+    activeView,
+    setActiveView,
+    createFolder,
+    renameFolder,
+    deleteFolder,
+    pinnedFolders,
+    togglePinFolder,
+  } = useNotes();
   const [isAddingFolder, setIsAddingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [editingFolder, setEditingFolder] = useState<string | null>(null);
@@ -183,6 +193,21 @@ export const FoldersModal: React.FC<FoldersModalProps> = ({ isOpen, onClose }) =
                         Active
                       </span>
                     )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        togglePinFolder(folder);
+                      }}
+                      className={`p-1 rounded cursor-pointer transition-colors ${
+                        pinnedFolders.includes(folder)
+                          ? 'text-amber-500 hover:text-amber-600 bg-amber-500/10'
+                          : 'text-neutral-400 hover:text-amber-500 hover:bg-neutral-200/60 dark:hover:bg-neutral-700'
+                      }`}
+                      aria-label={pinnedFolders.includes(folder) ? `Unpin folder "${folder}"` : `Pin folder "${folder}"`}
+                      title={pinnedFolders.includes(folder) ? 'Unpin from quick bar' : 'Pin to quick bar'}
+                    >
+                      <Pin className={`w-4 h-4 ${pinnedFolders.includes(folder) ? 'fill-amber-500 rotate-45' : ''}`} />
+                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

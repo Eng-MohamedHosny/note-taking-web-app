@@ -15,6 +15,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   Pencil,
+  Pin,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -28,9 +29,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
     setActiveView: rawSetActiveView,
     allTags,
     allFolders,
+    pinnedFolders,
+    pinnedTags,
     createFolder,
     renameFolder,
     deleteFolder,
+    togglePinFolder,
+    togglePinTag,
     notes,
   } = useNotes();
 
@@ -442,6 +447,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
+                              togglePinFolder(f);
+                            }}
+                            className={`${
+                              pinnedFolders.includes(f)
+                                ? 'opacity-100 text-amber-500 hover:text-amber-600'
+                                : 'opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-amber-500'
+                            } p-1 rounded transition-all cursor-pointer`}
+                            title={pinnedFolders.includes(f) ? `Unpin folder "${f}"` : `Pin folder "${f}"`}
+                            aria-label={pinnedFolders.includes(f) ? `Unpin folder "${f}"` : `Pin folder "${f}"`}
+                          >
+                            <Pin className={`w-3.5 h-3.5 ${pinnedFolders.includes(f) ? 'fill-amber-500 rotate-45' : ''}`} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setEditingFolder(f);
                               setEditFolderName(f);
                             }}
@@ -530,7 +551,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                         key={tag}
                         type="button"
                         onClick={() => setActiveView({ type: 'tag', tag })}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                        className={`group w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                           isTagActive
                             ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-950 dark:text-white font-semibold'
                             : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
@@ -546,11 +567,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                           />
                           <span className="truncate">{tag}</span>
                         </div>
-                        {tagCount > 0 && (
-                          <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-neutral-200/70 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-normal">
-                            {tagCount}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1 shrink-0">
+                          {tagCount > 0 && (
+                            <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-neutral-200/70 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-normal">
+                              {tagCount}
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              togglePinTag(tag);
+                            }}
+                            className={`${
+                              pinnedTags.includes(tag)
+                                ? 'opacity-100 text-amber-500 hover:text-amber-600'
+                                : 'opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-amber-500'
+                            } p-1 rounded transition-all cursor-pointer`}
+                            title={pinnedTags.includes(tag) ? `Unpin tag #${tag}` : `Pin tag #${tag}`}
+                            aria-label={pinnedTags.includes(tag) ? `Unpin tag #${tag}` : `Pin tag #${tag}`}
+                          >
+                            <Pin className={`w-3.5 h-3.5 ${pinnedTags.includes(tag) ? 'fill-amber-500 rotate-45' : ''}`} />
+                          </button>
+                        </div>
                       </button>
                     );
                   })
