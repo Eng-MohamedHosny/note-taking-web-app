@@ -438,7 +438,12 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
       </div>
 
       {/* 3. Main Content Body */}
-      <div className={`flex-1 flex flex-col p-4 md:p-6 lg:p-8 pb-4 lg:pb-8 overflow-y-auto transition-all h-full ${isFocusMode ? 'max-w-4xl mx-auto w-full' : ''}`}>
+      <div
+        style={{ scrollPaddingBottom: '160px' }}
+        className={`flex-1 flex flex-col p-4 md:p-6 lg:p-8 pb-[45vh] overflow-y-auto transition-all h-full ${
+          isFocusMode ? 'max-w-4xl mx-auto w-full' : ''
+        }`}
+      >
         {/* Title Input */}
         <input
           type="text"
