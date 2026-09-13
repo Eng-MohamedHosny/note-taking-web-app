@@ -649,17 +649,32 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     }
   }, [slashMenu?.selectedIndex]);
 
-  // Dismiss slash menu on click outside or document scroll
+  // Dismiss slash menu on click outside or external scroll
   useEffect(() => {
     if (!slashMenu) return;
 
     const handleClickOutside = (e: MouseEvent | TouchEvent) => {
-      if (slashMenuRef.current && !slashMenuRef.current.contains(e.target as Node)) {
-        setSlashMenu(null);
+      const target = e.target as Node | null;
+      if (
+        slashMenuRef.current &&
+        target &&
+        (slashMenuRef.current === target || slashMenuRef.current.contains(target))
+      ) {
+        return;
       }
+      setSlashMenu(null);
     };
 
-    const handleScroll = () => {
+    const handleScroll = (e: Event) => {
+      const target = e.target as Node | null;
+      // Do NOT dismiss if the scroll event originated inside the slash menu itself
+      if (
+        slashMenuRef.current &&
+        target &&
+        (slashMenuRef.current === target || slashMenuRef.current.contains(target))
+      ) {
+        return;
+      }
       setSlashMenu(null);
     };
 
@@ -1209,30 +1224,34 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
               top: `${slashMenu.coords.top}px`,
               left: `${slashMenu.coords.left}px`,
               transform: slashMenu.coords.openUpwards ? 'translateY(-100%)' : undefined,
-              maxHeight: 'min(340px, calc(100vh - 32px))',
+              maxHeight: 'min(280px, calc(100vh - 32px))',
               zIndex: 9999,
             }}
-            className="w-72 md:w-80 bg-white/95 dark:bg-[#161822]/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150 text-neutral-900 dark:text-neutral-100 select-none"
+            className="w-48 sm:w-52 bg-white/95 dark:bg-[#161822]/95 backdrop-blur-md rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-100 text-neutral-900 dark:text-neutral-100 select-none"
             onPointerDown={(e) => {
               // Prevent editor blur when clicking inside menu
               e.stopPropagation();
             }}
+            onWheel={(e) => {
+              e.stopPropagation();
+            }}
           >
             {/* Header / Filter status */}
-            <div className="flex items-center justify-between px-3.5 py-2 border-b border-neutral-100 dark:border-neutral-800/80 text-[11px] font-medium text-neutral-500 dark:text-neutral-400 bg-neutral-50/70 dark:bg-neutral-900/40 shrink-0">
-              <span className="font-semibold uppercase tracking-wider text-[10px] text-neutral-400 dark:text-neutral-500">
-                {slashMenu.query ? `Filter: /${slashMenu.query}` : 'Insert Block'}
+            <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-neutral-100 dark:border-neutral-800/80 text-[10px] font-medium text-neutral-400 dark:text-neutral-500 bg-neutral-50/70 dark:bg-neutral-900/40 shrink-0">
+              <span className="font-semibold uppercase tracking-wider text-[9px]">
+                {slashMenu.query ? `/${slashMenu.query}` : 'Tools'}
               </span>
-              <span className="text-[10px] text-neutral-400">
-                {filteredCommands.length} {filteredCommands.length === 1 ? 'tool' : 'tools'}
-              </span>
+              <span className="text-[9px]">{filteredCommands.length}</span>
             </div>
 
-            {/* Scrollable commands list */}
-            <div className="flex-1 overflow-y-auto p-1.5 space-y-0.5 max-h-64 scrollbar-thin">
+            {/* Scrollable commands list - simple, without sub text, compact */}
+            <div
+              className="flex-1 overflow-y-auto p-1 space-y-0.5 max-h-56 scrollbar-thin"
+              onWheel={(e) => e.stopPropagation()}
+            >
               {filteredCommands.length === 0 ? (
-                <div className="py-6 px-4 text-center text-xs text-neutral-400 dark:text-neutral-500">
-                  No matching tools for <span className="font-semibold text-neutral-600 dark:text-neutral-300">"/{slashMenu.query}"</span>
+                <div className="py-4 px-3 text-center text-xs text-neutral-400 dark:text-neutral-500">
+                  No tools for <span className="font-semibold text-neutral-600 dark:text-neutral-300">"/{slashMenu.query}"</span>
                 </div>
               ) : (
                 filteredCommands.map((cmd, idx) => {
@@ -1255,54 +1274,31 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
                         e.stopPropagation();
                         executeCommand(cmd);
                       }}
-                      className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-left transition-colors cursor-pointer group ${
+                      className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-left transition-colors cursor-pointer text-xs ${
                         isSelected
-                          ? 'bg-[#335CFF]/10 dark:bg-[#335CFF]/20 text-[#335CFF]'
-                          : 'hover:bg-neutral-100 dark:hover:bg-neutral-800/70 text-neutral-700 dark:text-neutral-200'
+                          ? 'bg-[#335CFF]/15 text-[#335CFF] font-semibold dark:bg-[#335CFF]/25'
+                          : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/70'
                       }`}
                     >
                       <div
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                        className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${
                           isSelected
-                            ? 'bg-white dark:bg-[#1E2232] shadow-xs ring-1 ring-[#335CFF]/30'
-                            : 'bg-neutral-100 dark:bg-neutral-800/80 group-hover:bg-white dark:group-hover:bg-[#1C1F2E]'
+                            ? 'text-[#335CFF]'
+                            : 'text-neutral-500 dark:text-neutral-400'
                         }`}
                       >
                         {cmd.icon}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div
-                          className={`text-xs font-semibold leading-tight truncate ${
-                            isSelected
-                              ? 'text-[#335CFF] dark:text-[#5B7FFF]'
-                              : 'text-neutral-900 dark:text-neutral-100'
-                          }`}
-                        >
-                          {cmd.title}
-                        </div>
-                        <div className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-tight truncate">
-                          {cmd.desc}
-                        </div>
-                      </div>
+                      <span className="flex-1 truncate">{cmd.title}</span>
                       {isSelected && (
-                        <div className="text-[10px] text-[#335CFF] font-medium hidden sm:block opacity-75">
+                        <span className="text-[10px] text-[#335CFF] opacity-60 font-mono">
                           ↵
-                        </div>
+                        </span>
                       )}
                     </button>
                   );
                 })
               )}
-            </div>
-
-            {/* Footer keyboard navigation hint */}
-            <div className="px-3 py-1.5 border-t border-neutral-100 dark:border-neutral-800/80 text-[10px] text-neutral-400 dark:text-neutral-500 bg-neutral-50/50 dark:bg-neutral-900/20 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-2">
-                <span>↑↓ Navigate</span>
-                <span>•</span>
-                <span>↵ Select</span>
-              </div>
-              <span>Esc to dismiss</span>
             </div>
           </div>,
           document.body

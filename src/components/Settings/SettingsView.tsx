@@ -19,8 +19,9 @@ import {
   ShowPasswordIcon,
   ArrowLeftIcon,
 } from '../Icons';
-import { Database, Check } from 'lucide-react';
+import { Database, Check, Command } from 'lucide-react';
 import { DataManagementTab } from './DataManagementTab';
+import { ShortcutsTab } from './ShortcutsTab';
 
 const ACCENT_OPTIONS: { id: AccentColor; name: string; hex: string; desc: string }[] = [
   { id: 'blue', name: 'Ocean Blue', hex: '#335CFF', desc: 'Classic default' },
@@ -60,6 +61,12 @@ const TAB_CONFIG: {
     title: 'Data & Backup',
     desc: 'Export notes (.json, .zip) & import backups',
     icon: ({ className }) => <Database className={className} />,
+  },
+  {
+    id: 'shortcuts',
+    title: 'Shortcuts',
+    desc: 'Slash commands & keyboard shortcuts',
+    icon: ({ className }) => <Command className={className} />,
   },
 ];
 
@@ -761,6 +768,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
 
           {/* DATA MANAGEMENT & BACKUP TAB */}
           {currentTab === 'data' && <DataManagementTab />}
+
+          {/* SHORTCUTS & SLASH COMMANDS TAB */}
+          {currentTab === 'shortcuts' && <ShortcutsTab />}
         </div>
       </div>
     </div>

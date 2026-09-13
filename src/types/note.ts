@@ -16,7 +16,7 @@ export type FontTheme = 'sans-serif' | 'serif' | 'monospace';
 export type AccentColor = 'blue' | 'purple' | 'emerald' | 'amber' | 'rose' | 'teal';
 export type ViewMode = 'list' | 'grid';
 
-export type SettingsTab = 'color' | 'font' | 'password' | 'data';
+export type SettingsTab = 'color' | 'font' | 'password' | 'data' | 'shortcuts';
 export type ImportStrategy = 'merge' | 'replace';
 
 export type ActiveView = 
