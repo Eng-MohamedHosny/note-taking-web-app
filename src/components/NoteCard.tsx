@@ -28,7 +28,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, isSelected, onSelect }
     >
       <div className="flex flex-col gap-3">
         {/* Title matching Figma text-preset-3: 16px SemiBold */}
-        <h3 className="text-base font-semibold text-neutral-950 dark:text-white line-clamp-1">
+        <h3 dir="auto" className="text-base font-semibold text-neutral-950 dark:text-white line-clamp-1">
           {note.title || 'Untitled Note'}
         </h3>
 

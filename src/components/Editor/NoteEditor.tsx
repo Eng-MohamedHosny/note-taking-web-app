@@ -377,6 +377,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
           value={title}
           onChange={(e) => handleTitleChange(e.target.value)}
           placeholder="Enter a title…"
+          dir="auto"
           className="w-full text-2xl font-bold bg-transparent border-none text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden mb-4 tracking-tight"
         />
 
@@ -455,6 +456,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
               value={tagsInput}
               onChange={(e) => handleTagsChange(e.target.value)}
               placeholder="Add tags separated by commas (e.g. Work, Planning)"
+              dir="auto"
               className="flex-1 text-sm bg-transparent border-none text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden"
             />
           </div>

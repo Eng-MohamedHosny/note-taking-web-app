@@ -26,7 +26,7 @@
   --color-red-500: #FB3748;
   --color-red-100: #FFD5D8;
 
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter', 'Cairo', 'Noto Sans Arabic', system-ui, -apple-system, sans-serif;
   --font-serif: 'Noto Serif', Georgia, serif;
   --font-mono: 'Source Code Pro', monospace;
   --font-logo: 'Pacifico', cursive;
@@ -126,6 +126,35 @@ html.extra-dark .dark\:hover\:bg-\[\#232530\]:hover {
 .ProseMirror {
   outline: none;
   min-height: 280px;
+  text-align: start;
+  unicode-bidi: plaintext;
+}
+
+.ProseMirror p,
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror li,
+.ProseMirror blockquote {
+  unicode-bidi: plaintext;
+}
+
+/* Explicit or detected direction styles */
+.ProseMirror [dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+  unicode-bidi: embed;
+}
+
+.ProseMirror [dir="ltr"] {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: embed;
+}
+
+.ProseMirror [dir="auto"] {
+  unicode-bidi: plaintext;
+  text-align: start;
 }
 
 .ProseMirror p {
@@ -139,6 +168,10 @@ html.extra-dark .dark\:hover\:bg-\[\#232530\]:hover {
   color: #99A0AE;
   pointer-events: none;
   height: 0;
+}
+
+.ProseMirror [dir="rtl"].is-editor-empty:first-child::before {
+  float: right;
 }
 
 .dark .ProseMirror p.is-editor-empty:first-child::before {
@@ -230,6 +263,13 @@ html.extra-dark .dark\:hover\:bg-\[\#232530\]:hover {
   margin-bottom: 0.75em;
   font-style: italic;
   color: #525866;
+}
+
+.ProseMirror blockquote[dir="rtl"] {
+  border-left: none;
+  border-right: 3px solid #335CFF;
+  padding-left: 0;
+  padding-right: 1em;
 }
 
 .dark .ProseMirror blockquote {

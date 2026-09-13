@@ -7,8 +7,10 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Link from '@tiptap/extension-link';
 import TiptapImage from '@tiptap/extension-image';
+import { Extension } from '@tiptap/core';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
+import { TextAlign } from '@tiptap/extension-text-align';
 import { ImageModal } from '../Modals/ImageModal';
 import {
   Bold,
@@ -30,6 +32,10 @@ import {
   RemoveFormatting,
   Image as ImageIcon,
   Check,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Languages,
 } from 'lucide-react';
 
 const PRESET_COLORS = [
@@ -44,8 +50,28 @@ const PRESET_COLORS = [
   { name: 'Indigo', value: '#6366F1' },
   { name: 'Purple', value: '#A855F7' },
   { name: 'Pink', value: '#EC4899' },
-  { name: 'Rose', value: '#F43F5E' },
 ];
+
+const DirectionExtension = Extension.create({
+  name: 'direction',
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['paragraph', 'heading', 'blockquote', 'bulletList', 'orderedList', 'taskList'],
+        attributes: {
+          dir: {
+            default: 'auto',
+            parseHTML: (element) => element.getAttribute('dir') || 'auto',
+            renderHTML: (attributes) => {
+              return { dir: attributes.dir || 'auto' };
+            },
+          },
+        },
+      },
+    ];
+  },
+});
 
 interface WysiwygEditorProps {
   content: string;
@@ -93,6 +119,10 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       Underline,
       TextStyle,
       Color,
+      DirectionExtension,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
       TaskList,
       TaskItem.configure({
         nested: true,
@@ -249,6 +279,26 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         ? 'bg-[#335CFF]/15 text-[#335CFF] font-semibold dark:bg-[#335CFF]/25 dark:text-[#335CFF]'
         : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700'
     }`;
+
+  const currentDir =
+    editor.getAttributes('paragraph').dir ||
+    editor.getAttributes('heading').dir ||
+    editor.getAttributes('blockquote').dir ||
+    'auto';
+  const isRtl = currentDir === 'rtl';
+
+  const toggleDirection = () => {
+    if (!editor) return;
+    const nextDir = currentDir === 'rtl' ? 'ltr' : 'rtl';
+    const chain = editor.chain().focus();
+    chain.updateAttributes('paragraph', { dir: nextDir });
+    chain.updateAttributes('heading', { dir: nextDir });
+    chain.updateAttributes('blockquote', { dir: nextDir });
+    chain.updateAttributes('bulletList', { dir: nextDir });
+    chain.updateAttributes('orderedList', { dir: nextDir });
+    chain.updateAttributes('taskList', { dir: nextDir });
+    chain.run();
+  };
 
   const showMobileToolbar = isEditorFocused || isImageModalOpen || isColorPickerOpen;
   const isToolbarVisible = !isMobileOrTablet || showMobileToolbar;
@@ -483,6 +533,52 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
             </div>
           )}
         </div>
+
+        {/* Alignment & RTL Text Direction Controls */}
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          className={btnClass(editor.isActive({ textAlign: 'left' }))}
+          title="Align Left"
+        >
+          <AlignLeft className="w-4 h-4 lg:w-3.5 lg:h-3.5 shrink-0" />
+        </button>
+
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          className={btnClass(editor.isActive({ textAlign: 'center' }))}
+          title="Align Center"
+        >
+          <AlignCenter className="w-4 h-4 lg:w-3.5 lg:h-3.5 shrink-0" />
+        </button>
+
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          className={btnClass(editor.isActive({ textAlign: 'right' }))}
+          title="Align Right"
+        >
+          <AlignRight className="w-4 h-4 lg:w-3.5 lg:h-3.5 shrink-0" />
+        </button>
+
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={toggleDirection}
+          className={`p-2 lg:p-1.5 rounded-lg lg:rounded-md transition-colors cursor-pointer text-xs flex items-center justify-center gap-1 shrink-0 select-none ${
+            isRtl
+              ? 'bg-[#335CFF]/15 text-[#335CFF] font-semibold dark:bg-[#335CFF]/25 dark:text-[#335CFF]'
+              : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800'
+          }`}
+          title={isRtl ? 'Text Direction: Right-to-Left (RTL)' : 'Text Direction: Left-to-Right (LTR) / Auto'}
+        >
+          <Languages className="w-4 h-4 lg:w-3.5 lg:h-3.5 shrink-0" />
+          <span className="text-[10px] font-bold tracking-tight">RTL</span>
+        </button>
 
         <div className="w-px h-5 lg:h-4 bg-neutral-200 dark:bg-neutral-800 shrink-0 mx-1" />
 
