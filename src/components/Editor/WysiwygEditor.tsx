@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -41,6 +41,9 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   placeholder = 'Start typing your note…',
 }) => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isEditorFocused, setIsEditorFocused] = useState(false);
+  const isInteractingWithToolbarRef = useRef(false);
+  const toolbarRef = useRef<HTMLDivElement>(null);
 
   const editor = useEditor({
     extensions: [
@@ -74,6 +77,25 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     content: content || '',
     onUpdate: ({ editor: ed }) => {
       onChange(ed.getHTML());
+    },
+    onFocus: () => {
+      setIsEditorFocused(true);
+    },
+    onBlur: ({ event }) => {
+      if (isInteractingWithToolbarRef.current) return;
+      if (
+        toolbarRef.current &&
+        event?.relatedTarget &&
+        toolbarRef.current.contains(event.relatedTarget as Node)
+      ) {
+        return;
+      }
+      setIsEditorFocused(false);
+    },
+    onSelectionUpdate: ({ editor: ed }) => {
+      if (ed.isFocused) {
+        setIsEditorFocused(true);
+      }
     },
     editorProps: {
       attributes: {
@@ -188,12 +210,27 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700'
     }`;
 
+  const showMobileToolbar = isEditorFocused || isImageModalOpen;
+  const isToolbarVisible = !isMobileOrTablet || showMobileToolbar;
+
   return (
     <div className="flex flex-col w-full h-full">
-      {/* Formatting Toolbar: On desktop sticky top, on phones/tablets fixed directly on top of keyboard and horizontally scrollable */}
+      {/* Formatting Toolbar: On desktop sticky top, on phones/tablets active ONLY when cursor is focused and docked on top of keyboard */}
       <div
+        ref={toolbarRef}
         style={isMobileOrTablet ? { bottom: `${keyboardOffset}px` } : undefined}
-        className="fixed lg:sticky bottom-0 lg:top-0 left-0 right-0 z-40 lg:z-10 flex items-center gap-1.5 lg:gap-0.5 px-3 py-2 lg:py-1.5 bg-white/95 dark:bg-[#12141D]/95 lg:bg-neutral-50/90 lg:dark:bg-[#161822]/90 backdrop-blur-md lg:backdrop-blur-xs border-t lg:border border-neutral-200 dark:border-neutral-800 lg:rounded-lg mb-0 lg:mb-3 shadow-lg lg:shadow-2xs overflow-x-auto lg:overflow-x-visible lg:flex-wrap scrollbar-none touch-pan-x select-none"
+        onPointerDown={(e) => {
+          isInteractingWithToolbarRef.current = true;
+          e.preventDefault();
+        }}
+        onPointerUp={() => {
+          setTimeout(() => {
+            isInteractingWithToolbarRef.current = false;
+          }, 200);
+        }}
+        className={`fixed lg:sticky z-40 lg:z-10 items-center gap-1.5 lg:gap-0.5 px-3 py-2 lg:py-1.5 bg-white/95 dark:bg-[#12141D]/95 lg:bg-neutral-50/90 lg:dark:bg-[#161822]/90 backdrop-blur-md lg:backdrop-blur-xs border-t lg:border border-neutral-200 dark:border-neutral-800 lg:rounded-lg mb-0 lg:mb-3 shadow-lg lg:shadow-2xs overflow-x-auto lg:overflow-x-visible lg:flex-wrap scrollbar-none touch-pan-x select-none ${
+          isToolbarVisible ? 'flex bottom-0 lg:top-0 left-0 right-0' : 'hidden'
+        }`}
       >
         {/* Undo / Redo */}
         <button
@@ -396,7 +433,14 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       </div>
 
       {/* Editor Content Area */}
-      <div className="flex-1 overflow-y-auto">
+      <div
+        className="flex-1 overflow-y-auto cursor-text"
+        onClick={() => {
+          if (editor && !editor.isFocused) {
+            editor.commands.focus('end');
+          }
+        }}
+      >
         <EditorContent editor={editor} />
       </div>
 
