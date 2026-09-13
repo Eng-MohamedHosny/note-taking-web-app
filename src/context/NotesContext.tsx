@@ -80,9 +80,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return INITIAL_NOTES;
   });
 
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(() => {
-    return notes.length > 0 ? notes[0].id : null;
-  });
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
 
   const [activeView, setActiveViewState] = useState<ActiveView>({ type: 'all' });
   const [searchQuery, setSearchQuery] = useState<string>('');

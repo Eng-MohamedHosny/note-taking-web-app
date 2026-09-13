@@ -277,19 +277,15 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
             ))}
           </div>
         ) : (
-          /* Classic List View Layout with 1px Dividers */
-          <div className="space-y-1 py-1">
-            {filteredNotes.map((note, idx) => (
-              <React.Fragment key={note.id}>
-                <NoteCard
-                  note={note}
-                  isSelected={!isCreatingNewNote && selectedNoteId === note.id}
-                  onSelect={() => handleSelect(note.id)}
-                />
-                {idx < filteredNotes.length - 1 && (
-                  <div className="h-px bg-[#E0E4EA] dark:bg-[#232530] my-1" />
-                )}
-              </React.Fragment>
+          /* Card-style List View Layout */
+          <div className="flex flex-col gap-2.5 py-1">
+            {filteredNotes.map((note) => (
+              <NoteCard
+                key={note.id}
+                note={note}
+                isSelected={!isCreatingNewNote && selectedNoteId === note.id}
+                onSelect={() => handleSelect(note.id)}
+              />
             ))}
           </div>
         )}

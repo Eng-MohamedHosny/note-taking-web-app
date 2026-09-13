@@ -338,20 +338,6 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
             )}
           </div>
 
-          {/* Focus Mode Button */}
-          <button
-            type="button"
-            onClick={toggleFocusMode}
-            className={`p-1.5 rounded-lg cursor-pointer transition-colors ${
-              isFocusMode
-                ? 'bg-[#335CFF] text-white'
-                : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
-            }`}
-            title={isFocusMode ? 'Exit Fullscreen' : 'Expand Note'}
-          >
-            {isFocusMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-          </button>
-
           {/* Three Dots Button (Apple Action Menu) */}
           <button
             type="button"

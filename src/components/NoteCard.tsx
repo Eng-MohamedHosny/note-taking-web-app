@@ -20,34 +20,34 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, isSelected, onSelect }
           onSelect();
         }
       }}
-      className={`w-full p-2 rounded-md transition-colors cursor-pointer text-left outline-hidden select-none ${
+      className={`w-full p-3 rounded-xl transition-all cursor-pointer text-left outline-hidden select-none border ${
         isSelected
-          ? 'bg-neutral-100 dark:bg-neutral-800'
-          : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
+          ? 'bg-neutral-100 dark:bg-neutral-800 border-blue-500/80 ring-2 ring-[#335CFF]/30 dark:ring-[#335CFF]/40 shadow-xs'
+          : 'bg-neutral-100/90 dark:bg-neutral-800/80 border-neutral-200/80 dark:border-neutral-700/60 hover:bg-neutral-200/60 dark:hover:bg-neutral-700'
       }`}
     >
-      <div className="flex flex-col gap-3">
-        {/* Title matching Figma text-preset-3: 16px SemiBold */}
+      <div className="flex flex-col gap-2">
+        {/* Title */}
         <h3 dir="auto" className="text-base font-semibold text-neutral-950 dark:text-white line-clamp-1">
           {note.title || 'Untitled Note'}
         </h3>
 
-        {/* Tags Row matching Figma: gap 4px, tags in #E0E4EA with 12px text */}
+        {/* Tags Row */}
         {note.tags.length > 0 && (
           <div className="flex flex-wrap items-center gap-1">
             {note.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-1.5 py-0.5 rounded-sm bg-neutral-200 dark:bg-neutral-700 text-xs font-normal text-neutral-950 dark:text-white"
+                className="px-1.5 py-0.5 rounded-md bg-neutral-200/80 dark:bg-neutral-700 text-xs font-normal text-neutral-950 dark:text-white"
               >
-                {tag}
+                #{tag}
               </span>
             ))}
           </div>
         )}
 
-        {/* Last Edited Date matching Figma text-preset-6: 12px Regular #2B303B */}
-        <p className="text-xs text-neutral-700 dark:text-neutral-400">
+        {/* Last Edited Date */}
+        <p className="text-xs text-neutral-500 dark:text-neutral-400">
           {formatDate(note.lastEdited)}
         </p>
       </div>
