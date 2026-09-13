@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
-import { Note, ActiveView, ToastMessage, SettingsTab, ViewMode } from '../types/note';
+import { Note, ActiveView, ToastMessage, SettingsTab, ViewMode, ImportStrategy } from '../types/note';
 import { INITIAL_NOTES } from '../utils/initialData';
 import { useAuth } from './AuthContext';
 import { fetchCloudNotes, upsertCloudNote, deleteCloudNote } from '../services/supabase';
@@ -49,6 +49,7 @@ interface NotesContextType {
   deleteNote: (id: string) => void;
   restoreFromTrash: (id: string) => void;
   emptyTrash: () => void;
+  importNotes: (importedNotes: Note[], strategy: ImportStrategy, extraFolders?: string[]) => { added: number; updated: number };
   addToast: (message: string, type?: 'success' | 'info' | 'error') => void;
   removeToast: (id: string) => void;
 }
@@ -683,6 +684,100 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const importNotes = (
+    importedNotes: Note[],
+    strategy: ImportStrategy,
+    extraFolders: string[] = []
+  ): { added: number; updated: number } => {
+    if (!importedNotes || importedNotes.length === 0) {
+      addToast('No notes to import', 'info');
+      return { added: 0, updated: 0 };
+    }
+
+    // Extract new folders
+    const newFolders = new Set<string>(customFolders);
+    extraFolders.forEach((f) => {
+      if (f && f.trim()) newFolders.add(f.trim());
+    });
+    importedNotes.forEach((n) => {
+      if (n.folder && n.folder.trim()) newFolders.add(n.folder.trim());
+    });
+    const updatedFolders = Array.from(newFolders);
+    setCustomFolders(updatedFolders);
+    localStorage.setItem('notes_app_folders', JSON.stringify(updatedFolders));
+
+    let finalNotes: Note[] = [];
+    let addedCount = 0;
+    let updatedCount = 0;
+
+    if (strategy === 'replace') {
+      finalNotes = [...importedNotes];
+      addedCount = importedNotes.length;
+      setNotes(finalNotes);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(finalNotes));
+
+      if (!isGuest && user) {
+        setSyncStatus('syncing');
+        Promise.all(importedNotes.map((n) => upsertCloudNote(n, user.id))).then(() => {
+          setSyncStatus('synced');
+        });
+      }
+
+      addToast(`Imported ${addedCount} notes (Replaced existing workspace)`, 'success');
+      return { added: addedCount, updated: 0 };
+    } else {
+      // Merge strategy:
+      const existingIds = new Set(notes.map((n) => n.id));
+      const existingTitles = new Map(notes.map((n) => [n.title.toLowerCase().trim(), n]));
+
+      const newItems: Note[] = [];
+      const updatedList = notes.map((existingNote) => {
+        const match = importedNotes.find((inNote) => inNote.id === existingNote.id);
+        if (match) {
+          updatedCount++;
+          return {
+            ...match,
+            lastEdited: new Date().toISOString(),
+          };
+        }
+        return existingNote;
+      });
+
+      importedNotes.forEach((inNote) => {
+        if (!existingIds.has(inNote.id)) {
+          let finalId = inNote.id;
+          if (existingTitles.has(inNote.title.toLowerCase().trim()) || existingIds.has(finalId)) {
+            finalId = `note-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+          }
+          newItems.push({
+            ...inNote,
+            id: finalId,
+          });
+          addedCount++;
+        }
+      });
+
+      finalNotes = [...newItems, ...updatedList];
+      setNotes(finalNotes);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(finalNotes));
+
+      if (!isGuest && user) {
+        setSyncStatus('syncing');
+        Promise.all(newItems.map((n) => upsertCloudNote(n, user.id))).then(() => {
+          setSyncStatus('synced');
+        });
+      }
+
+      const summary =
+        updatedCount > 0
+          ? `Imported ${addedCount} new notes, updated ${updatedCount}`
+          : `Successfully imported ${addedCount} notes`;
+      addToast(summary, 'success');
+
+      return { added: addedCount, updated: updatedCount };
+    }
+  };
+
   return (
     <NotesContext.Provider
       value={{
@@ -728,6 +823,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         deleteNote,
         restoreFromTrash,
         emptyTrash,
+        importNotes,
         addToast,
         removeToast,
       }}

@@ -15,7 +15,8 @@ export type ColorTheme = 'light' | 'dark' | 'extra-dark' | 'notion-dark' | 'syst
 export type FontTheme = 'sans-serif' | 'serif' | 'monospace';
 export type ViewMode = 'list' | 'grid';
 
-export type SettingsTab = 'color' | 'font' | 'password';
+export type SettingsTab = 'color' | 'font' | 'password' | 'data';
+export type ImportStrategy = 'merge' | 'replace';
 
 export type ActiveView = 
   | { type: 'all'; folder?: string; tag?: string }

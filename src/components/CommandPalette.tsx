@@ -12,9 +12,10 @@ import {
   Sun, 
   Settings, 
   Download, 
+  Upload,
   X 
 } from 'lucide-react';
-import { exportToJSON } from '../utils/formatters';
+import { exportAllToJSON, exportAllToZip } from '../utils/formatters';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -101,13 +102,40 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   });
 
   filteredCommands.push({
-    id: 'cmd-export',
-    title: 'Export All Notes (JSON)',
+    id: 'cmd-export-json',
+    title: 'Export All Notes (JSON Backup)',
     category: 'Actions',
-    icon: <Download className="w-4 h-4 text-green-500" />,
+    icon: <Download className="w-4 h-4 text-emerald-500" />,
     action: () => {
-      exportToJSON(notes);
-      addToast('Notes backup downloaded', 'success');
+      exportAllToJSON(notes);
+      addToast('Full notes backup downloaded', 'success');
+      onClose();
+    },
+  });
+
+  filteredCommands.push({
+    id: 'cmd-export-zip',
+    title: 'Export All Notes as Markdown (.zip)',
+    category: 'Actions',
+    icon: <Archive className="w-4 h-4 text-emerald-500" />,
+    action: async () => {
+      try {
+        await exportAllToZip(notes);
+        addToast('Markdown archive downloaded', 'success');
+      } catch (err: any) {
+        addToast('Failed to export zip', 'error');
+      }
+      onClose();
+    },
+  });
+
+  filteredCommands.push({
+    id: 'cmd-import',
+    title: 'Import Notes (JSON / Markdown / Text)...',
+    category: 'Actions',
+    icon: <Upload className="w-4 h-4 text-blue-500" />,
+    action: () => {
+      setActiveView({ type: 'settings', tab: 'data' });
       onClose();
     },
   });

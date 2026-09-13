@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNotes } from '../../context/NotesContext';
-import { formatDate } from '../../utils/formatters';
+import { formatDate, exportToMarkdown, exportToTXT, exportToJSON, exportToPrint } from '../../utils/formatters';
 import { DeleteModal } from '../Modals/DeleteModal';
 import { ArchiveModal } from '../Modals/ArchiveModal';
 import { WysiwygEditor } from './WysiwygEditor';
@@ -13,7 +13,7 @@ import {
   ClockIcon,
   StatusIcon,
 } from '../Icons';
-import { Folder as FolderIcon, Plus, Check, Maximize2, Minimize2, ChevronDown, X, MoreHorizontal } from 'lucide-react';
+import { Folder as FolderIcon, Plus, Check, Maximize2, Minimize2, ChevronDown, X, MoreHorizontal, Download, Printer, FileText } from 'lucide-react';
 
 interface NoteEditorProps {
   onBackToList?: () => void;
@@ -33,6 +33,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
     isFocusMode,
     toggleFocusMode,
     setFocusMode,
+    addToast,
   } = useNotes();
 
   const [title, setTitle] = useState('');
@@ -646,6 +647,64 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
                   </>
                 )}
               </button>
+            )}
+
+            {/* Export Note Options */}
+            {selectedNote && (
+              <>
+                <div className="h-[1px] bg-neutral-100 dark:bg-neutral-800/80 my-1.5" />
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400 px-2.5 py-1">
+                  Export Note
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    exportToMarkdown(selectedNote);
+                    addToast('Exported as Markdown (.md)', 'success');
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
+                >
+                  <FileText className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Markdown (.md)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    exportToTXT(selectedNote);
+                    addToast('Exported as Plain Text (.txt)', 'success');
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
+                >
+                  <Download className="w-3.5 h-3.5 text-blue-500" />
+                  <span>Plain Text (.txt)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    exportToJSON(selectedNote, `${selectedNote.title || 'note'}.json`);
+                    addToast('Exported as JSON', 'success');
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
+                >
+                  <Download className="w-3.5 h-3.5 text-amber-500" />
+                  <span>JSON File (.json)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    exportToPrint(selectedNote);
+                  }}
+                  className="flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors w-full text-left cursor-pointer text-neutral-700 dark:text-neutral-200"
+                >
+                  <Printer className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>Print / Save as PDF</span>
+                </button>
+                <div className="h-[1px] bg-neutral-100 dark:bg-neutral-800/80 my-1.5" />
+              </>
             )}
 
             {/* Delete */}

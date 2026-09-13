@@ -20,6 +20,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { exportToJSON } from '../../utils/formatters';
+import { DataManagementTab } from '../Settings/DataManagementTab';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -456,25 +457,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   </div>
                 </div>
 
-                {/* Backup & Export */}
-                <div className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-2">
-                  <h4 className="text-sm font-semibold text-neutral-950 dark:text-white">
-                    Export All Notes
-                  </h4>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                    Download a full JSON backup of all your notes, tags, and timestamps.
-                  </p>
-                  <button
-                    onClick={() => {
-                      exportToJSON(notes, `notes-backup-${new Date().toISOString().slice(0, 10)}.json`);
-                      addToast('All notes exported successfully', 'success');
-                    }}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-neutral-800 dark:text-neutral-200 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-lg transition-colors cursor-pointer"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download JSON Backup ({notes.length} notes)</span>
-                  </button>
-                </div>
+                {/* Full Export & Import Suite */}
+                <DataManagementTab />
               </div>
             )}
           </div>

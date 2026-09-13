@@ -18,6 +18,8 @@ import {
   HidePasswordIcon,
   ShowPasswordIcon,
 } from '../Icons';
+import { Database } from 'lucide-react';
+import { DataManagementTab } from './DataManagementTab';
 
 interface SettingsViewProps {
   initialTab?: SettingsTab;
@@ -137,6 +139,23 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
             <span>Change Password</span>
           </div>
           {currentTab === 'password' && (
+            <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
+          )}
+        </button>
+
+        <button
+          onClick={() => handleTabChange('data')}
+          className={`w-full flex items-center justify-between p-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+            currentTab === 'data'
+              ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-950 dark:text-white font-semibold'
+              : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <Database className={`w-5 h-5 ${currentTab === 'data' ? 'text-blue-500' : 'text-neutral-500 dark:text-neutral-400'}`} />
+            <span>Data & Backup</span>
+          </div>
+          {currentTab === 'data' && (
             <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
           )}
         </button>
@@ -585,6 +604,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
               </div>
             </form>
           )}
+
+          {/* DATA MANAGEMENT & BACKUP TAB */}
+          {currentTab === 'data' && <DataManagementTab />}
         </div>
       </div>
     </div>
