@@ -38,7 +38,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, isSelected, onSelect }
             {note.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-1.5 py-0.5 rounded-md bg-neutral-200/80 dark:bg-neutral-700 text-xs font-normal text-neutral-950 dark:text-white"
+                className="px-2 py-0.5 rounded-md bg-neutral-200 dark:bg-neutral-700/80 text-xs font-medium text-neutral-800 dark:text-neutral-200 border border-neutral-300 dark:border-neutral-600/70 shadow-2xs"
               >
                 #{tag}
               </span>

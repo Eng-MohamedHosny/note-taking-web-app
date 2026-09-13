@@ -70,7 +70,7 @@ export const NoteGridCard: React.FC<NoteGridCardProps> = ({ note, isSelected, on
           {note.tags.slice(0, 2).map((tag) => (
             <span
               key={tag}
-              className="text-[11px] px-1.5 py-0.5 rounded bg-neutral-200/80 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 line-clamp-1"
+              className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-neutral-200 dark:bg-neutral-700/80 text-neutral-800 dark:text-neutral-200 border border-neutral-300 dark:border-neutral-600/70 shadow-2xs line-clamp-1"
             >
               {tag}
             </span>
