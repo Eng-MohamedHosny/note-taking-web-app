@@ -1183,17 +1183,20 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
 
       {/* Editor Content Area - Expanded with generous in-flow bottom spacer */}
       <div
-        className="flex-1 flex flex-col min-h-full cursor-text"
+        className="flex-1 flex flex-col min-h-full"
         onClick={(e) => {
           if (touchMovedRef.current || !editor) return;
           const target = e.target as HTMLElement;
+          // CRITICAL: If click is inside the editor content, NEVER force focus to end!
+          // TipTap / ProseMirror natively positions the cursor exactly at the clicked line/character.
+          if (target.closest('.tiptap')) {
+            return;
+          }
           if (target.closest('button, a, input, select, [role="button"], [data-prevent-editor-focus]')) {
             return;
           }
-          const isDirectText = target.closest('p, h1, h2, h3, li, blockquote, pre');
-          if (!isDirectText || target === e.currentTarget || target.classList.contains('empty-space-spacer')) {
-            editor.commands.focus('end');
-          }
+          // Only if clicked in the empty space below or outside the editor
+          editor.commands.focus('end');
         }}
       >
         <EditorContent
