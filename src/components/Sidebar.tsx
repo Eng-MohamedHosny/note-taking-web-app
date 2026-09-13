@@ -17,10 +17,15 @@ import {
   Pencil,
 } from 'lucide-react';
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isMobile?: boolean;
+  onNavigate?: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }) => {
   const {
     activeView,
-    setActiveView,
+    setActiveView: rawSetActiveView,
     allTags,
     allFolders,
     createFolder,
@@ -28,6 +33,13 @@ export const Sidebar: React.FC = () => {
     deleteFolder,
     notes,
   } = useNotes();
+
+  const setActiveView = (view: Parameters<typeof rawSetActiveView>[0]) => {
+    rawSetActiveView(view);
+    if (isMobile && onNavigate) {
+      onNavigate();
+    }
+  };
   const { isGuest, user, logout } = useAuth();
 
   // Sidebar collapse mode
@@ -98,6 +110,7 @@ export const Sidebar: React.FC = () => {
     }
   };
 
+  const effectiveCollapsed = isMobile ? false : isCollapsed;
   const isAllNotesActive = activeView.type === 'all';
   const isArchivedActive = activeView.type === 'archived';
   const isTrashActive = activeView.type === 'trash';
@@ -105,57 +118,76 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside
-      className={`hidden lg:flex flex-col h-screen bg-white dark:bg-[#0E121B] border-r border-[#E0E4EA] dark:border-[#232530] shrink-0 select-none transition-all duration-200 ease-in-out ${
-        isCollapsed ? 'w-[72px]' : 'w-[272px]'
-      }`}
+      className={
+        isMobile
+          ? 'flex flex-col h-full w-full bg-white dark:bg-[#0E121B] select-none'
+          : `hidden lg:flex flex-col h-screen bg-white dark:bg-[#0E121B] border-r border-[#E0E4EA] dark:border-[#232530] shrink-0 select-none transition-all duration-200 ease-in-out ${
+              effectiveCollapsed ? 'w-[72px]' : 'w-[272px]'
+            }`
+      }
     >
-      {/* 1. Header (Logo + Collapse / Expand Button) */}
-      <div
-        className={`flex items-center py-5 border-b border-[#E0E4EA]/50 dark:border-[#232530]/50 shrink-0 ${
-          isCollapsed ? 'flex-col justify-center px-2 gap-2' : 'justify-between px-5'
-        }`}
-      >
-        {isCollapsed ? (
-          <>
-            <div className="flex items-center justify-center p-1" title="Notes App">
-              <Logo iconOnly className="w-7 h-7" />
-            </div>
-            <button
-              type="button"
-              onClick={toggleCollapsed}
-              className="p-1.5 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
-              title="Expand Sidebar"
-              aria-label="Expand Sidebar"
-            >
-              <PanelLeft className="w-4 h-4" />
-            </button>
-          </>
-        ) : (
-          <>
-            <Logo className="h-7 w-auto" />
-            <button
-              type="button"
-              onClick={toggleCollapsed}
-              className="p-1.5 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
-              title="Collapse Sidebar"
-              aria-label="Collapse Sidebar"
-            >
-              <PanelLeftClose className="w-4 h-4" />
-            </button>
-          </>
-        )}
-      </div>
+      {/* 1. Header (Logo + Collapse / Expand / Close Button) */}
+      {isMobile ? (
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E0E4EA]/50 dark:border-[#232530]/50 shrink-0">
+          <Logo className="h-7 w-auto" />
+          <button
+            type="button"
+            onClick={onNavigate}
+            className="p-1.5 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+            title="Close menu"
+            aria-label="Close menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      ) : (
+        <div
+          className={`flex items-center py-5 border-b border-[#E0E4EA]/50 dark:border-[#232530]/50 shrink-0 ${
+            effectiveCollapsed ? 'flex-col justify-center px-2 gap-2' : 'justify-between px-5'
+          }`}
+        >
+          {effectiveCollapsed ? (
+            <>
+              <div className="flex items-center justify-center p-1" title="Notes App">
+                <Logo iconOnly className="w-7 h-7" />
+              </div>
+              <button
+                type="button"
+                onClick={toggleCollapsed}
+                className="p-1.5 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                title="Expand Sidebar"
+                aria-label="Expand Sidebar"
+              >
+                <PanelLeft className="w-4 h-4" />
+              </button>
+            </>
+          ) : (
+            <>
+              <Logo className="h-7 w-auto" />
+              <button
+                type="button"
+                onClick={toggleCollapsed}
+                className="p-1.5 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                title="Collapse Sidebar"
+                aria-label="Collapse Sidebar"
+              >
+                <PanelLeftClose className="w-4 h-4" />
+              </button>
+            </>
+          )}
+        </div>
+      )}
 
       {/* 2. Navigation Content Area */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 space-y-4">
         {/* Core Links */}
-        <div className={`space-y-1 ${isCollapsed ? 'px-2' : 'px-3'}`}>
+        <div className={`space-y-1 ${effectiveCollapsed ? 'px-2' : 'px-3'}`}>
           {/* All Notes */}
           <button
             type="button"
             onClick={() => setActiveView({ type: 'all' })}
             className={`w-full flex items-center rounded-lg transition-colors cursor-pointer ${
-              isCollapsed
+              effectiveCollapsed
                 ? 'justify-center p-2.5'
                 : 'justify-between px-3 py-2.5 text-sm font-medium'
             } ${
@@ -173,9 +205,9 @@ export const Sidebar: React.FC = () => {
                     : 'text-neutral-500 dark:text-neutral-400'
                 }`}
               />
-              {!isCollapsed && <span>All Notes</span>}
+              {!effectiveCollapsed && <span>All Notes</span>}
             </div>
-            {!isCollapsed && isAllNotesActive && (
+            {!effectiveCollapsed && isAllNotesActive && (
               <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
             )}
           </button>
@@ -185,7 +217,7 @@ export const Sidebar: React.FC = () => {
             type="button"
             onClick={() => setActiveView({ type: 'archived' })}
             className={`w-full flex items-center rounded-lg transition-colors cursor-pointer ${
-              isCollapsed
+              effectiveCollapsed
                 ? 'justify-center p-2.5'
                 : 'justify-between px-3 py-2.5 text-sm font-medium'
             } ${
@@ -203,9 +235,9 @@ export const Sidebar: React.FC = () => {
                     : 'text-neutral-500 dark:text-neutral-400'
                 }`}
               />
-              {!isCollapsed && <span>Archived Notes</span>}
+              {!effectiveCollapsed && <span>Archived Notes</span>}
             </div>
-            {!isCollapsed && isArchivedActive && (
+            {!effectiveCollapsed && isArchivedActive && (
               <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
             )}
           </button>
@@ -215,7 +247,7 @@ export const Sidebar: React.FC = () => {
             type="button"
             onClick={() => setActiveView({ type: 'trash' })}
             className={`w-full flex items-center rounded-lg transition-colors cursor-pointer relative ${
-              isCollapsed
+              effectiveCollapsed
                 ? 'justify-center p-2.5'
                 : 'justify-between px-3 py-2.5 text-sm font-medium'
             } ${
@@ -231,12 +263,12 @@ export const Sidebar: React.FC = () => {
                   isTrashActive ? 'text-red-500' : 'text-neutral-400'
                 }`}
               />
-              {!isCollapsed && <span>Trash</span>}
+              {!effectiveCollapsed && <span>Trash</span>}
             </div>
             {trashCount > 0 && (
               <span
                 className={`text-xs px-2 py-0.5 rounded-full ${
-                  isCollapsed
+                  effectiveCollapsed
                     ? 'absolute top-1 right-1 px-1 py-0 text-[10px] bg-red-500 text-white'
                     : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400'
                 }`}
@@ -248,10 +280,10 @@ export const Sidebar: React.FC = () => {
         </div>
 
         {/* Divider */}
-        <div className={`h-px bg-neutral-200 dark:bg-neutral-800 ${isCollapsed ? 'mx-2' : 'mx-4'}`} />
+        <div className={`h-px bg-neutral-200 dark:bg-neutral-800 ${effectiveCollapsed ? 'mx-2' : 'mx-4'}`} />
 
         {/* 3. Folders Section (Above Tags) */}
-        {isCollapsed ? (
+        {effectiveCollapsed ? (
           <div className="px-2 flex flex-col items-center gap-2">
             <button
               type="button"
@@ -442,10 +474,10 @@ export const Sidebar: React.FC = () => {
         )}
 
         {/* Divider */}
-        <div className={`h-px bg-neutral-200 dark:bg-neutral-800 ${isCollapsed ? 'mx-2' : 'mx-4'}`} />
+        <div className={`h-px bg-neutral-200 dark:bg-neutral-800 ${effectiveCollapsed ? 'mx-2' : 'mx-4'}`} />
 
         {/* 4. Tags Section */}
-        {isCollapsed ? (
+        {effectiveCollapsed ? (
           <div className="px-2 flex flex-col items-center gap-2">
             <button
               type="button"
@@ -531,7 +563,7 @@ export const Sidebar: React.FC = () => {
 
       {/* 5. Bottom Area (User / Cloud status & Logout logo) */}
       <div className="p-3 border-t border-[#E0E4EA] dark:border-[#232530] shrink-0">
-        {isCollapsed ? (
+        {effectiveCollapsed ? (
           <div className="flex flex-col items-center gap-3 py-1">
             <div
               className={`w-2.5 h-2.5 rounded-full ${
@@ -546,7 +578,10 @@ export const Sidebar: React.FC = () => {
             {user && !isGuest ? (
               <button
                 type="button"
-                onClick={logout}
+                onClick={() => {
+                  logout();
+                  if (isMobile && onNavigate) onNavigate();
+                }}
                 className="p-2 rounded-lg text-neutral-500 hover:text-red-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
                 title="Log Out"
                 aria-label="Log Out"
@@ -556,7 +591,10 @@ export const Sidebar: React.FC = () => {
             ) : (
               <button
                 type="button"
-                onClick={() => logout()}
+                onClick={() => {
+                  logout();
+                  if (isMobile && onNavigate) onNavigate();
+                }}
                 className="p-2 rounded-lg text-[#335CFF] hover:bg-[#EBF1FF] dark:hover:bg-neutral-800 transition-colors cursor-pointer"
                 title="Sign In"
                 aria-label="Sign In"
@@ -586,7 +624,10 @@ export const Sidebar: React.FC = () => {
             {user && !isGuest ? (
               <button
                 type="button"
-                onClick={logout}
+                onClick={() => {
+                  logout();
+                  if (isMobile && onNavigate) onNavigate();
+                }}
                 className="flex items-center gap-1 text-xs text-neutral-500 hover:text-red-500 transition-colors cursor-pointer py-1 px-1.5 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800"
                 title="Log Out"
               >
@@ -596,7 +637,10 @@ export const Sidebar: React.FC = () => {
             ) : (
               <button
                 type="button"
-                onClick={() => logout()}
+                onClick={() => {
+                  logout();
+                  if (isMobile && onNavigate) onNavigate();
+                }}
                 className="text-xs text-[#335CFF] hover:underline font-medium cursor-pointer py-1 px-1.5"
               >
                 Sign In

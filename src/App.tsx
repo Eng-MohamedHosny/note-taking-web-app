@@ -8,7 +8,6 @@ import { Header } from './components/Header';
 import { NoteList } from './components/NoteList';
 import { NoteEditor } from './components/Editor/NoteEditor';
 import { SettingsView } from './components/Settings/SettingsView';
-import { BottomMenuBar } from './components/Navigation/BottomMenuBar';
 import { FloatingActionButton } from './components/Navigation/FloatingActionButton';
 import { TagsModal } from './components/Modals/TagsModal';
 import { FoldersModal } from './components/Modals/FoldersModal';
@@ -33,6 +32,7 @@ const MainLayout: React.FC = () => {
   } = useNotes();
 
   const [mobileView, setMobileView] = useState<'list' | 'editor'>('list');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
   const [isFoldersModalOpen, setIsFoldersModalOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
@@ -78,6 +78,7 @@ const MainLayout: React.FC = () => {
         {!isFocusMode && (
           <div className={mobileView === 'editor' ? 'hidden lg:block' : 'block'}>
             <Header
+              onOpenSidebar={() => setIsMobileSidebarOpen(true)}
               onOpenSettings={() => {
                 if (isSettingsView) {
                   setActiveView({ type: 'all' });
@@ -101,7 +102,11 @@ const MainLayout: React.FC = () => {
                   mobileView === 'list' ? 'flex' : 'hidden lg:flex'
                 }`}
               >
-                <NoteList onSelectMobileNote={() => setMobileView('editor')} />
+                <NoteList
+                  onSelectMobileNote={() => setMobileView('editor')}
+                  onOpenFoldersModal={() => setIsFoldersModalOpen(true)}
+                  onOpenTagsModal={() => setIsTagsModalOpen(true)}
+                />
               </div>
             )}
 
@@ -116,19 +121,26 @@ const MainLayout: React.FC = () => {
           </div>
         )}
 
-        {/* Mobile & Tablet Bottom Navigation Bar (Figma Tablet & Mobile specs) */}
-        {mobileView === 'list' && !isFocusMode && (
-          <BottomMenuBar
-            onOpenTagsModal={() => setIsTagsModalOpen(true)}
-            onOpenFoldersModal={() => setIsFoldersModalOpen(true)}
-          />
-        )}
-
         {/* Mobile & Tablet Floating Action Button (+ Create Note) */}
         {mobileView === 'list' && (
           <FloatingActionButton onClick={() => setMobileView('editor')} />
         )}
       </div>
+
+      {/* Mobile & Tablet Slide-Over Navigation Drawer */}
+      {isMobileSidebarOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
+          {/* Drawer content */}
+          <div className="relative w-[285px] max-w-[82vw] h-full bg-white dark:bg-[#0E121B] shadow-2xl z-10 flex flex-col">
+            <Sidebar isMobile onNavigate={() => setIsMobileSidebarOpen(false)} />
+          </div>
+        </div>
+      )}
 
       {/* Modals & Dialogs */}
       <TagsModal

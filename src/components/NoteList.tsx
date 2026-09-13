@@ -2,14 +2,20 @@ import React from 'react';
 import { useNotes } from '../context/NotesContext';
 import { NoteCard } from './NoteCard';
 import { NoteGridCard } from './NoteGridCard';
-import { DeleteIcon, SearchIcon, CrossIcon, GridViewIcon, ListViewIcon, TagIcon } from './Icons';
-import { Folder as FolderIcon } from 'lucide-react';
+import { DeleteIcon, SearchIcon, CrossIcon, GridViewIcon, ListViewIcon, TagIcon, ArchiveIcon } from './Icons';
+import { Folder as FolderIcon, ChevronDown, Plus } from 'lucide-react';
 
 interface NoteListProps {
   onSelectMobileNote?: () => void;
+  onOpenFoldersModal?: () => void;
+  onOpenTagsModal?: () => void;
 }
 
-export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
+export const NoteList: React.FC<NoteListProps> = ({
+  onSelectMobileNote,
+  onOpenFoldersModal,
+  onOpenTagsModal,
+}) => {
   const {
     filteredNotes,
     selectedNoteId,
@@ -17,6 +23,10 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
     startNewNote,
     isCreatingNewNote,
     activeView,
+    setActiveView,
+    allFolders,
+    allTags,
+    notes,
     searchQuery,
     setSearchQuery,
     emptyTrash,
@@ -137,6 +147,127 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
             )}
           </div>
         )}
+
+        {/* Mobile / Tablet Horizontal Navigation Chips (Replaces bottom bar) */}
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pt-3 pb-1 -mx-4 px-4 md:-mx-8 md:px-8 select-none">
+          {/* All Notes Pill */}
+          <button
+            type="button"
+            onClick={() => setActiveView({ type: 'all' })}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+              activeView.type === 'all'
+                ? 'bg-[#335CFF] text-white shadow-xs'
+                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700/60'
+            }`}
+          >
+            <span>All</span>
+            <span className="text-[10px] opacity-80">({notes.filter((n) => !n.isDeleted && !n.isArchived).length})</span>
+          </button>
+
+          {/* Folders Dropdown / Modal Trigger */}
+          <button
+            type="button"
+            onClick={() => onOpenFoldersModal?.()}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+              activeView.type === 'folder'
+                ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30'
+                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700/60'
+            }`}
+          >
+            <FolderIcon className="w-3.5 h-3.5 text-blue-500" />
+            <span>{activeView.type === 'folder' ? activeView.folder : 'Folders'}</span>
+            {activeView.type === 'folder' ? (
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveView({ type: 'all' });
+                }}
+                className="hover:text-red-500 p-0.5 ml-0.5 font-bold"
+              >
+                ✕
+              </span>
+            ) : (
+              <ChevronDown className="w-3 h-3 opacity-60" />
+            )}
+          </button>
+
+          {/* Tags Dropdown / Modal Trigger */}
+          <button
+            type="button"
+            onClick={() => onOpenTagsModal?.()}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+              activeView.type === 'tag'
+                ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30'
+                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700/60'
+            }`}
+          >
+            <TagIcon className="w-3.5 h-3.5 text-purple-500" />
+            <span>{activeView.type === 'tag' ? `#${activeView.tag}` : 'Tags'}</span>
+            {activeView.type === 'tag' ? (
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveView({ type: 'all' });
+                }}
+                className="hover:text-red-500 p-0.5 ml-0.5 font-bold"
+              >
+                ✕
+              </span>
+            ) : (
+              <ChevronDown className="w-3 h-3 opacity-60" />
+            )}
+          </button>
+
+          {/* Archive Pill */}
+          <button
+            type="button"
+            onClick={() => {
+              if (activeView.type === 'archived') {
+                setActiveView({ type: 'all' });
+              } else {
+                setActiveView({ type: 'archived' });
+              }
+            }}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+              activeView.type === 'archived'
+                ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/40'
+                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700/60'
+            }`}
+          >
+            <ArchiveIcon className="w-3.5 h-3.5 text-amber-500" />
+            <span>Archive</span>
+            {activeView.type === 'archived' && (
+              <span className="hover:text-red-500 p-0.5 ml-0.5 font-bold">✕</span>
+            )}
+          </button>
+
+          {/* Quick Folder Pills if available */}
+          {allFolders.map((f) => {
+            if (activeView.type === 'folder' && activeView.folder === f) return null;
+            return (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setActiveView({ type: 'folder', folder: f })}
+                className="px-2.5 py-1.5 rounded-full text-xs font-normal transition-all shrink-0 flex items-center gap-1.5 bg-neutral-100/70 dark:bg-neutral-800/60 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer border border-neutral-200/40 dark:border-neutral-700/40"
+              >
+                <FolderIcon className="w-3 h-3 text-neutral-400" />
+                <span>{f}</span>
+              </button>
+            );
+          })}
+
+          {/* Quick Create Folder Button */}
+          <button
+            type="button"
+            onClick={() => onOpenFoldersModal?.()}
+            className="px-2.5 py-1.5 rounded-full text-xs font-medium text-[#335CFF] hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all shrink-0 flex items-center gap-1 cursor-pointer border border-blue-200 dark:border-blue-900/50"
+            title="Create or manage folders"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>New Folder</span>
+          </button>
+        </div>
 
         {/* Mobile/Tablet Subtitle Text */}
         {searchQuery.trim() ? (

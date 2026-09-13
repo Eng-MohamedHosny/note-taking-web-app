@@ -2,13 +2,14 @@ import React from 'react';
 import { useNotes } from '../context/NotesContext';
 import { Logo } from './Logo';
 import { SearchIcon, SettingsIcon, CrossIcon, TagIcon } from './Icons';
-import { Folder as FolderIcon } from 'lucide-react';
+import { Folder as FolderIcon, Menu } from 'lucide-react';
 
 interface HeaderProps {
   onOpenSettings: () => void;
+  onOpenSidebar?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar }) => {
   const { activeView, searchQuery, setSearchQuery } = useNotes();
 
   const renderHeadingTitle = () => {
@@ -50,8 +51,19 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
     <header className="h-[54px] md:h-[74px] lg:h-[81px] px-4 md:px-8 border-b border-[#E0E4EA] dark:border-[#232530] bg-white dark:bg-[#0E121B] flex items-center justify-between gap-4 shrink-0">
       {/* Left: Heading Title (Desktop) or Brand Logo (Mobile/Tablet) */}
       <div className="flex items-center gap-3">
-        {/* Mobile/Tablet Logo matching Figma #2286:16015 / #2286:16124 */}
+        {/* Mobile/Tablet Menu Button & Logo */}
         <div className="flex items-center gap-2 lg:hidden">
+          {onOpenSidebar && (
+            <button
+              type="button"
+              onClick={onOpenSidebar}
+              className="p-1.5 -ml-1 text-[#525866] dark:text-[#99A0AE] hover:text-[#0E121B] dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg cursor-pointer transition-colors"
+              aria-label="Open sidebar menu"
+              title="Menu & Folders"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
           <Logo className="h-6 w-auto" />
         </div>
 
