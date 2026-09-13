@@ -68,7 +68,7 @@ const MainLayout: React.FC = () => {
   const isSettingsView = activeView.type === 'settings';
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-neutral-100 dark:bg-neutral-950 font-inherit">
+    <div className="flex h-dvh max-h-dvh w-screen overflow-hidden bg-neutral-100 dark:bg-neutral-950 font-inherit">
       {/* 1. Left Navigation Sidebar (Desktop 272px in Figma) */}
       {!isFocusMode && <Sidebar />}
 

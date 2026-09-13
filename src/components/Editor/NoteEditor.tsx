@@ -80,11 +80,9 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
     };
 
     vv.addEventListener('resize', handleViewportChange);
-    vv.addEventListener('scroll', handleViewportChange);
 
     return () => {
       vv.removeEventListener('resize', handleViewportChange);
-      vv.removeEventListener('scroll', handleViewportChange);
     };
   }, []);
 
@@ -479,7 +477,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
         style={{
           marginBottom: isMobileOrTablet && isToolbarActive ? `${keyboardOffset + 56}px` : '0px',
         }}
-        className={`flex-1 flex flex-col p-4 md:p-6 lg:p-8 overflow-y-auto transition-[margin] duration-100 h-full ${
+        className={`flex-1 min-h-0 flex flex-col p-4 md:p-6 lg:p-8 overflow-y-auto overscroll-contain ${
           isFocusMode ? 'max-w-4xl mx-auto w-full' : ''
         }`}
       >

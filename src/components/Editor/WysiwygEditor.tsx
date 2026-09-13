@@ -119,10 +119,15 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   }, [isColorPickerOpen]);
 
   const isUserTouchingRef = useRef(false);
+  const touchMovedRef = useRef(false);
 
   useEffect(() => {
     const handleTouchStart = () => {
       isUserTouchingRef.current = true;
+      touchMovedRef.current = false;
+    };
+    const handleTouchMove = () => {
+      touchMovedRef.current = true;
     };
     const handleTouchEnd = () => {
       setTimeout(() => {
@@ -131,11 +136,15 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     };
 
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
     window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
 
     return () => {
       window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchEnd);
     };
   }, []);
 
@@ -247,6 +256,8 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       }
     },
     editorProps: {
+      scrollThreshold: 0,
+      scrollMargin: 0,
       attributes: {
         class:
           'w-full flex-1 min-h-[300px] py-3 text-neutral-800 dark:text-neutral-200 text-sm md:text-base leading-relaxed focus:outline-hidden font-inherit',
@@ -797,7 +808,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       <div
         className="flex-1 flex flex-col min-h-full cursor-text"
         onClick={() => {
-          if (editor && !editor.isFocused) {
+          if (!touchMovedRef.current && editor && !editor.isFocused) {
             editor.commands.focus('end');
           }
         }}
@@ -809,13 +820,8 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
 
         {/* Generous in-flow bottom spacer: 75vh Notion-style scroll-past-end freedom */}
         <div
-          className="w-full shrink-0 min-h-[500px] h-[75vh] cursor-text select-none"
+          className="w-full shrink-0 min-h-[500px] h-[75vh] select-none pointer-events-none"
           aria-hidden="true"
-          onClick={() => {
-            if (editor) {
-              editor.commands.focus('end');
-            }
-          }}
         />
       </div>
 
