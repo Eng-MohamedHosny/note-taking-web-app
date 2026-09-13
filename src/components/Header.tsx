@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNotes } from '../context/NotesContext';
 import { Logo } from './Logo';
-import { SearchIcon, SettingsIcon, CrossIcon, TagIcon, ArrowLeftIcon } from './Icons';
+import { SearchIcon, SettingsIcon, CrossIcon, TagIcon } from './Icons';
 import { Folder as FolderIcon, Menu, CheckSquare } from 'lucide-react';
 
 interface HeaderProps {
@@ -110,12 +110,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar, o
 
   const isSearching = searchQuery.trim().length > 0;
 
-  const isNotRoot =
-    activeView.type !== 'all' ||
-    Boolean(activeFolder) ||
-    Boolean(activeTag) ||
-    isSearching;
-
   const handleBackToRoot = () => {
     clearFolder();
     clearTag();
@@ -131,7 +125,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar, o
     <header className="h-[54px] md:h-[74px] lg:h-[81px] px-4 md:px-8 border-b border-[#E0E4EA] dark:border-[#232530] bg-white dark:bg-[#0E121B] flex items-center justify-between gap-4 shrink-0">
       {/* Left: Heading Title (Desktop) or Brand Logo (Mobile/Tablet) */}
       <div className="flex items-center gap-3">
-        {/* Mobile/Tablet Menu Button, Back Button & Logo */}
+        {/* Mobile/Tablet Menu Button & Logo */}
         <div className="flex items-center gap-2 lg:hidden">
           {onOpenSidebar && (
             <button
@@ -142,19 +136,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar, o
               title="Menu & Folders"
             >
               <Menu className="w-5 h-5" />
-            </button>
-          )}
-
-          {isNotRoot && (
-            <button
-              type="button"
-              onClick={handleBackToRoot}
-              className="flex items-center gap-1.5 py-1 px-2.5 text-xs sm:text-sm font-semibold text-[#335CFF] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 border border-blue-200/70 dark:border-blue-800/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-lg transition-colors cursor-pointer shrink-0 active:scale-95"
-              title="Back to All Notes (Root Page)"
-              aria-label="Back to All Notes"
-            >
-              <ArrowLeftIcon className="w-3.5 h-3.5" />
-              <span>All Notes</span>
             </button>
           )}
 

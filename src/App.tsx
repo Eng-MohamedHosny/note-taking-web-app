@@ -184,10 +184,11 @@ const MainLayout: React.FC = () => {
           return;
         }
         setActiveView({ type: 'all' });
-      } else if (activeFolder || activeTag || searchQuery) {
+      } else if (activeFolder || activeTag || searchQuery || activeView.type !== 'all') {
         clearFolder();
         clearTag();
         setSearchQuery('');
+        setActiveView({ type: 'all' });
       }
 
       setTimeout(() => {
@@ -289,6 +290,15 @@ const MainLayout: React.FC = () => {
                   onSelectMobileNote={() => setMobileView('editor')}
                   onOpenFoldersModal={() => setIsFoldersModalOpen(true)}
                   onOpenTagsModal={() => setIsTagsModalOpen(true)}
+                  onBackToHome={() => {
+                    safeGoBack(() => {
+                      clearFolder();
+                      clearTag();
+                      setSearchQuery('');
+                      setActiveView({ type: 'all' });
+                      setMobileView('list');
+                    });
+                  }}
                 />
               </div>
             )}

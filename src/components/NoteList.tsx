@@ -14,6 +14,7 @@ import {
 import {
   Folder as FolderIcon,
   ChevronDown,
+  ChevronLeft,
   Plus,
   Pin,
   Download,
@@ -30,12 +31,14 @@ interface NoteListProps {
   onSelectMobileNote?: () => void;
   onOpenFoldersModal?: () => void;
   onOpenTagsModal?: () => void;
+  onBackToHome?: () => void;
 }
 
 export const NoteList: React.FC<NoteListProps> = ({
   onSelectMobileNote,
   onOpenFoldersModal,
   onOpenTagsModal,
+  onBackToHome,
 }) => {
   const {
     filteredNotes,
@@ -133,6 +136,22 @@ export const NoteList: React.FC<NoteListProps> = ({
 
   const isSearching = activeView.type === 'search' || searchQuery.trim().length > 0;
   const selectedNotesList = notes.filter((n) => selectedIds.has(n.id));
+
+  const isNotRoot =
+    activeView.type !== 'all' ||
+    Boolean(activeFolder) ||
+    Boolean(activeTag);
+
+  const handleBackToRoot = () => {
+    if (onBackToHome) {
+      onBackToHome();
+    } else {
+      clearFolder();
+      clearTag();
+      setSearchQuery('');
+      setActiveView({ type: 'all' });
+    }
+  };
 
   const renderHeadingTitle = () => {
     if (activeView.type === 'search') return 'Search';
@@ -272,9 +291,22 @@ export const NoteList: React.FC<NoteListProps> = ({
         {/* Mobile / Tablet Collapsible Top Section: Title & Search bar */}
         <div className="lg:hidden px-4 pt-5 pb-2 md:px-8 md:pt-6">
           <div className="flex items-center justify-between gap-3">
-            <h1 className="text-2xl font-bold text-[#0E121B] dark:text-white tracking-tight flex items-center">
-              {renderHeadingTitle()}
-            </h1>
+            <div className="flex items-center gap-2.5 min-w-0">
+              {isNotRoot && (
+                <button
+                  type="button"
+                  onClick={handleBackToRoot}
+                  className="w-9 h-9 rounded-xl border border-[#E0E4EA] dark:border-[#272B35] bg-[#F3F5F8] dark:bg-[#1A1D24] hover:bg-[#EBF1FF]/40 dark:hover:bg-[#232530] text-[#525866] dark:text-[#99A0AE] hover:text-[#0E121B] dark:hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0 active:scale-95"
+                  title="Back to All Notes"
+                  aria-label="Back to All Notes"
+                >
+                  <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
+                </button>
+              )}
+              <h1 className="text-2xl font-bold text-[#0E121B] dark:text-white tracking-tight flex items-center min-w-0 truncate">
+                {renderHeadingTitle()}
+              </h1>
+            </div>
 
             <div className="flex items-center gap-2 shrink-0">
               {/* Grid / List View Toggle for Mobile & Tablet */}
