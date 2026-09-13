@@ -298,7 +298,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-[#0E121B] overflow-hidden">
       {/* 1. Mobile/Tablet Top Bar Control - Apple Style */}
-      <div className="lg:hidden h-14 px-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between gap-2 bg-white dark:bg-neutral-900 shrink-0 relative">
+      <div className="lg:hidden h-14 px-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between gap-2 bg-white dark:bg-neutral-900 shrink-0 relative print:hidden">
         <div className="flex items-center gap-2 min-w-0">
           <button
             type="button"
@@ -370,7 +370,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
       </div>
 
       {/* 2. Desktop Top Actions Bar - Apple Style */}
-      <div className="hidden lg:flex items-center justify-between px-8 py-2.5 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-[#12141D]/60 shrink-0 relative">
+      <div className="hidden lg:flex items-center justify-between px-8 py-2.5 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-[#12141D]/60 shrink-0 relative print:hidden">
         <div className="flex items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
           {/* Folder Selector Pill */}
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-white dark:bg-neutral-800/80 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700/80 hover:border-neutral-300 transition-colors shadow-2xs">
@@ -496,7 +496,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
       {isMenuOpen && (
         <div
           ref={menuRef}
-          className="absolute right-4 top-13 lg:top-12 w-72 bg-white dark:bg-[#181B26] rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-neutral-900 dark:text-neutral-100 backdrop-blur-md"
+          className="absolute right-4 top-13 lg:top-12 w-72 bg-white dark:bg-[#181B26] rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-neutral-900 dark:text-neutral-100 backdrop-blur-md print:hidden"
         >
           {/* Note Info */}
           <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-neutral-100 dark:border-neutral-800/80 text-[11px] text-neutral-400">
@@ -749,18 +749,21 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
           isFocusMode ? 'max-w-4xl mx-auto w-full' : ''
         }`}
       >
-        {/* Title Input */}
+        {/* Title for Print & Screen */}
+        <h1 className="hidden print:block text-2xl md:text-3xl font-bold text-black mb-4 tracking-tight">
+          {title || 'Untitled Note'}
+        </h1>
         <input
           type="text"
           value={title}
           onChange={(e) => handleTitleChange(e.target.value)}
           placeholder="Note Title"
           dir="auto"
-          className="w-full text-2xl md:text-3xl font-bold bg-transparent border-none text-neutral-950 dark:text-white placeholder:text-neutral-300 dark:placeholder:text-neutral-600 focus:outline-hidden mb-2 tracking-tight"
+          className="print:hidden w-full text-2xl md:text-3xl font-bold bg-transparent border-none text-neutral-950 dark:text-white placeholder:text-neutral-300 dark:placeholder:text-neutral-600 focus:outline-hidden mb-2 tracking-tight"
         />
 
         {/* Minimal Micro Tags line */}
-        <div className="flex items-center gap-1.5 flex-wrap mb-2 text-xs">
+        <div className="flex items-center gap-1.5 flex-wrap mb-2 text-xs print:hidden">
           {currentTags.map((tag) => (
             <span
               key={tag}

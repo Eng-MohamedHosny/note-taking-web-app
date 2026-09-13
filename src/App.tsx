@@ -179,6 +179,10 @@ const MainLayout: React.FC = () => {
         setMobileView('list');
         selectNote(null);
       } else if (isSettingsView) {
+        // If we popped from a subtab back to the settings menu, do not close settings
+        if (window.history.state?.layer === 'settings') {
+          return;
+        }
         setActiveView({ type: 'all' });
       } else if (activeFolder || activeTag || searchQuery) {
         clearFolder();

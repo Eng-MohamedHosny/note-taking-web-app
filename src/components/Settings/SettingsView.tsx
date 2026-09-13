@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useNotes } from '../../context/NotesContext';
@@ -29,6 +29,38 @@ const ACCENT_OPTIONS: { id: AccentColor; name: string; hex: string; desc: string
   { id: 'amber', name: 'Sunset Amber', hex: '#F59E0B', desc: 'Warm & glowing' },
   { id: 'rose', name: 'Ruby Rose', hex: '#F43F5E', desc: 'Vivid & bold' },
   { id: 'teal', name: 'Aqua Teal', hex: '#14B8A6', desc: 'Balanced & sleek' },
+];
+
+const TAB_CONFIG: {
+  id: SettingsTab;
+  title: string;
+  desc: string;
+  icon: React.FC<{ className?: string }>;
+}[] = [
+  {
+    id: 'color',
+    title: 'Color Theme',
+    desc: 'Light, Dark, OLED, Notion & Accent colors',
+    icon: SunIcon,
+  },
+  {
+    id: 'font',
+    title: 'Font Theme',
+    desc: 'Sans-Serif, Serif, or Monospace typography',
+    icon: FontIcon,
+  },
+  {
+    id: 'password',
+    title: 'Change Password',
+    desc: 'Update your account security credentials',
+    icon: LockIcon,
+  },
+  {
+    id: 'data',
+    title: 'Data & Backup',
+    desc: 'Export notes (.json, .zip) & import backups',
+    icon: ({ className }) => <Database className={className} />,
+  },
 ];
 
 interface SettingsViewProps {
@@ -101,11 +133,45 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
     }
   };
 
+  // On mobile (<md), null means the user is on the Settings Menu overview.
+  // When set to a tab, the menu hides and the tab content is displayed from line 1 of the page.
+  const [mobileTab, setMobileTab] = useState<SettingsTab | null>(null);
+
+  const handleMobileSelectTab = (tab: SettingsTab) => {
+    handleTabChange(tab);
+    setMobileTab(tab);
+    if (window.history.state?.layer !== 'settings-subtab') {
+      window.history.pushState({ __notesApp: true, layer: 'settings-subtab' }, '');
+    }
+  };
+
+  const handleBackToSettingsMenu = () => {
+    if (window.history.state?.layer === 'settings-subtab') {
+      window.history.back();
+    } else {
+      setMobileTab(null);
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (mobileTab !== null) {
+        setMobileTab(null);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [mobileTab]);
+
   return (
     <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden bg-white dark:bg-neutral-950">
-      {/* Middle Column: Settings Menu (258px width in Figma) */}
-      <div className="w-full md:w-64.5 border-r border-neutral-200 dark:border-neutral-800 p-5 md:py-5 md:pl-8 md:pr-4 flex flex-col gap-2 shrink-0 bg-white dark:bg-neutral-900">
-        {/* Mobile & Tablet Back Button */}
+      {/* Middle Column: Settings Menu (Full screen on mobile when mobileTab === null, 258px on desktop) */}
+      <div
+        className={`w-full md:w-64.5 border-r border-neutral-200 dark:border-neutral-800 p-5 md:py-5 md:pl-8 md:pr-4 flex flex-col gap-2 shrink-0 bg-white dark:bg-neutral-900 ${
+          mobileTab !== null ? 'hidden md:flex' : 'flex'
+        }`}
+      >
+        {/* Mobile & Tablet Back to Notes Button */}
         <div className="md:hidden pb-3 mb-1 border-b border-neutral-200 dark:border-neutral-800">
           <button
             type="button"
@@ -117,73 +183,48 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
           </button>
         </div>
 
-        <button
-          onClick={() => handleTabChange('color')}
-          className={`w-full flex items-center justify-between p-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-            currentTab === 'color'
-              ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-950 dark:text-white font-semibold'
-              : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
-          }`}
-        >
-          <div className="flex items-center gap-2.5">
-            <SunIcon className={`w-5 h-5 ${currentTab === 'color' ? 'text-blue-500' : 'text-neutral-500 dark:text-neutral-400'}`} />
-            <span>Color Theme</span>
-          </div>
-          {currentTab === 'color' && (
-            <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
-          )}
-        </button>
+        {/* Mobile Header Title */}
+        <div className="md:hidden mb-1">
+          <h1 className="text-xl font-bold text-neutral-950 dark:text-white">Settings</h1>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+            Personalize your workspace and account
+          </p>
+        </div>
 
-        <button
-          onClick={() => handleTabChange('font')}
-          className={`w-full flex items-center justify-between p-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-            currentTab === 'font'
-              ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-950 dark:text-white font-semibold'
-              : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
-          }`}
-        >
-          <div className="flex items-center gap-2.5">
-            <FontIcon className={`w-5 h-5 ${currentTab === 'font' ? 'text-blue-500' : 'text-neutral-500 dark:text-neutral-400'}`} />
-            <span>Font Theme</span>
-          </div>
-          {currentTab === 'font' && (
-            <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
-          )}
-        </button>
-
-        <button
-          onClick={() => handleTabChange('password')}
-          className={`w-full flex items-center justify-between p-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-            currentTab === 'password'
-              ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-950 dark:text-white font-semibold'
-              : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
-          }`}
-        >
-          <div className="flex items-center gap-2.5">
-            <LockIcon className={`w-5 h-5 ${currentTab === 'password' ? 'text-blue-500' : 'text-neutral-500 dark:text-neutral-400'}`} />
-            <span>Change Password</span>
-          </div>
-          {currentTab === 'password' && (
-            <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
-          )}
-        </button>
-
-        <button
-          onClick={() => handleTabChange('data')}
-          className={`w-full flex items-center justify-between p-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-            currentTab === 'data'
-              ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-950 dark:text-white font-semibold'
-              : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
-          }`}
-        >
-          <div className="flex items-center gap-2.5">
-            <Database className={`w-5 h-5 ${currentTab === 'data' ? 'text-blue-500' : 'text-neutral-500 dark:text-neutral-400'}`} />
-            <span>Data & Backup</span>
-          </div>
-          {currentTab === 'data' && (
-            <ChevronRightIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400 shrink-0" />
-          )}
-        </button>
+        {/* Settings options */}
+        {TAB_CONFIG.map((item) => {
+          const isSelected = currentTab === item.id;
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              onClick={() => {
+                handleTabChange(item.id);
+                handleMobileSelectTab(item.id);
+              }}
+              className={`w-full flex items-center justify-between p-3 md:p-2 rounded-xl md:rounded-md text-sm font-medium transition-colors cursor-pointer text-left ${
+                isSelected
+                  ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-950 dark:text-white font-semibold'
+                  : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
+              }`}
+            >
+              <div className="flex items-center gap-3 md:gap-2.5 min-w-0">
+                <Icon
+                  className={`w-5 h-5 shrink-0 ${
+                    isSelected ? 'text-[#335CFF]' : 'text-neutral-500 dark:text-neutral-400'
+                  }`}
+                />
+                <div className="flex flex-col min-w-0">
+                  <span className="truncate">{item.title}</span>
+                  <span className="md:hidden text-[11px] text-neutral-500 dark:text-neutral-400 font-normal truncate">
+                    {item.desc}
+                  </span>
+                </div>
+              </div>
+              <ChevronRightIcon className="w-5 h-5 text-neutral-400 shrink-0 ml-2" />
+            </button>
+          );
+        })}
 
         <div className="h-px bg-neutral-200 dark:bg-neutral-800 my-1 w-full" />
 
@@ -192,18 +233,62 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
             logout();
             addToast('Logged out', 'info');
           }}
-          className="w-full flex items-center gap-2.5 p-2 rounded-md text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
+          className="w-full flex items-center gap-3 md:gap-2.5 p-3 md:p-2 rounded-xl md:rounded-md text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
         >
           <LogoutIcon className="w-5 h-5 text-neutral-500 dark:text-neutral-400" />
           <span>Logout</span>
         </button>
       </div>
 
-      {/* Main Content Area (528px width in Figma) */}
-      <div className="flex-1 px-6 pt-6 pb-36 md:px-8 md:pt-8 md:pl-12 lg:pb-12 overflow-y-auto">
-        <div className="max-w-[528px] w-full flex flex-col gap-6 pb-4">
-          {/* COLOR THEME TAB */}
-          {currentTab === 'color' && (
+      {/* Main Content Area (Full screen on mobile from line 1 when mobileTab !== null, 528px on desktop) */}
+      <div
+        className={`flex-1 flex flex-col h-full overflow-hidden bg-white dark:bg-neutral-950 ${
+          mobileTab === null ? 'hidden md:flex' : 'flex'
+        }`}
+      >
+        {/* Mobile Subtab Header with [< Settings] back button and quick pill switcher */}
+        <div className="md:hidden shrink-0 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800">
+          <div className="h-13 px-4 flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={handleBackToSettingsMenu}
+              className="flex items-center gap-1.5 text-sm font-semibold text-[#335CFF] hover:opacity-80 transition-opacity cursor-pointer active:scale-95"
+            >
+              <ArrowLeftIcon className="w-4 h-4" />
+              <span>Settings</span>
+            </button>
+            <span className="text-sm font-semibold text-neutral-950 dark:text-white">
+              {TAB_CONFIG.find((t) => t.id === currentTab)?.title}
+            </span>
+          </div>
+
+          {/* Quick horizontal switcher pills */}
+          <div className="flex items-center gap-1.5 px-4 pb-2.5 overflow-x-auto scrollbar-none">
+            {TAB_CONFIG.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => {
+                  handleTabChange(t.id);
+                  setMobileTab(t.id);
+                }}
+                className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 transition-colors cursor-pointer ${
+                  currentTab === t.id
+                    ? 'bg-[#335CFF] text-white shadow-xs'
+                    : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                }`}
+              >
+                {t.title}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Scrollable Tab Content: Starts right at the top on mobile! */}
+        <div className="flex-1 px-4 pt-4 pb-32 md:px-8 md:pt-8 md:pl-12 lg:pb-12 overflow-y-auto">
+          <div className="max-w-[528px] w-full flex flex-col gap-6 pb-4">
+            {/* COLOR THEME TAB */}
+            {currentTab === 'color' && (
             <>
               <div className="flex flex-col gap-1">
                 <h2 className="text-base font-semibold text-neutral-950 dark:text-white">
@@ -679,5 +764,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
         </div>
       </div>
     </div>
+  </div>
   );
 };

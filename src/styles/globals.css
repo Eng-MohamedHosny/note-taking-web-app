@@ -520,3 +520,96 @@ html.notion-dark .dark\:hover\:bg-neutral-800\/40:hover {
   will-change: transform, opacity, filter;
 }
 
+/* Print optimization: only note title and content, deep black text, preserved colors, zero clutter */
+@media print {
+  @page {
+    margin: 15mm 20mm;
+    size: auto;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide app chrome, navigations, sidebars, headers, dialogs, buttons */
+  nav,
+  header,
+  aside,
+  button,
+  .no-print,
+  .toast-container,
+  [role="dialog"],
+  [aria-modal="true"],
+  [data-sidebar],
+  #floating-action-button,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Hide NoteList sidebar so only the editor prints */
+  .note-list-container,
+  [class*="lg:w-[290px]"] {
+    display: none !important;
+  }
+
+  /* Reset layout constraints to allow natural pagination */
+  #root,
+  .h-dvh,
+  .max-h-dvh,
+  .overflow-hidden,
+  .overflow-y-auto {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    display: block !important;
+    position: static !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  #note-editor-scroll-container {
+    padding: 10px 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    max-width: 100% !important;
+  }
+
+  .ProseMirror {
+    color: #000000 !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    padding: 0 !important;
+  }
+
+  .ProseMirror p {
+    color: inherit;
+    margin-bottom: 10px !important;
+  }
+
+  .ProseMirror h1,
+  .ProseMirror h2,
+  .ProseMirror h3,
+  .ProseMirror h4 {
+    color: #000000 !important;
+  }
+
+  /* Keep custom inline colored text and highlights */
+  .ProseMirror [style*="color"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .ProseMirror mark {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+

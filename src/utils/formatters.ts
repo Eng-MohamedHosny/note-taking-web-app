@@ -347,13 +347,6 @@ export async function exportAllToZip(notes: Note[]): Promise<void> {
 }
 
 export function exportToPrint(note: Note) {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) return;
-
-  const tagsHtml = note.tags.length
-    ? `<span class="tags">${note.tags.map((t) => `<span class="tag">#${escapeHtml(t)}</span>`).join(' ')}</span>`
-    : '';
-
   // Clean excessive empty paragraphs from TipTap HTML
   const cleanedContent = (note.content || '')
     .replace(/(<p><\/p>\s*){2,}/gi, '<p></p>')
@@ -361,69 +354,64 @@ export function exportToPrint(note: Note) {
 
   const html = `
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
       <head>
         <meta charset="utf-8" />
-        <title>${escapeHtml(note.title)}</title>
+        <title>${escapeHtml(note.title || 'Untitled Note')}</title>
         <style>
           @media print {
-            @page { margin: 15mm; }
-            body { padding: 0 !important; max-width: 100% !important; }
+            @page {
+              margin: 15mm 20mm;
+              size: auto;
+            }
+            body {
+              padding: 0 !important;
+              max-width: 100% !important;
+            }
           }
-          * { box-sizing: border-box; }
+          * {
+            box-sizing: border-box;
+          }
           body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            color: #111827;
-            max-width: 760px;
+            color: #000000;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 32px 24px;
-            line-height: 1.5;
+            padding: 28px 20px;
+            line-height: 1.6;
             font-size: 14px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background: #ffffff;
           }
           h1.doc-title {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 700;
-            margin: 0 0 6px 0;
-            color: #0E121B;
+            margin: 0 0 16px 0;
+            color: #000000;
             letter-spacing: -0.01em;
-          }
-          .meta {
-            font-size: 12px;
-            color: #6B7280;
-            margin-bottom: 18px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #E5E7EB;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 12px;
-          }
-          .tags { display: inline-flex; flex-wrap: wrap; gap: 4px; }
-          .tag {
-            background: #F3F4F6;
-            border: 1px solid #E5E7EB;
-            padding: 1px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            color: #374151;
+            word-break: break-word;
           }
           .content {
             font-size: 14px;
-            line-height: 1.5;
-            color: #1F2937;
+            line-height: 1.6;
+            color: #000000;
+            word-break: break-word;
           }
           .content p {
-            margin: 0 0 8px 0;
+            margin: 0 0 10px 0;
+            color: inherit;
           }
           .content p:last-child {
             margin-bottom: 0;
           }
-          .content h1 { font-size: 20px; font-weight: 700; margin: 16px 0 6px 0; }
-          .content h2 { font-size: 17px; font-weight: 600; margin: 14px 0 4px 0; }
-          .content h3 { font-size: 15px; font-weight: 600; margin: 12px 0 4px 0; }
+          .content h1 { font-size: 20px; font-weight: 700; margin: 18px 0 8px 0; color: #000000; }
+          .content h2 { font-size: 17px; font-weight: 700; margin: 16px 0 6px 0; color: #000000; }
+          .content h3 { font-size: 15px; font-weight: 600; margin: 14px 0 4px 0; color: #000000; }
           .content ul, .content ol {
-            margin: 0 0 10px 0;
-            padding-left: 22px;
+            margin: 0 0 12px 0;
+            padding-left: 24px;
+            color: #000000;
           }
           .content li {
             margin-bottom: 4px;
@@ -433,20 +421,21 @@ export function exportToPrint(note: Note) {
           }
           .content blockquote {
             border-left: 3px solid #335CFF;
-            padding-left: 10px;
-            margin: 8px 0;
-            color: #4B5563;
+            padding-left: 12px;
+            margin: 12px 0;
+            color: #222222;
             font-style: italic;
           }
           .content pre {
             background: #F9FAFB;
             border: 1px solid #E5E7EB;
-            padding: 8px 12px;
+            padding: 10px 14px;
             border-radius: 6px;
             font-family: monospace;
             font-size: 12px;
-            margin: 8px 0;
+            margin: 10px 0;
             overflow-x: auto;
+            color: #000000;
           }
           .content code {
             background: #F3F4F6;
@@ -454,33 +443,45 @@ export function exportToPrint(note: Note) {
             border-radius: 3px;
             font-family: monospace;
             font-size: 12px;
+            color: #000000;
           }
           .content img {
             max-width: 100%;
             height: auto;
-            border-radius: 6px;
-            margin: 8px 0;
+            border-radius: 4px;
+            margin: 10px 0;
+          }
+          /* Ensure text with explicit color styles retains its color */
+          [style*="color"] {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          mark {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
         </style>
       </head>
       <body>
         <h1 class="doc-title">${escapeHtml(note.title || 'Untitled Note')}</h1>
-        <div class="meta">
-          <span>Last Edited: ${formatDate(note.lastEdited)}</span>
-          ${note.folder ? `<span>Folder: ${escapeHtml(note.folder)}</span>` : ''}
-          ${tagsHtml}
-        </div>
         <div class="content">${cleanedContent}</div>
       </body>
     </html>
   `;
+
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    // If pop-up blocked on mobile browser, fallback to window.print()
+    window.print();
+    return;
+  }
 
   printWindow.document.write(html);
   printWindow.document.close();
   printWindow.focus();
   setTimeout(() => {
     printWindow.print();
-  }, 300);
+  }, 350);
 }
 
 export interface ParsedImportResult {
