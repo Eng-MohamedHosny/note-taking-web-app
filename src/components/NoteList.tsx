@@ -64,11 +64,13 @@ export const NoteList: React.FC<NoteListProps> = ({
     setViewMode,
     batchDeleteNotes,
     batchArchiveNotes,
+    isSelectionMode,
+    selectedIds,
+    setIsSelectionMode,
+    toggleSelectNote,
+    selectAllNotes,
+    clearSelection,
   } = useNotes();
-
-  // Multi-selection state
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Bulk modals state
   const [isBulkTagOpen, setIsBulkTagOpen] = useState(false);
@@ -81,17 +83,27 @@ export const NoteList: React.FC<NoteListProps> = ({
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const lastScrollTop = useRef(0);
 
-  // Clear selection when view changes
+  // Reset collapse on view change
   useEffect(() => {
-    setSelectedIds(new Set());
-    setIsSelectionMode(false);
     setIsCollapsed(false);
   }, [activeView, activeFolder, activeTag]);
+
+  // Escape key cancels selection mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isSelectionMode) {
+        e.preventDefault();
+        clearSelection();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSelectionMode, clearSelection]);
 
   // Handle note selection or check toggle
   const handleSelect = (id: string) => {
     if (isSelectionMode) {
-      handleToggleCheck(id);
+      toggleSelectNote(id);
       return;
     }
     selectNote(id);
@@ -100,24 +112,14 @@ export const NoteList: React.FC<NoteListProps> = ({
     }
   };
 
-  const handleToggleCheck = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
+  // Long press on mobile touch screen triggers selection mode!
+  const handleLongPress = (id: string) => {
+    setIsSelectionMode(true);
+    toggleSelectNote(id);
   };
 
   const handleToggleSelectAll = () => {
-    if (selectedIds.size === filteredNotes.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(filteredNotes.map((n) => n.id)));
-    }
+    selectAllNotes();
   };
 
   const handleCreateNew = () => {
@@ -131,15 +133,13 @@ export const NoteList: React.FC<NoteListProps> = ({
     const ids = Array.from(selectedIds);
     const shouldArchive = activeView.type !== 'archived';
     batchArchiveNotes(ids, shouldArchive);
-    setSelectedIds(new Set());
-    setIsSelectionMode(false);
+    clearSelection();
   };
 
   const handleBulkDeleteConfirm = () => {
     const ids = Array.from(selectedIds);
     batchDeleteNotes(ids);
-    setSelectedIds(new Set());
-    setIsSelectionMode(false);
+    clearSelection();
   };
 
   // Scroll listener for collapsing header animation
@@ -226,24 +226,6 @@ export const NoteList: React.FC<NoteListProps> = ({
             </h1>
 
             <div className="flex items-center gap-2 shrink-0">
-              {/* Select Mode Toggle Button (Mobile/Tablet) */}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSelectionMode((prev) => !prev);
-                  setSelectedIds(new Set());
-                }}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer border ${
-                  isSelectionMode
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                    : 'bg-[#F3F5F8] dark:bg-[#1A1D24] text-[#525866] dark:text-[#99A0AE] border-[#E0E4EA] dark:border-[#2B303B] hover:text-[#0E121B] dark:hover:text-white'
-                }`}
-                title={isSelectionMode ? 'Cancel selection' : 'Select notes'}
-              >
-                <CheckSquare className="w-3.5 h-3.5" />
-                <span>{isSelectionMode ? 'Cancel' : 'Select'}</span>
-              </button>
-
               {/* Grid / List View Toggle for Mobile & Tablet */}
               <div className="flex items-center p-0.5 rounded-lg border border-[#E0E4EA] dark:border-[#2B303B] bg-[#F3F5F8] dark:bg-[#1A1D24] shrink-0">
                 <button
@@ -557,24 +539,6 @@ export const NoteList: React.FC<NoteListProps> = ({
           </button>
         )}
 
-        {/* Desktop Select Mode Button */}
-        <button
-          type="button"
-          onClick={() => {
-            setIsSelectionMode((prev) => !prev);
-            setSelectedIds(new Set());
-          }}
-          className={`h-[44px] px-3 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shrink-0 ${
-            isSelectionMode
-              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-              : 'bg-[#F3F5F8] dark:bg-[#1A1D24] text-[#525866] dark:text-[#99A0AE] border-[#E0E4EA] dark:border-[#2B303B] hover:text-[#0E121B] dark:hover:text-white'
-          }`}
-          title={isSelectionMode ? 'Exit select mode' : 'Select multiple notes'}
-        >
-          <CheckSquare className="w-4 h-4" />
-          <span>{isSelectionMode ? 'Done' : 'Select'}</span>
-        </button>
-
         {/* Desktop Grid / List View Toggle */}
         <div className="flex items-center p-0.5 rounded-lg border border-[#E0E4EA] dark:border-[#2B303B] bg-[#F3F5F8] dark:bg-[#1A1D24] shrink-0">
           <button
@@ -632,10 +596,7 @@ export const NoteList: React.FC<NoteListProps> = ({
             <span className="text-neutral-300 dark:text-neutral-700">|</span>
             <button
               type="button"
-              onClick={() => {
-                setIsSelectionMode(false);
-                setSelectedIds(new Set());
-              }}
+              onClick={clearSelection}
               className="font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 cursor-pointer"
             >
               Cancel
@@ -718,7 +679,8 @@ export const NoteList: React.FC<NoteListProps> = ({
                   onSelect={() => handleSelect(note.id)}
                   isSelectionMode={isSelectionMode}
                   isChecked={selectedIds.has(note.id)}
-                  onToggleCheck={() => handleToggleCheck(note.id)}
+                  onToggleCheck={() => toggleSelectNote(note.id)}
+                  onLongPress={() => handleLongPress(note.id)}
                 />
               </div>
             ))}
@@ -734,7 +696,8 @@ export const NoteList: React.FC<NoteListProps> = ({
                 onSelect={() => handleSelect(note.id)}
                 isSelectionMode={isSelectionMode}
                 isChecked={selectedIds.has(note.id)}
-                onToggleCheck={() => handleToggleCheck(note.id)}
+                onToggleCheck={() => toggleSelectNote(note.id)}
+                onLongPress={() => handleLongPress(note.id)}
               />
             ))}
           </div>
@@ -811,10 +774,7 @@ export const NoteList: React.FC<NoteListProps> = ({
           {/* Done button */}
           <button
             type="button"
-            onClick={() => {
-              setIsSelectionMode(false);
-              setSelectedIds(new Set());
-            }}
+            onClick={clearSelection}
             className="px-3 py-2 rounded-xl text-xs font-bold bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 transition cursor-pointer"
           >
             Done
@@ -829,20 +789,14 @@ export const NoteList: React.FC<NoteListProps> = ({
         isOpen={isBulkTagOpen}
         onClose={() => setIsBulkTagOpen(false)}
         selectedIds={Array.from(selectedIds)}
-        onComplete={() => {
-          setSelectedIds(new Set());
-          setIsSelectionMode(false);
-        }}
+        onComplete={clearSelection}
       />
 
       <BulkFolderModal
         isOpen={isBulkFolderOpen}
         onClose={() => setIsBulkFolderOpen(false)}
         selectedIds={Array.from(selectedIds)}
-        onComplete={() => {
-          setSelectedIds(new Set());
-          setIsSelectionMode(false);
-        }}
+        onComplete={clearSelection}
       />
 
       <BulkDeleteModal

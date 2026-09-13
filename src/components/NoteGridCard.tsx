@@ -11,6 +11,7 @@ interface NoteGridCardProps {
   isSelectionMode?: boolean;
   isChecked?: boolean;
   onToggleCheck?: () => void;
+  onLongPress?: () => void;
 }
 
 export const NoteGridCard: React.FC<NoteGridCardProps> = ({
@@ -20,15 +21,58 @@ export const NoteGridCard: React.FC<NoteGridCardProps> = ({
   isSelectionMode = false,
   isChecked = false,
   onToggleCheck,
+  onLongPress,
 }) => {
   const { togglePinNote } = useNotes();
+  const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isLongPressActiveRef = React.useRef(false);
+  const touchStartPosRef = React.useRef<{ x: number; y: number } | null>(null);
 
   const handlePinClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     togglePinNote(note.id);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (isSelectionMode) return;
+    isLongPressActiveRef.current = false;
+    const touch = e.touches[0];
+    touchStartPosRef.current = { x: touch.clientX, y: touch.clientY };
+
+    timerRef.current = setTimeout(() => {
+      isLongPressActiveRef.current = true;
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try {
+          navigator.vibrate(40);
+        } catch (_) {}
+      }
+      onLongPress?.();
+    }, 450);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartPosRef.current || !timerRef.current) return;
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - touchStartPosRef.current.x);
+    const dy = Math.abs(touch.clientY - touchStartPosRef.current.y);
+    if (dx > 8 || dy > 8) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
   const handleClick = () => {
+    if (isLongPressActiveRef.current) {
+      isLongPressActiveRef.current = false;
+      return;
+    }
     if (isSelectionMode) {
       if (onToggleCheck) onToggleCheck();
       else onSelect();
@@ -37,11 +81,23 @@ export const NoteGridCard: React.FC<NoteGridCardProps> = ({
     }
   };
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (!isSelectionMode && onLongPress) {
+      e.preventDefault();
+      onLongPress();
+    }
+  };
+
   return (
     <div
       role="button"
       tabIndex={0}
       onClick={handleClick}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
+      onContextMenu={handleContextMenu}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();

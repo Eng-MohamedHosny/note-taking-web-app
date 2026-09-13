@@ -53,6 +53,13 @@ interface NotesContextType {
   batchArchiveNotes: (ids: string[], archive: boolean) => void;
   batchMoveToFolder: (ids: string[], folder?: string) => void;
   batchAddTag: (ids: string[], tag: string) => void;
+  isSelectionMode: boolean;
+  selectedIds: Set<string>;
+  setIsSelectionMode: (val: boolean) => void;
+  toggleSelectionMode: () => void;
+  toggleSelectNote: (id: string) => void;
+  selectAllNotes: () => void;
+  clearSelection: () => void;
   importNotes: (importedNotes: Note[], strategy: ImportStrategy, extraFolders?: string[]) => { added: number; updated: number };
   addToast: (message: string, type?: 'success' | 'info' | 'error') => void;
   removeToast: (id: string) => void;
@@ -507,6 +514,51 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   }, [notes, activeView, searchQuery]);
 
+  // Multi-selection state
+  const [isSelectionMode, setIsSelectionMode] = useState<boolean>(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const toggleSelectionMode = () => {
+    setIsSelectionMode((prev) => {
+      if (prev) {
+        setSelectedIds(new Set());
+      }
+      return !prev;
+    });
+  };
+
+  const toggleSelectNote = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const selectAllNotes = () => {
+    setSelectedIds((prev) => {
+      if (prev.size === filteredNotes.length && filteredNotes.length > 0) {
+        return new Set();
+      }
+      return new Set(filteredNotes.map((n) => n.id));
+    });
+  };
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+    setIsSelectionMode(false);
+  };
+
+  // Reset selection mode whenever active view changes
+  useEffect(() => {
+    setSelectedIds(new Set());
+    setIsSelectionMode(false);
+  }, [activeView]);
+
   const selectedNote = useMemo(() => {
     if (isCreatingNewNote) return null;
     return notes.find((n) => n.id === selectedNoteId) || null;
@@ -930,6 +982,13 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         batchArchiveNotes,
         batchMoveToFolder,
         batchAddTag,
+        isSelectionMode,
+        selectedIds,
+        setIsSelectionMode,
+        toggleSelectionMode,
+        toggleSelectNote,
+        selectAllNotes,
+        clearSelection,
         importNotes,
         addToast,
         removeToast,

@@ -2,7 +2,7 @@ import React from 'react';
 import { useNotes } from '../context/NotesContext';
 import { Logo } from './Logo';
 import { SearchIcon, SettingsIcon, CrossIcon, TagIcon, ArrowLeftIcon } from './Icons';
-import { Folder as FolderIcon, Menu } from 'lucide-react';
+import { Folder as FolderIcon, Menu, CheckSquare } from 'lucide-react';
 
 interface HeaderProps {
   onOpenSettings: () => void;
@@ -20,6 +20,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar, o
     searchQuery,
     setSearchQuery,
     setActiveView,
+    isSelectionMode,
+    toggleSelectionMode,
+    selectedIds,
   } = useNotes();
 
   const renderHeadingTitle = () => {
@@ -179,8 +182,30 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings, onOpenSidebar, o
         </h1>
       </div>
 
-      {/* Right: Search Field (300px in Figma) + Settings Button (42x42px) */}
-      <div className="flex items-center gap-4">
+      {/* Right: Select Button (Desktop) + Search Field (300px) + Settings Button (42x42px) */}
+      <div className="flex items-center gap-3">
+        {/* Desktop Select Mode Button */}
+        {activeView.type !== 'settings' && (
+          <button
+            type="button"
+            onClick={toggleSelectionMode}
+            className={`hidden lg:flex items-center gap-2 h-[44px] px-3.5 rounded-lg text-sm font-semibold border transition-all cursor-pointer select-none shrink-0 ${
+              isSelectionMode
+                ? 'bg-blue-600 text-white border-blue-600 shadow-xs hover:bg-blue-700'
+                : 'bg-[#F3F5F8] dark:bg-[#1A1D24] text-[#525866] dark:text-[#CACFD8] border-[#E0E4EA] dark:border-[#2B303B] hover:text-[#0E121B] dark:hover:text-white hover:bg-neutral-200/60 dark:hover:bg-neutral-700/60'
+            }`}
+            title={isSelectionMode ? 'Exit note selection' : 'Select multiple notes'}
+          >
+            <CheckSquare className={`w-4 h-4 ${isSelectionMode ? 'text-white' : 'text-blue-500'}`} />
+            <span>{isSelectionMode ? 'Done' : 'Select'}</span>
+            {isSelectionMode && selectedIds.size > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-white text-blue-600 font-bold leading-none">
+                {selectedIds.size}
+              </span>
+            )}
+          </button>
+        )}
+
         {/* Desktop Header Search Field matching Figma #2165:11967 */}
         <div className="relative w-full max-w-[300px] hidden lg:block">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
