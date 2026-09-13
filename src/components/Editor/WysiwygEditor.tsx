@@ -118,8 +118,32 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     };
   }, [isColorPickerOpen]);
 
+  const isUserTouchingRef = useRef(false);
+
+  useEffect(() => {
+    const handleTouchStart = () => {
+      isUserTouchingRef.current = true;
+    };
+    const handleTouchEnd = () => {
+      setTimeout(() => {
+        isUserTouchingRef.current = false;
+      }, 350);
+    };
+
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, []);
+
   const keepCursorVisible = () => {
+    if (isUserTouchingRef.current) return;
+
     requestAnimationFrame(() => {
+      if (isUserTouchingRef.current) return;
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0) return;
 
@@ -133,21 +157,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       }
 
       const rect = range.getBoundingClientRect();
-      const hasValidRect = rect.height > 0 || rect.width > 0 || rect.top > 0;
-
-      // Calculate toolbar top barrier
-      let toolbarTop = window.innerHeight;
-      if (isMobileOrTabletRef.current && toolbarRef.current) {
-        const tbRect = toolbarRef.current.getBoundingClientRect();
-        if (tbRect.top > 0) {
-          toolbarTop = tbRect.top;
-        }
-      } else if (window.visualViewport) {
-        toolbarTop = window.visualViewport.offsetTop + window.visualViewport.height;
-      }
-
-      // Keep safe clearance of 90px above toolbar
-      const safeBottom = toolbarTop - 90;
+      const hasValidRect = (rect.height > 0 || rect.width > 0) && rect.top > 0;
 
       const cursorBottom = hasValidRect
         ? rect.bottom
@@ -163,16 +173,14 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
 
       if (scrollContainer) {
         const containerRect = scrollContainer.getBoundingClientRect();
-        // Notion-style centered typing: keeps active line at ~40% of visible container height
-        // leaving the lower ~60% as a massive empty cushion below the typing line!
-        const targetY = containerRect.top + containerRect.height * 0.40;
-        const safeBottom = containerRect.top + containerRect.height * 0.52;
+        // Only adjust if cursor is dangerously close to the toolbar (within 50px of bottom)
+        const barrierBottom = containerRect.bottom - 50;
 
-        if (cursorBottom > safeBottom && cursorBottom > 0) {
-          const scrollNeeded = cursorBottom - targetY;
+        if (cursorBottom > barrierBottom && cursorBottom > 0) {
+          const scrollNeeded = cursorBottom - (containerRect.bottom - 120);
           scrollContainer.scrollBy({ top: scrollNeeded, behavior: 'instant' as ScrollBehavior });
-        } else if (cursorTop < containerRect.top + 25 && cursorTop > 0) {
-          const scrollNeeded = cursorTop - (containerRect.top + 50);
+        } else if (cursorTop < containerRect.top + 20 && cursorTop > 0) {
+          const scrollNeeded = cursorTop - (containerRect.top + 40);
           scrollContainer.scrollBy({ top: scrollNeeded, behavior: 'instant' as ScrollBehavior });
         }
       }
@@ -221,7 +229,6 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     },
     onFocus: () => {
       setIsEditorFocused(true);
-      keepCursorVisible();
     },
     onBlur: ({ event }) => {
       if (isInteractingWithToolbarRef.current || isColorPickerOpen) return;
@@ -237,7 +244,6 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     onSelectionUpdate: ({ editor: ed }) => {
       if (ed.isFocused) {
         setIsEditorFocused(true);
-        keepCursorVisible();
       }
     },
     editorProps: {
@@ -331,17 +337,12 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
       const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
       setKeyboardOffset(offset);
       keyboardOffsetRef.current = offset;
-      if (editor?.isFocused) {
-        setTimeout(keepCursorVisible, 80);
-      }
     };
 
     vv.addEventListener('resize', handleViewportChange);
-    vv.addEventListener('scroll', handleViewportChange);
 
     return () => {
       vv.removeEventListener('resize', handleViewportChange);
-      vv.removeEventListener('scroll', handleViewportChange);
     };
   }, []);
 
