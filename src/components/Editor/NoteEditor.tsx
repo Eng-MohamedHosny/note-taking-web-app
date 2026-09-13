@@ -474,6 +474,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
 
       {/* 3. Main Content Body */}
       <div
+        id="note-editor-scroll-container"
         style={{
           scrollPaddingBottom: isMobileOrTablet ? `${keyboardOffset + 140}px` : '120px',
           paddingBottom: isMobileOrTablet ? `${Math.max(300, keyboardOffset + 260)}px` : '160px',
@@ -618,7 +619,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
         </div>
 
         {/* 4. TipTap WYSIWYG Editor */}
-        <div className="flex-1 flex flex-col min-h-full h-full">
+        <div className="flex-1 flex flex-col min-h-full">
           <WysiwygEditor
             content={content}
             onChange={handleContentChange}
