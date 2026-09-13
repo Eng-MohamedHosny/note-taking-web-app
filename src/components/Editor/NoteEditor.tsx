@@ -70,6 +70,41 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
 
+  // Virtual keyboard and responsive tracking for scroll padding
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
+
+  useEffect(() => {
+    const checkWidth = () => {
+      setIsMobileOrTablet(window.innerWidth < 1024);
+    };
+    checkWidth();
+    window.addEventListener('resize', checkWidth);
+    return () => window.removeEventListener('resize', checkWidth);
+  }, []);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const handleViewportChange = () => {
+      if (window.innerWidth >= 1024) {
+        setKeyboardOffset(0);
+        return;
+      }
+      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      setKeyboardOffset(offset);
+    };
+
+    vv.addEventListener('resize', handleViewportChange);
+    vv.addEventListener('scroll', handleViewportChange);
+
+    return () => {
+      vv.removeEventListener('resize', handleViewportChange);
+      vv.removeEventListener('scroll', handleViewportChange);
+    };
+  }, []);
+
   // Synchronize state when selectedNote or mode changes
   useEffect(() => {
     if (isCreatingNewNote) {
@@ -648,8 +683,11 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
 
       {/* 3. Main Content Body - Apple Minimalist (Zero wasted space) */}
       <div
-        style={{ scrollPaddingBottom: '160px' }}
-        className={`flex-1 flex flex-col p-4 md:p-6 lg:p-8 pb-[45vh] overflow-y-auto transition-all h-full ${
+        style={{
+          scrollPaddingBottom: isMobileOrTablet ? `${keyboardOffset + 140}px` : '120px',
+          paddingBottom: isMobileOrTablet ? `${Math.max(300, keyboardOffset + 260)}px` : '160px',
+        }}
+        className={`flex-1 flex flex-col p-4 md:p-6 lg:p-8 overflow-y-auto transition-all h-full ${
           isFocusMode ? 'max-w-4xl mx-auto w-full' : ''
         }`}
       >
