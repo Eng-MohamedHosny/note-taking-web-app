@@ -90,22 +90,27 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
   const isInteractingWithToolbarRef = useRef(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
+  const colorButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!isColorPickerOpen) return;
-    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+    const handleClickOutside = (event: Event) => {
+      const target = event.target as Node;
       if (
         colorPickerRef.current &&
-        !colorPickerRef.current.contains(event.target as Node)
+        !colorPickerRef.current.contains(target) &&
+        colorButtonRef.current &&
+        !colorButtonRef.current.contains(target)
       ) {
         setIsColorPickerOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
+    const timer = setTimeout(() => {
+      document.addEventListener('pointerdown', handleClickOutside);
+    }, 60);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
+      clearTimeout(timer);
+      document.removeEventListener('pointerdown', handleClickOutside);
     };
   }, [isColorPickerOpen]);
 
@@ -170,7 +175,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     editorProps: {
       attributes: {
         class:
-          'w-full min-h-[360px] py-3 text-neutral-800 dark:text-neutral-200 text-sm leading-relaxed focus:outline-hidden font-inherit',
+          'w-full flex-1 min-h-full py-3 pb-32 text-neutral-800 dark:text-neutral-200 text-sm md:text-base leading-relaxed focus:outline-hidden font-inherit',
       },
       handlePaste: (view, event) => {
         const items = Array.from(event.clipboardData?.items || []);
@@ -300,23 +305,36 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     chain.run();
   };
 
+  const handleSelectColor = (colorValue: string) => {
+    if (editor) {
+      editor.chain().focus().setColor(colorValue).run();
+    }
+    setIsColorPickerOpen(false);
+  };
+
+  const handleResetColor = () => {
+    if (editor) {
+      editor.chain().focus().unsetColor().run();
+    }
+    setIsColorPickerOpen(false);
+  };
+
   const showMobileToolbar = isEditorFocused || isImageModalOpen || isColorPickerOpen;
   const isToolbarVisible = !isMobileOrTablet || showMobileToolbar;
 
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="flex flex-col w-full h-full flex-1 relative">
       {/* Formatting Toolbar: On desktop sticky top, on phones/tablets active ONLY when cursor is focused and docked on top of keyboard */}
       <div
         ref={toolbarRef}
         style={isMobileOrTablet ? { bottom: `${keyboardOffset}px` } : undefined}
-        onPointerDown={(e) => {
+        onPointerDown={() => {
           isInteractingWithToolbarRef.current = true;
-          e.preventDefault();
         }}
         onPointerUp={() => {
           setTimeout(() => {
             isInteractingWithToolbarRef.current = false;
-          }, 200);
+          }, 300);
         }}
         className={`fixed lg:sticky z-40 lg:z-10 items-center gap-1.5 lg:gap-0.5 px-3 py-2 lg:py-1.5 bg-white/95 dark:bg-[#12141D]/95 lg:bg-neutral-50/90 lg:dark:bg-[#161822]/90 backdrop-blur-md lg:backdrop-blur-xs border-t lg:border border-neutral-200 dark:border-neutral-800 lg:rounded-lg mb-0 lg:mb-3 shadow-lg lg:shadow-2xs overflow-x-auto lg:overflow-x-visible lg:flex-wrap scrollbar-none touch-pan-x select-none ${
           isToolbarVisible ? 'flex bottom-0 lg:top-0 left-0 right-0' : 'hidden'
@@ -380,7 +398,7 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
 
         <div className="w-px h-5 lg:h-4 bg-neutral-200 dark:bg-neutral-800 shrink-0 mx-1" />
 
-        {/* Inline styles */}
+        {/* Text Formats */}
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
@@ -431,12 +449,19 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
           <Code className="w-4 h-4 lg:w-3.5 lg:h-3.5 shrink-0" />
         </button>
 
-        {/* Color Circle Button & Palette */}
-        <div className="relative shrink-0 flex items-center" ref={colorPickerRef}>
+        {/* Color Circle Button */}
+        <div className="relative shrink-0 flex items-center">
           <button
+            ref={colorButtonRef}
             type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => setIsColorPickerOpen((prev) => !prev)}
+            onPointerDown={(e) => {
+              isInteractingWithToolbarRef.current = true;
+              e.stopPropagation();
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsColorPickerOpen((prev) => !prev);
+            }}
             className={`p-2 lg:p-1.5 rounded-lg lg:rounded-md transition-colors cursor-pointer text-xs flex items-center justify-center shrink-0 select-none ${
               isColorPickerOpen || editor.getAttributes('textStyle').color
                 ? 'bg-[#335CFF]/15 text-[#335CFF] font-semibold dark:bg-[#335CFF]/25 dark:text-[#335CFF]'
@@ -461,77 +486,6 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
               )}
             </span>
           </button>
-
-          {/* Color Palette Popover */}
-          {isColorPickerOpen && (
-            <div
-              onPointerDown={(e) => {
-                isInteractingWithToolbarRef.current = true;
-                e.preventDefault();
-              }}
-              className="absolute z-50 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 bottom-full mb-2 lg:bottom-auto lg:top-full lg:mt-2 p-3 bg-white dark:bg-[#1C1F2E] border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-xl w-60 select-none"
-            >
-              <div className="flex items-center justify-between pb-2 mb-2 border-b border-neutral-100 dark:border-neutral-800">
-                <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
-                  Text Color
-                </span>
-                {editor.getAttributes('textStyle').color && (
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => {
-                      editor.chain().focus().unsetColor().run();
-                      setIsColorPickerOpen(false);
-                    }}
-                    className="text-[11px] text-neutral-500 hover:text-red-500 dark:hover:text-red-400 font-medium transition-colors cursor-pointer"
-                  >
-                    Reset
-                  </button>
-                )}
-              </div>
-
-              {/* Grid of preset color circles */}
-              <div className="grid grid-cols-4 gap-2 mb-3">
-                {PRESET_COLORS.map((preset) => {
-                  const currentColor = editor.getAttributes('textStyle').color;
-                  const isSelected = currentColor?.toLowerCase() === preset.value.toLowerCase();
-                  return (
-                    <button
-                      key={preset.value}
-                      type="button"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => {
-                        editor.chain().focus().setColor(preset.value).run();
-                        setIsColorPickerOpen(false);
-                      }}
-                      title={preset.name}
-                      className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform hover:scale-110 active:scale-95 cursor-pointer relative shadow-xs ${
-                        isSelected ? 'ring-2 ring-offset-2 ring-[#335CFF] dark:ring-offset-[#1C1F2E]' : ''
-                      }`}
-                      style={{ backgroundColor: preset.value }}
-                    >
-                      {isSelected && (
-                        <Check className="w-3.5 h-3.5 text-white drop-shadow-sm" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Custom Color Picker input */}
-              <label className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700/80 hover:bg-neutral-50 dark:hover:bg-neutral-800/60 cursor-pointer text-xs text-neutral-600 dark:text-neutral-300 transition-colors">
-                <input
-                  type="color"
-                  value={editor.getAttributes('textStyle').color || '#335CFF'}
-                  onChange={(e) => {
-                    editor.chain().focus().setColor(e.target.value).run();
-                  }}
-                  className="w-5 h-5 rounded-full border-0 p-0 cursor-pointer bg-transparent"
-                />
-                <span className="font-medium text-[11px]">Custom Color</span>
-              </label>
-            </div>
-          )}
         </div>
 
         {/* Alignment & RTL Text Direction Controls */}
@@ -671,16 +625,107 @@ export const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
         </button>
       </div>
 
-      {/* Editor Content Area */}
+      {/* Color Palette Popover (Outside toolbar to eliminate overflow clipping on phone & tablet) */}
+      {isColorPickerOpen && (
+        <div
+          ref={colorPickerRef}
+          onPointerDown={(e) => {
+            isInteractingWithToolbarRef.current = true;
+            e.stopPropagation();
+          }}
+          style={
+            isMobileOrTablet
+              ? { bottom: `${keyboardOffset + 54}px` }
+              : {
+                  top: toolbarRef.current
+                    ? `${toolbarRef.current.offsetTop + toolbarRef.current.offsetHeight + 4}px`
+                    : '48px',
+                  left: colorButtonRef.current
+                    ? `${Math.max(16, colorButtonRef.current.offsetLeft - 80)}px`
+                    : '160px',
+                }
+          }
+          className={`z-50 p-3 bg-white dark:bg-[#1C1F2E] border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl w-64 select-none animate-in fade-in zoom-in-95 duration-150 ${
+            isMobileOrTablet ? 'fixed left-1/2 -translate-x-1/2' : 'absolute'
+          }`}
+        >
+          <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-neutral-100 dark:border-neutral-800">
+            <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+              Text Color
+            </span>
+            {editor.getAttributes('textStyle').color && (
+              <button
+                type="button"
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleResetColor();
+                }}
+                onClick={handleResetColor}
+                className="text-[11px] text-neutral-500 hover:text-red-500 dark:hover:text-red-400 font-medium transition-colors cursor-pointer"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+
+          {/* Grid of preset color circles */}
+          <div className="grid grid-cols-4 gap-2.5 mb-3">
+            {PRESET_COLORS.map((preset) => {
+              const currentColor = editor.getAttributes('textStyle').color;
+              const isSelected = currentColor?.toLowerCase() === preset.value.toLowerCase();
+              return (
+                <button
+                  key={preset.value}
+                  type="button"
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSelectColor(preset.value);
+                  }}
+                  onClick={() => handleSelectColor(preset.value)}
+                  title={preset.name}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-110 active:scale-90 cursor-pointer relative shadow-sm shrink-0 ${
+                    isSelected ? 'ring-2 ring-offset-2 ring-[#335CFF] dark:ring-offset-[#1C1F2E]' : ''
+                  }`}
+                  style={{ backgroundColor: preset.value }}
+                >
+                  {isSelected && (
+                    <Check className="w-4 h-4 text-white drop-shadow-sm" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Custom Color Picker input */}
+          <label className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700/80 hover:bg-neutral-50 dark:hover:bg-neutral-800/60 cursor-pointer text-xs text-neutral-600 dark:text-neutral-300 transition-colors">
+            <input
+              type="color"
+              value={editor.getAttributes('textStyle').color || '#335CFF'}
+              onChange={(e) => {
+                editor.chain().focus().setColor(e.target.value).run();
+              }}
+              className="w-5 h-5 rounded-full border-0 p-0 cursor-pointer bg-transparent"
+            />
+            <span className="font-medium text-[11px]">Custom Color</span>
+          </label>
+        </div>
+      )}
+
+      {/* Editor Content Area - Expanded to full page height */}
       <div
-        className="flex-1 overflow-y-auto cursor-text"
+        className="flex-1 flex flex-col h-full min-h-full cursor-text"
         onClick={() => {
           if (editor && !editor.isFocused) {
             editor.commands.focus('end');
           }
         }}
       >
-        <EditorContent editor={editor} />
+        <EditorContent
+          editor={editor}
+          className="flex-1 flex flex-col h-full min-h-full [&>.tiptap]:h-full [&>.tiptap]:min-h-full [&>.tiptap]:flex-1"
+        />
       </div>
 
       {/* Image Upload / Insert Modal */}
