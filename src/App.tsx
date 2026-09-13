@@ -28,6 +28,8 @@ const MainLayout: React.FC = () => {
     restoreNote,
     deleteNote,
     openSettingsTab,
+    isFocusMode,
+    setFocusMode,
   } = useNotes();
 
   const [mobileView, setMobileView] = useState<'list' | 'editor'>('list');
@@ -43,6 +45,11 @@ const MainLayout: React.FC = () => {
   // Global keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFocusMode) {
+        e.preventDefault();
+        setFocusMode(false);
+        return;
+      }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsCommandPaletteOpen((prev) => !prev);
@@ -56,27 +63,29 @@ const MainLayout: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [startNewNote]);
+  }, [startNewNote, isFocusMode, setFocusMode]);
 
   const isSettingsView = activeView.type === 'settings';
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-neutral-100 dark:bg-neutral-950 font-inherit">
       {/* 1. Left Navigation Sidebar (Desktop 272px in Figma) */}
-      <Sidebar />
+      {!isFocusMode && <Sidebar />}
 
       {/* 2. Main Work Area */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* Top Header (81px height in Figma) */}
-        <Header
-          onOpenSettings={() => {
-            if (isSettingsView) {
-              setActiveView({ type: 'all' });
-            } else {
-              openSettingsTab('color');
-            }
-          }}
-        />
+        {!isFocusMode && (
+          <Header
+            onOpenSettings={() => {
+              if (isSettingsView) {
+                setActiveView({ type: 'all' });
+              } else {
+                openSettingsTab('color');
+              }
+            }}
+          />
+        )}
 
         {/* Dynamic Body: Either Settings View OR Notes Split View */}
         {isSettingsView ? (
@@ -84,18 +93,20 @@ const MainLayout: React.FC = () => {
         ) : (
           <div className="flex-1 flex overflow-hidden relative">
             {/* NoteList (290px in Figma Desktop, full on mobile list view) */}
-            <div
-              className={`w-full lg:w-[290px] h-full ${
-                mobileView === 'list' ? 'flex' : 'hidden lg:flex'
-              }`}
-            >
-              <NoteList onSelectMobileNote={() => setMobileView('editor')} />
-            </div>
+            {!isFocusMode && (
+              <div
+                className={`w-full lg:w-[290px] h-full ${
+                  mobileView === 'list' ? 'flex' : 'hidden lg:flex'
+                }`}
+              >
+                <NoteList onSelectMobileNote={() => setMobileView('editor')} />
+              </div>
+            )}
 
             {/* NoteEditor (Main center area, full on mobile editor view) */}
             <div
               className={`flex-1 h-full ${
-                mobileView === 'editor' ? 'flex' : 'hidden lg:flex'
+                mobileView === 'editor' || isFocusMode ? 'flex' : 'hidden lg:flex'
               }`}
             >
               <NoteEditor onBackToList={() => setMobileView('list')} />
@@ -104,7 +115,7 @@ const MainLayout: React.FC = () => {
         )}
 
         {/* Mobile & Tablet Bottom Navigation Bar (Figma Tablet & Mobile specs) */}
-        {mobileView === 'list' && (
+        {mobileView === 'list' && !isFocusMode && (
           <BottomMenuBar
             onOpenTagsModal={() => setIsTagsModalOpen(true)}
             onOpenFoldersModal={() => setIsFoldersModalOpen(true)}

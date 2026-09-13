@@ -13,7 +13,7 @@ import {
   ClockIcon,
   StatusIcon,
 } from '../Icons';
-import { Folder as FolderIcon, Plus, Check } from 'lucide-react';
+import { Folder as FolderIcon, Plus, Check, Maximize2, Minimize2, ChevronDown, X } from 'lucide-react';
 
 interface NoteEditorProps {
   onBackToList?: () => void;
@@ -30,11 +30,15 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
     activeView,
     allFolders,
     createFolder,
+    isFocusMode,
+    toggleFocusMode,
+    setFocusMode,
   } = useNotes();
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [tagsInput, setTagsInput] = useState('');
+  const [newTagInput, setNewTagInput] = useState('');
   const [folder, setFolder] = useState<string>('');
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -165,6 +169,9 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
 
   const handleBack = () => {
     flushSave();
+    if (isFocusMode) {
+      setFocusMode(false);
+    }
     if (onBackToList) {
       onBackToList();
     }
@@ -181,6 +188,30 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
       isDirtyRef.current = true;
       setSaveStatus('saving');
     }
+  };
+
+  const currentTags = tagsInput
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    const updated = currentTags.filter((t) => t !== tagToRemove);
+    setTagsInput(updated.join(', '));
+    isDirtyRef.current = true;
+    setSaveStatus('saving');
+  };
+
+  const handleAddTag = (newTag: string) => {
+    const trimmed = newTag.trim().replace(/^#/, '');
+    if (!trimmed) return;
+    if (!currentTags.includes(trimmed)) {
+      const updated = [...currentTags, trimmed];
+      setTagsInput(updated.join(', '));
+      isDirtyRef.current = true;
+      setSaveStatus('saving');
+    }
+    setNewTagInput('');
   };
 
   if (!selectedNote && !isCreatingNewNote) {
@@ -227,6 +258,19 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
               </>
             )}
           </div>
+
+          <button
+            type="button"
+            onClick={toggleFocusMode}
+            className={`p-1.5 rounded-md cursor-pointer transition-colors ${
+              isFocusMode
+                ? 'bg-[#335CFF] text-white'
+                : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+            }`}
+            title={isFocusMode ? 'Exit Fullscreen / Focus Mode (Esc)' : 'Expand Note (Focus Mode)'}
+          >
+            {isFocusMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
 
           {selectedNote && (
             <>
@@ -300,6 +344,30 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
             )}
           </div>
 
+          {/* Expand / Focus Mode Button */}
+          <button
+            type="button"
+            onClick={toggleFocusMode}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer select-none ${
+              isFocusMode
+                ? 'bg-[#335CFF] text-white border-[#335CFF] shadow-xs'
+                : 'border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-200'
+            }`}
+            title={isFocusMode ? 'Exit Fullscreen / Focus Mode (Esc)' : 'Expand Note (Focus Mode)'}
+          >
+            {isFocusMode ? (
+              <>
+                <Minimize2 className="w-3.5 h-3.5" />
+                <span>Exit Focus</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span>Expand</span>
+              </>
+            )}
+          </button>
+
           {selectedNote && !isCreatingNewNote && (
             <>
               <div className="w-px h-4 bg-neutral-200 dark:border-neutral-800 mx-0.5" />
@@ -370,7 +438,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
       </div>
 
       {/* 3. Main Content Body */}
-      <div className="flex-1 flex flex-col p-6 md:p-8 pb-24 lg:pb-8 overflow-y-auto">
+      <div className={`flex-1 flex flex-col p-4 md:p-8 pb-24 lg:pb-8 overflow-y-auto transition-all ${isFocusMode ? 'max-w-4xl mx-auto w-full' : ''}`}>
         {/* Title Input */}
         <input
           type="text"
@@ -378,112 +446,131 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
           onChange={(e) => handleTitleChange(e.target.value)}
           placeholder="Enter a title…"
           dir="auto"
-          className="w-full text-2xl font-bold bg-transparent border-none text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden mb-4 tracking-tight"
+          className="w-full text-2xl md:text-3xl font-bold bg-transparent border-none text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden mb-3 tracking-tight"
         />
 
-        {/* Properties Container */}
-        <div className="flex flex-col gap-2.5 pb-4 mb-4 border-b border-neutral-200 dark:border-neutral-800 text-sm">
-          {/* Folder Row */}
-          <div className="flex items-center gap-2">
-            <div className="w-[115px] flex items-center gap-1.5 shrink-0 text-neutral-600 dark:text-neutral-400">
-              <FolderIcon className="w-4 h-4 text-blue-500" />
-              <span>Folder</span>
-            </div>
-
-            {isCreatingFolder ? (
-              <form onSubmit={handleCreateNewFolder} className="flex items-center gap-1.5">
-                <input
-                  type="text"
-                  autoFocus
-                  value={newFolderName}
-                  onChange={(e) => setNewFolderName(e.target.value)}
-                  placeholder="New folder name…"
-                  className="px-2 py-1 text-xs rounded border border-neutral-300 dark:border-neutral-700 bg-transparent text-neutral-950 dark:text-white focus:outline-hidden focus:border-[#335CFF]"
-                />
-                <button
-                  type="submit"
-                  className="p-1 rounded bg-[#335CFF] text-white hover:bg-blue-600 cursor-pointer"
-                  title="Save folder"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsCreatingFolder(false);
-                    setNewFolderName('');
-                  }}
-                  className="px-2 py-1 text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </form>
-            ) : (
-              <div className="flex items-center gap-2 flex-wrap">
-                <select
-                  value={folder}
-                  onChange={(e) => handleFolderChange(e.target.value)}
-                  className="px-2.5 py-1 text-xs rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:outline-hidden focus:border-[#335CFF] cursor-pointer"
-                >
-                  <option value="">(No Folder / General)</option>
-                  {allFolders.map((f) => (
-                    <option key={f} value={f}>
-                      {f}
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  type="button"
-                  onClick={() => setIsCreatingFolder(true)}
-                  className="flex items-center gap-1 text-xs text-[#335CFF] hover:underline cursor-pointer py-0.5 px-1"
-                >
-                  <Plus className="w-3 h-3" />
-                  <span>New Folder</span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Tags Row */}
-          <div className="flex items-center gap-2">
-            <div className="w-[115px] flex items-center gap-1.5 shrink-0 text-neutral-600 dark:text-neutral-400">
-              <TagIcon className="w-4 h-4" />
-              <span>Tags</span>
-            </div>
-            <input
-              type="text"
-              value={tagsInput}
-              onChange={(e) => handleTagsChange(e.target.value)}
-              placeholder="Add tags separated by commas (e.g. Work, Planning)"
-              dir="auto"
-              className="flex-1 text-sm bg-transparent border-none text-neutral-950 dark:text-white placeholder:text-neutral-400 focus:outline-hidden"
-            />
-          </div>
-
-          {/* Status Row */}
-          {isArchived && (
-            <div className="flex items-center gap-2">
-              <div className="w-[115px] flex items-center gap-1.5 shrink-0 text-neutral-600 dark:text-neutral-400">
-                <StatusIcon className="w-4 h-4" />
-                <span>Status</span>
-              </div>
-              <span className="text-xs px-2 py-0.5 rounded bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-medium">
-                Archived
-              </span>
+        {/* Compact Metadata Chips Bar (Inline Folder + Tags + Status) */}
+        <div className="flex items-center gap-2 flex-wrap pb-3 mb-4 border-b border-neutral-200/80 dark:border-neutral-800 text-xs">
+          {/* Folder Pill */}
+          {isCreatingFolder ? (
+            <form onSubmit={handleCreateNewFolder} className="inline-flex items-center gap-1">
+              <input
+                type="text"
+                autoFocus
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                placeholder="Folder name…"
+                className="px-2 py-0.5 text-xs rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:outline-hidden focus:border-[#335CFF] w-28"
+              />
+              <button
+                type="submit"
+                className="p-1 rounded bg-[#335CFF] text-white hover:bg-blue-600 cursor-pointer"
+                title="Save Folder"
+              >
+                <Check className="w-3 h-3" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCreatingFolder(false);
+                  setNewFolderName('');
+                }}
+                className="p-1 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 cursor-pointer"
+                title="Cancel"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </form>
+          ) : (
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-neutral-100 dark:bg-neutral-800/90 text-neutral-700 dark:text-neutral-300 border border-neutral-200/80 dark:border-neutral-700/80 hover:border-neutral-300 dark:hover:border-neutral-600 transition-colors">
+              <FolderIcon className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+              <select
+                value={folder}
+                onChange={(e) => {
+                  if (e.target.value === '__NEW__') {
+                    setIsCreatingFolder(true);
+                  } else {
+                    handleFolderChange(e.target.value);
+                  }
+                }}
+                className="bg-transparent border-none text-xs text-neutral-800 dark:text-neutral-200 font-medium focus:outline-hidden cursor-pointer pr-1"
+              >
+                <option value="" className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">
+                  No Folder
+                </option>
+                {allFolders.map((f) => (
+                  <option key={f} value={f} className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">
+                    {f}
+                  </option>
+                ))}
+                <option value="__NEW__" className="bg-white dark:bg-neutral-900 text-blue-600 dark:text-blue-400 font-semibold">
+                  + New Folder…
+                </option>
+              </select>
             </div>
           )}
 
-          {isTrash && (
-            <div className="flex items-center gap-2">
-              <div className="w-[115px] flex items-center gap-1.5 shrink-0 text-neutral-600 dark:text-neutral-400">
-                <DeleteIcon className="w-4 h-4 text-red-500" />
-                <span>Status</span>
-              </div>
-              <span className="text-xs px-2 py-0.5 rounded bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 font-medium">
-                Trash (Deleted)
+          <div className="w-[1px] h-3.5 bg-neutral-200 dark:bg-neutral-800 self-center hidden sm:block" />
+
+          {/* Tags Chips */}
+          <div className="inline-flex items-center gap-1.5 flex-wrap">
+            {currentTags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-100 dark:bg-neutral-800/80 text-neutral-600 dark:text-neutral-300 border border-neutral-200/60 dark:border-neutral-700/60 group"
+              >
+                <span className="text-neutral-400 dark:text-neutral-500 font-mono">#</span>
+                <span>{tag}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveTag(tag)}
+                  className="text-neutral-400 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer ml-0.5"
+                  title={`Remove ${tag}`}
+                >
+                  <X className="w-3 h-3" />
+                </button>
               </span>
+            ))}
+
+            {/* Inline tag input */}
+            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-dashed border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-500 focus-within:border-[#335CFF] focus-within:ring-1 focus-within:ring-[#335CFF]/30 transition-all">
+              <span className="text-neutral-400 dark:text-neutral-500 text-xs">#</span>
+              <input
+                type="text"
+                value={newTagInput}
+                onChange={(e) => setNewTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    handleAddTag(newTagInput);
+                  } else if (e.key === 'Backspace' && !newTagInput && currentTags.length > 0) {
+                    handleRemoveTag(currentTags[currentTags.length - 1]);
+                  }
+                }}
+                onBlur={() => {
+                  if (newTagInput.trim()) {
+                    handleAddTag(newTagInput);
+                  }
+                }}
+                placeholder="Add tag…"
+                className="text-xs bg-transparent border-none text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-hidden w-16 focus:w-24 transition-all"
+              />
             </div>
+          </div>
+
+          {/* Status Badges */}
+          {isArchived && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100/80 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 ml-auto sm:ml-0">
+              <StatusIcon className="w-3 h-3" />
+              <span>Archived</span>
+            </span>
+          )}
+
+          {isTrash && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100/80 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200/60 dark:border-red-800/60 ml-auto sm:ml-0">
+              <DeleteIcon className="w-3 h-3" />
+              <span>Trash</span>
+            </span>
           )}
         </div>
 

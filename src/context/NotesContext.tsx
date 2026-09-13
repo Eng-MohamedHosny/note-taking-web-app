@@ -17,8 +17,11 @@ interface NotesContextType {
   allTags: string[];
   allFolders: string[];
   filteredNotes: Note[];
+  isFocusMode: boolean;
   
   // Actions
+  toggleFocusMode: () => void;
+  setFocusMode: (val: boolean) => void;
   selectNote: (id: string | null) => void;
   setActiveView: (view: ActiveView) => void;
   setViewMode: (mode: ViewMode) => void;
@@ -100,6 +103,8 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem('notes_view_mode', mode);
   };
   const [isCreatingNewNote, setIsCreatingNewNote] = useState<boolean>(false);
+  const [isFocusMode, setIsFocusMode] = useState<boolean>(false);
+  const toggleFocusMode = () => setIsFocusMode((prev) => !prev);
   const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'local'>('local');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
@@ -559,6 +564,9 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         allTags,
         allFolders,
         filteredNotes,
+        isFocusMode,
+        toggleFocusMode,
+        setFocusMode: setIsFocusMode,
         selectNote,
         setActiveView,
         setViewMode,
