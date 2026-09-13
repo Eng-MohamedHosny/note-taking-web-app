@@ -117,6 +117,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setActiveViewState({ type: 'folder', folder });
     }
     setSearchQuery('');
+    setSelectedNoteId(null);
   };
 
   const selectTag = (tag: string) => {
@@ -126,6 +127,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setActiveViewState({ type: 'tag', tag });
     }
     setSearchQuery('');
+    setSelectedNoteId(null);
   };
 
   const clearFolder = () => {
@@ -134,6 +136,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } else {
       setActiveViewState({ type: 'all' });
     }
+    setSelectedNoteId(null);
   };
 
   const clearTag = () => {
@@ -142,6 +145,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } else {
       setActiveViewState({ type: 'all' });
     }
+    setSelectedNoteId(null);
   };
 
   const setActiveView = (view: ActiveView) => {
@@ -149,6 +153,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (view.type !== 'search') {
       setSearchQuery('');
     }
+    setSelectedNoteId(null);
   };
 
   const [viewMode, setViewModeState] = useState<ViewMode>(() => {
@@ -208,11 +213,9 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             return n;
           });
           setNotes(upgradedCloudNotes);
-          setSelectedNoteId(upgradedCloudNotes[0].id);
         } else {
           // New user with 0 notes in Supabase: give them only the single initial welcome note
           setNotes(INITIAL_NOTES);
-          setSelectedNoteId(INITIAL_NOTES[0].id);
           INITIAL_NOTES.forEach((note) => {
             upsertCloudNote(note, user.id);
           });
@@ -223,7 +226,6 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Guest mode: ensure single welcome note if prev held old dummy dataset
       setNotes((prev) => {
         if (prev.some((n) => n.id === 'note-1' || n.title === 'React Performance Optimization')) {
-          setSelectedNoteId(INITIAL_NOTES[0].id);
           return INITIAL_NOTES;
         }
         return prev.map((n) => {

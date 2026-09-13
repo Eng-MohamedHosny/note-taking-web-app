@@ -78,8 +78,114 @@ html[data-font-theme="monospace"] {
 
 /* Focus rings styled cleanly as per Figma */
 *:focus-visible {
-  outline: 2px solid #335CFF;
+  outline: 2px solid var(--accent-color, #335CFF);
   outline-offset: 2px;
+}
+
+/* Dynamic Accent Color System */
+:root {
+  --accent-color: #335CFF;
+  --accent-color-hover: #2547D0;
+  --accent-color-light: #EBF1FF;
+}
+
+html[data-accent="blue"],
+html:not([data-accent]) {
+  --color-blue-500: #335CFF;
+  --color-blue-600: #2547D0;
+  --color-blue-700: #1D3BB9;
+  --color-blue-100: #EBF1FF;
+  --accent-color: #335CFF;
+  --accent-color-hover: #2547D0;
+  --accent-color-light: #EBF1FF;
+}
+
+html[data-accent="purple"] {
+  --color-blue-500: #8B5CF6;
+  --color-blue-600: #7C3AED;
+  --color-blue-700: #6D28D9;
+  --color-blue-100: #EDE9FE;
+  --accent-color: #8B5CF6;
+  --accent-color-hover: #7C3AED;
+  --accent-color-light: #EDE9FE;
+}
+
+html[data-accent="emerald"] {
+  --color-blue-500: #10B981;
+  --color-blue-600: #059669;
+  --color-blue-700: #047857;
+  --color-blue-100: #D1FAE5;
+  --accent-color: #10B981;
+  --accent-color-hover: #059669;
+  --accent-color-light: #D1FAE5;
+}
+
+html[data-accent="amber"] {
+  --color-blue-500: #F59E0B;
+  --color-blue-600: #D97706;
+  --color-blue-700: #B45309;
+  --color-blue-100: #FEF3C7;
+  --accent-color: #F59E0B;
+  --accent-color-hover: #D97706;
+  --accent-color-light: #FEF3C7;
+}
+
+html[data-accent="rose"] {
+  --color-blue-500: #F43F5E;
+  --color-blue-600: #E11D48;
+  --color-blue-700: #BE123C;
+  --color-blue-100: #FFE4E6;
+  --accent-color: #F43F5E;
+  --accent-color-hover: #E11D48;
+  --accent-color-light: #FFE4E6;
+}
+
+html[data-accent="teal"] {
+  --color-blue-500: #14B8A6;
+  --color-blue-600: #0D9488;
+  --color-blue-700: #0F766E;
+  --color-blue-100: #CCFBF1;
+  --accent-color: #14B8A6;
+  --accent-color-hover: #0D9488;
+  --accent-color-light: #CCFBF1;
+}
+
+/* Ensure hardcoded arbitrary Tailwind classes for #335CFF respond to accent */
+html[data-accent]:not([data-accent="blue"]) .bg-\[\#335CFF\] {
+  background-color: var(--accent-color) !important;
+}
+html[data-accent]:not([data-accent="blue"]) .text-\[\#335CFF\] {
+  color: var(--accent-color) !important;
+}
+html[data-accent]:not([data-accent="blue"]) .border-\[\#335CFF\] {
+  border-color: var(--accent-color) !important;
+}
+html[data-accent]:not([data-accent="blue"]) .fill-\[\#335CFF\] {
+  fill: var(--accent-color) !important;
+}
+html[data-accent]:not([data-accent="blue"]) .ring-\[\#335CFF\] {
+  --tw-ring-color: var(--accent-color) !important;
+}
+html[data-accent]:not([data-accent="blue"]) .focus\:border-\[\#335CFF\]:focus {
+  border-color: var(--accent-color) !important;
+}
+html[data-accent]:not([data-accent="blue"]) .hover\:text-\[\#335CFF\]:hover {
+  color: var(--accent-color) !important;
+}
+html[data-accent]:not([data-accent="blue"]) .hover\:bg-blue-600:hover {
+  background-color: var(--accent-color-hover) !important;
+}
+html[data-accent]:not([data-accent="blue"]) .bg-\[\#EBF1FF\] {
+  background-color: var(--accent-color-light) !important;
+}
+html[data-accent]:not([data-accent="blue"]) [class*="bg-[#335CFF]/"] {
+  background-color: color-mix(in srgb, var(--accent-color) 18%, transparent) !important;
+}
+html[data-accent]:not([data-accent="blue"]) [class*="ring-[#335CFF]"] {
+  --tw-ring-color: color-mix(in srgb, var(--accent-color) 40%, transparent) !important;
+}
+html[data-accent]:not([data-accent="blue"]) [class*="border-[#335CFF]/"] {
+  border-color: color-mix(in srgb, var(--accent-color) 25%, transparent) !important;
 }
 
 /* Extra Dark (OLED Pure Black) Mode */

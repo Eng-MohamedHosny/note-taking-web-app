@@ -13,6 +13,7 @@ export interface Note {
 
 export type ColorTheme = 'light' | 'dark' | 'extra-dark' | 'notion-dark' | 'system';
 export type FontTheme = 'sans-serif' | 'serif' | 'monospace';
+export type AccentColor = 'blue' | 'purple' | 'emerald' | 'amber' | 'rose' | 'teal';
 export type ViewMode = 'list' | 'grid';
 
 export type SettingsTab = 'color' | 'font' | 'password' | 'data';

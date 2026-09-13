@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { ColorTheme, FontTheme } from '../types/note';
+import { ColorTheme, FontTheme, AccentColor } from '../types/note';
 
 interface ThemeContextType {
   colorTheme: ColorTheme;
   fontTheme: FontTheme;
+  accentColor: AccentColor;
   setColorTheme: (theme: ColorTheme) => void;
   setFontTheme: (font: FontTheme) => void;
+  setAccentColor: (accent: AccentColor) => void;
   isDark: boolean;
 }
 
@@ -18,6 +20,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [fontTheme, setFontThemeState] = useState<FontTheme>(() => {
     return (localStorage.getItem('notes_font_theme') as FontTheme) || 'sans-serif';
+  });
+
+  const [accentColor, setAccentColorState] = useState<AccentColor>(() => {
+    return (localStorage.getItem('notes_accent_color') as AccentColor) || 'blue';
   });
 
   const [isDark, setIsDark] = useState<boolean>(false);
@@ -67,6 +73,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.setAttribute('data-font-theme', fontTheme);
   }, [fontTheme]);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute('data-accent', accentColor);
+  }, [accentColor]);
+
   const setColorTheme = (theme: ColorTheme) => {
     setColorThemeState(theme);
     localStorage.setItem('notes_color_theme', theme);
@@ -77,8 +88,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem('notes_font_theme', font);
   };
 
+  const setAccentColor = (accent: AccentColor) => {
+    setAccentColorState(accent);
+    localStorage.setItem('notes_accent_color', accent);
+  };
+
   return (
-    <ThemeContext.Provider value={{ colorTheme, fontTheme, setColorTheme, setFontTheme, isDark }}>
+    <ThemeContext.Provider value={{ colorTheme, fontTheme, accentColor, setColorTheme, setFontTheme, setAccentColor, isDark }}>
       {children}
     </ThemeContext.Provider>
   );

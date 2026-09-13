@@ -233,9 +233,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
 
   const handleBack = () => {
     flushSave();
-    if (isCreatingNewNote) {
-      selectNote(null);
-    }
+    selectNote(null);
     if (isFocusMode) {
       setFocusMode(false);
     }

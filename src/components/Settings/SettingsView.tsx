@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useNotes } from '../../context/NotesContext';
-import { ColorTheme, FontTheme, SettingsTab } from '../../types/note';
+import { ColorTheme, FontTheme, SettingsTab, AccentColor } from '../../types/note';
 import {
   SunIcon,
   FontIcon,
@@ -19,15 +19,25 @@ import {
   ShowPasswordIcon,
   ArrowLeftIcon,
 } from '../Icons';
-import { Database } from 'lucide-react';
+import { Database, Check } from 'lucide-react';
 import { DataManagementTab } from './DataManagementTab';
+
+const ACCENT_OPTIONS: { id: AccentColor; name: string; hex: string; desc: string }[] = [
+  { id: 'blue', name: 'Ocean Blue', hex: '#335CFF', desc: 'Classic default' },
+  { id: 'purple', name: 'Iris Purple', hex: '#8B5CF6', desc: 'Modern & vibrant' },
+  { id: 'emerald', name: 'Emerald Green', hex: '#10B981', desc: 'Fresh & calming' },
+  { id: 'amber', name: 'Sunset Amber', hex: '#F59E0B', desc: 'Warm & glowing' },
+  { id: 'rose', name: 'Ruby Rose', hex: '#F43F5E', desc: 'Vivid & bold' },
+  { id: 'teal', name: 'Aqua Teal', hex: '#14B8A6', desc: 'Balanced & sleek' },
+];
 
 interface SettingsViewProps {
   initialTab?: SettingsTab;
+  onBackToNotes?: () => void;
 }
 
-export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color' }) => {
-  const { colorTheme, fontTheme, setColorTheme, setFontTheme } = useTheme();
+export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color', onBackToNotes }) => {
+  const { colorTheme, fontTheme, accentColor, setColorTheme, setFontTheme, setAccentColor } = useTheme();
   const { updatePassword, logout } = useAuth();
   const { addToast, activeView, setActiveView } = useNotes();
 
@@ -37,6 +47,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
   // Temporary selection state until user clicks "Apply Changes"
   const [selectedColor, setSelectedColor] = useState<ColorTheme>(colorTheme);
   const [selectedFont, setSelectedFont] = useState<FontTheme>(fontTheme);
+  const [selectedAccent, setSelectedAccent] = useState<AccentColor>(accentColor);
 
   // Change Password state
   const [oldPassword, setOldPassword] = useState('');
@@ -54,7 +65,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
 
   const handleApplyColor = () => {
     setColorTheme(selectedColor);
-    addToast('Color theme applied', 'success');
+    setAccentColor(selectedAccent);
+    addToast('Color theme and accent applied', 'success');
   };
 
   const handleApplyFont = () => {
@@ -97,7 +109,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
         <div className="md:hidden pb-3 mb-1 border-b border-neutral-200 dark:border-neutral-800">
           <button
             type="button"
-            onClick={() => setActiveView({ type: 'all' })}
+            onClick={onBackToNotes || (() => setActiveView({ type: 'all' }))}
             className="flex items-center gap-1.5 text-sm font-semibold text-[#335CFF] hover:opacity-80 transition-opacity cursor-pointer active:scale-95"
           >
             <ArrowLeftIcon className="w-4 h-4" />
@@ -372,6 +384,50 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ initialTab = 'color'
                     )}
                   </div>
                 </div>
+              </div>
+
+              {/* Accent Color Section */}
+              <div className="h-px bg-neutral-200 dark:bg-neutral-800 my-1" />
+
+              <div className="flex flex-col gap-1">
+                <h3 className="text-base font-semibold text-neutral-950 dark:text-white">
+                  Accent Color
+                </h3>
+                <p className="text-sm text-neutral-700 dark:text-neutral-400">
+                  Select your primary accent color for buttons, highlights, and active items:
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {ACCENT_OPTIONS.map((option) => {
+                  const isSelected = selectedAccent === option.id;
+                  return (
+                    <div
+                      key={option.id}
+                      onClick={() => setSelectedAccent(option.id)}
+                      className={`p-3 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-neutral-100 dark:bg-neutral-800 border-neutral-400 dark:border-neutral-600 shadow-xs ring-1 ring-neutral-400 dark:ring-neutral-600'
+                          : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
+                      }`}
+                    >
+                      <span
+                        className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 shadow-xs text-white"
+                        style={{ backgroundColor: option.hex }}
+                      >
+                        {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
+                      </span>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-medium text-neutral-950 dark:text-white truncate">
+                          {option.name}
+                        </span>
+                        <span className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate">
+                          {option.desc}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Apply Changes Button */}

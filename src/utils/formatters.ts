@@ -351,30 +351,126 @@ export function exportToPrint(note: Note) {
   if (!printWindow) return;
 
   const tagsHtml = note.tags.length
-    ? `<div class="tags">${note.tags.map((t) => `<span class="tag">#${escapeHtml(t)}</span>`).join('')}</div>`
+    ? `<span class="tags">${note.tags.map((t) => `<span class="tag">#${escapeHtml(t)}</span>`).join(' ')}</span>`
     : '';
+
+  // Clean excessive empty paragraphs from TipTap HTML
+  const cleanedContent = (note.content || '')
+    .replace(/(<p><\/p>\s*){2,}/gi, '<p></p>')
+    .replace(/(<p>\s*<br\s*\/?>\s*<\/p>\s*){2,}/gi, '<p></p>');
 
   const html = `
     <!DOCTYPE html>
     <html>
       <head>
+        <meta charset="utf-8" />
         <title>${escapeHtml(note.title)}</title>
         <style>
-          body { font-family: system-ui, -apple-system, sans-serif; padding: 40px; color: #0E121B; line-height: 1.6; max-width: 800px; margin: 0 auto; }
-          h1 { font-size: 28px; margin-bottom: 8px; }
-          .meta { font-size: 13px; color: #717784; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #E0E4EA; }
-          .tags { display: flex; gap: 6px; margin-top: 6px; }
-          .tag { background: #F3F5F8; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-          .content { white-space: pre-wrap; font-size: 15px; }
+          @media print {
+            @page { margin: 15mm; }
+            body { padding: 0 !important; max-width: 100% !important; }
+          }
+          * { box-sizing: border-box; }
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #111827;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            line-height: 1.5;
+            font-size: 14px;
+          }
+          h1.doc-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            color: #0E121B;
+            letter-spacing: -0.01em;
+          }
+          .meta {
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #E5E7EB;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+          }
+          .tags { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+          .tag {
+            background: #F3F4F6;
+            border: 1px solid #E5E7EB;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #374151;
+          }
+          .content {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #1F2937;
+          }
+          .content p {
+            margin: 0 0 8px 0;
+          }
+          .content p:last-child {
+            margin-bottom: 0;
+          }
+          .content h1 { font-size: 20px; font-weight: 700; margin: 16px 0 6px 0; }
+          .content h2 { font-size: 17px; font-weight: 600; margin: 14px 0 4px 0; }
+          .content h3 { font-size: 15px; font-weight: 600; margin: 12px 0 4px 0; }
+          .content ul, .content ol {
+            margin: 0 0 10px 0;
+            padding-left: 22px;
+          }
+          .content li {
+            margin-bottom: 4px;
+          }
+          .content li > p {
+            margin: 0;
+          }
+          .content blockquote {
+            border-left: 3px solid #335CFF;
+            padding-left: 10px;
+            margin: 8px 0;
+            color: #4B5563;
+            font-style: italic;
+          }
+          .content pre {
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 8px 0;
+            overflow-x: auto;
+          }
+          .content code {
+            background: #F3F4F6;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 12px;
+          }
+          .content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin: 8px 0;
+          }
         </style>
       </head>
       <body>
-        <h1>${escapeHtml(note.title)}</h1>
+        <h1 class="doc-title">${escapeHtml(note.title || 'Untitled Note')}</h1>
         <div class="meta">
-          <div>Last Edited: ${formatDate(note.lastEdited)}</div>
+          <span>Last Edited: ${formatDate(note.lastEdited)}</span>
+          ${note.folder ? `<span>Folder: ${escapeHtml(note.folder)}</span>` : ''}
           ${tagsHtml}
         </div>
-        <div class="content">${note.content}</div>
+        <div class="content">${cleanedContent}</div>
       </body>
     </html>
   `;

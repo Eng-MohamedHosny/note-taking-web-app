@@ -491,8 +491,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                             className={`${
                               pinnedFolders.includes(f)
                                 ? 'opacity-100 text-amber-500 hover:text-amber-600'
+                                : isMobile
+                                ? 'opacity-70 hover:opacity-100 text-neutral-400 hover:text-amber-500'
                                 : 'opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-amber-500'
-                            } p-1 rounded transition-all cursor-pointer`}
+                            } p-1.5 rounded transition-all cursor-pointer`}
                             title={pinnedFolders.includes(f) ? `Unpin folder "${f}"` : `Pin folder "${f}"`}
                             aria-label={pinnedFolders.includes(f) ? `Unpin folder "${f}"` : `Pin folder "${f}"`}
                           >
@@ -505,7 +507,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                               setEditingFolder(f);
                               setEditFolderName(f);
                             }}
-                            className="opacity-0 group-hover:opacity-100 p-1 text-neutral-400 hover:text-[#335CFF] rounded transition-opacity cursor-pointer"
+                            className={`${
+                              isMobile ? 'opacity-70 hover:opacity-100' : 'opacity-0 group-hover:opacity-100'
+                            } p-1.5 text-neutral-400 hover:text-[#335CFF] rounded transition-opacity cursor-pointer`}
                             title={`Rename folder "${f}"`}
                             aria-label={`Rename folder "${f}"`}
                           >
@@ -517,7 +521,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                               e.stopPropagation();
                               deleteFolder(f);
                             }}
-                            className="opacity-0 group-hover:opacity-100 p-1 text-neutral-400 hover:text-red-500 rounded transition-opacity cursor-pointer"
+                            className={`${
+                              isMobile ? 'opacity-70 hover:opacity-100' : 'opacity-0 group-hover:opacity-100'
+                            } p-1.5 text-neutral-400 hover:text-red-500 rounded transition-opacity cursor-pointer`}
                             title={`Delete folder "${f}"`}
                             aria-label={`Delete folder "${f}"`}
                           >
@@ -640,8 +646,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
                             className={`${
                               pinnedTags.includes(tag)
                                 ? 'opacity-100 text-amber-500 hover:text-amber-600'
+                                : isMobile
+                                ? 'opacity-70 hover:opacity-100 text-neutral-400 hover:text-amber-500'
                                 : 'opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-amber-500'
-                            } p-1 rounded transition-all cursor-pointer`}
+                            } p-1.5 rounded transition-all cursor-pointer`}
                             title={pinnedTags.includes(tag) ? `Unpin tag #${tag}` : `Pin tag #${tag}`}
                             aria-label={pinnedTags.includes(tag) ? `Unpin tag #${tag}` : `Pin tag #${tag}`}
                           >
