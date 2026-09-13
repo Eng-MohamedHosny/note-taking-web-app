@@ -49,6 +49,10 @@ interface NotesContextType {
   deleteNote: (id: string) => void;
   restoreFromTrash: (id: string) => void;
   emptyTrash: () => void;
+  batchDeleteNotes: (ids: string[]) => void;
+  batchArchiveNotes: (ids: string[], archive: boolean) => void;
+  batchMoveToFolder: (ids: string[], folder?: string) => void;
+  batchAddTag: (ids: string[], tag: string) => void;
   importNotes: (importedNotes: Note[], strategy: ImportStrategy, extraFolders?: string[]) => { added: number; updated: number };
   addToast: (message: string, type?: 'success' | 'info' | 'error') => void;
   removeToast: (id: string) => void;
@@ -686,6 +690,103 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const batchDeleteNotes = (ids: string[]) => {
+    if (!ids || ids.length === 0) return;
+    const idSet = new Set(ids);
+    const now = new Date().toISOString();
+    const inTrash = activeView.type === 'trash';
+
+    if (inTrash) {
+      setNotes((prev) => prev.filter((n) => !idSet.has(n.id)));
+      if (selectedNoteId && idSet.has(selectedNoteId)) setSelectedNoteId(null);
+      addToast(`${ids.length} ${ids.length === 1 ? 'note' : 'notes'} permanently deleted`, 'info');
+      if (!isGuest && user) {
+        ids.forEach((id) => deleteCloudNote(id, user.id));
+      }
+    } else {
+      setNotes((prev) =>
+        prev.map((n) => (idSet.has(n.id) ? { ...n, isDeleted: true, lastEdited: now } : n))
+      );
+      if (selectedNoteId && idSet.has(selectedNoteId)) setSelectedNoteId(null);
+      addToast(`${ids.length} ${ids.length === 1 ? 'note' : 'notes'} moved to Trash`, 'info');
+      if (!isGuest && user) {
+        ids.forEach((id) => {
+          const target = notes.find((n) => n.id === id);
+          if (target) upsertCloudNote({ ...target, isDeleted: true, lastEdited: now }, user.id);
+        });
+      }
+    }
+  };
+
+  const batchArchiveNotes = (ids: string[], archive: boolean) => {
+    if (!ids || ids.length === 0) return;
+    const idSet = new Set(ids);
+    const now = new Date().toISOString();
+
+    setNotes((prev) =>
+      prev.map((n) => (idSet.has(n.id) ? { ...n, isArchived: archive, lastEdited: now } : n))
+    );
+    addToast(
+      `${ids.length} ${ids.length === 1 ? 'note' : 'notes'} ${archive ? 'archived' : 'unarchived'}`,
+      'info'
+    );
+    if (!isGuest && user) {
+      ids.forEach((id) => {
+        const target = notes.find((n) => n.id === id);
+        if (target) upsertCloudNote({ ...target, isArchived: archive, lastEdited: now }, user.id);
+      });
+    }
+  };
+
+  const batchMoveToFolder = (ids: string[], folder?: string) => {
+    if (!ids || ids.length === 0) return;
+    const idSet = new Set(ids);
+    const now = new Date().toISOString();
+    const cleanFolder = folder && folder.trim() ? folder.trim() : undefined;
+
+    if (cleanFolder && !allFolders.includes(cleanFolder)) {
+      createFolder(cleanFolder);
+    }
+
+    setNotes((prev) =>
+      prev.map((n) => (idSet.has(n.id) ? { ...n, folder: cleanFolder, lastEdited: now } : n))
+    );
+    addToast(
+      `${ids.length} ${ids.length === 1 ? 'note' : 'notes'} moved to ${cleanFolder || 'root'}`,
+      'success'
+    );
+    if (!isGuest && user) {
+      ids.forEach((id) => {
+        const target = notes.find((n) => n.id === id);
+        if (target) upsertCloudNote({ ...target, folder: cleanFolder, lastEdited: now }, user.id);
+      });
+    }
+  };
+
+  const batchAddTag = (ids: string[], tag: string) => {
+    const cleanTag = tag.replace(/^#/, '').trim();
+    if (!cleanTag || ids.length === 0) return;
+    const idSet = new Set(ids);
+    const now = new Date().toISOString();
+
+    setNotes((prev) =>
+      prev.map((n) => {
+        if (!idSet.has(n.id)) return n;
+        if (n.tags.includes(cleanTag)) return n;
+        return { ...n, tags: [...n.tags, cleanTag], lastEdited: now };
+      })
+    );
+    addToast(`Tag #${cleanTag} added to ${ids.length} ${ids.length === 1 ? 'note' : 'notes'}`, 'success');
+    if (!isGuest && user) {
+      ids.forEach((id) => {
+        const target = notes.find((n) => n.id === id);
+        if (target && !target.tags.includes(cleanTag)) {
+          upsertCloudNote({ ...target, tags: [...target.tags, cleanTag], lastEdited: now }, user.id);
+        }
+      });
+    }
+  };
+
   const importNotes = (
     importedNotes: Note[],
     strategy: ImportStrategy,
@@ -825,6 +926,10 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         deleteNote,
         restoreFromTrash,
         emptyTrash,
+        batchDeleteNotes,
+        batchArchiveNotes,
+        batchMoveToFolder,
+        batchAddTag,
         importNotes,
         addToast,
         removeToast,

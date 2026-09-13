@@ -8,9 +8,19 @@ interface NoteGridCardProps {
   note: Note;
   isSelected: boolean;
   onSelect: () => void;
+  isSelectionMode?: boolean;
+  isChecked?: boolean;
+  onToggleCheck?: () => void;
 }
 
-export const NoteGridCard: React.FC<NoteGridCardProps> = ({ note, isSelected, onSelect }) => {
+export const NoteGridCard: React.FC<NoteGridCardProps> = ({
+  note,
+  isSelected,
+  onSelect,
+  isSelectionMode = false,
+  isChecked = false,
+  onToggleCheck,
+}) => {
   const { togglePinNote } = useNotes();
 
   const handlePinClick = (e: React.MouseEvent) => {
@@ -18,19 +28,30 @@ export const NoteGridCard: React.FC<NoteGridCardProps> = ({ note, isSelected, on
     togglePinNote(note.id);
   };
 
+  const handleClick = () => {
+    if (isSelectionMode) {
+      if (onToggleCheck) onToggleCheck();
+      else onSelect();
+    } else {
+      onSelect();
+    }
+  };
+
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={onSelect}
+      onClick={handleClick}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          onSelect();
+          handleClick();
         }
       }}
       className={`group relative p-3.5 sm:p-4 rounded-[18px] transition-all duration-150 cursor-pointer flex flex-col select-none text-left border ${
-        isSelected
+        isSelectionMode && isChecked
+          ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50/60 dark:bg-blue-950/30 shadow-xs'
+          : isSelected && !isSelectionMode
           ? 'ring-2 ring-[#335CFF] border-transparent bg-[#EBF1FF]/40 dark:bg-[#232530]'
           : 'bg-[#F3F5F8] dark:bg-[#1A1D24] dark:hover:bg-[#232530] hover:bg-[#EBF1FF]/30 border-[#E0E4EA] dark:border-[#272B35]'
       } hover:shadow-xs active:scale-[0.98]`}
@@ -39,6 +60,26 @@ export const NoteGridCard: React.FC<NoteGridCardProps> = ({ note, isSelected, on
         backgroundColor: undefined,
       }}
     >
+      {/* Selection Checkbox */}
+      {isSelectionMode && (
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleCheck?.();
+          }}
+          className={`absolute top-3.5 right-3.5 z-10 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer ${
+            isChecked
+              ? 'bg-blue-600 border-blue-600 text-white shadow-xs scale-105'
+              : 'border-neutral-400 dark:border-neutral-500 bg-white/90 dark:bg-neutral-800/90 hover:border-blue-500'
+          }`}
+        >
+          {isChecked && (
+            <svg className="w-3 h-3 stroke-[3]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          )}
+        </div>
+      )}
       {/* Card Content Top */}
       <div className="flex flex-col min-w-0">
         {/* Title matching screenshot */}

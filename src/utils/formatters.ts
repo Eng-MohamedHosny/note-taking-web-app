@@ -346,6 +346,104 @@ export async function exportAllToZip(notes: Note[]): Promise<void> {
   downloadBlob(`notes-markdown-${dateStr}.zip`, blob);
 }
 
+/**
+ * Bulk exports a specific list of selected notes into a .zip archive of Markdown files.
+ */
+export async function exportSelectedNotesToZip(notes: Note[], zipFilename?: string): Promise<void> {
+  const zip = new JSZip();
+  const activeNotes = notes.filter((n) => !n.isDeleted);
+  if (activeNotes.length === 0) return;
+
+  const manifest = {
+    appName: 'Notes App',
+    exportedAt: new Date().toISOString(),
+    totalNotes: activeNotes.length,
+    notes: activeNotes.map((n) => ({
+      title: n.title,
+      folder: n.folder || null,
+      tags: n.tags,
+      lastEdited: n.lastEdited,
+      isArchived: n.isArchived,
+      isPinned: n.isPinned || false,
+    })),
+  };
+  zip.file('manifest.json', JSON.stringify(manifest, null, 2));
+
+  const nameCounts: Record<string, number> = {};
+
+  activeNotes.forEach((note) => {
+    const folderName = note.folder?.trim() || '';
+    const safeTitle = slugify(note.title);
+    const key = folderName ? `${folderName}/${safeTitle}` : safeTitle;
+
+    let filename = `${safeTitle}.md`;
+    if (nameCounts[key]) {
+      nameCounts[key] += 1;
+      filename = `${safeTitle}-${nameCounts[key]}.md`;
+    } else {
+      nameCounts[key] = 1;
+    }
+
+    const tagsHeader = note.tags.length > 0 ? `tags: [${note.tags.map((t) => `"${t}"`).join(', ')}]\n` : '';
+    const folderHeader = note.folder ? `folder: "${note.folder}"\n` : '';
+    const frontmatter = `---\ntitle: "${escapeQuotes(note.title)}"\n${folderHeader}${tagsHeader}lastEdited: "${note.lastEdited}"\narchived: ${note.isArchived}\npinned: ${Boolean(note.isPinned)}\n---\n\n`;
+    const mdBody = htmlToMarkdown(note.content);
+    const fileContent = `${frontmatter}# ${note.title}\n\n${mdBody}`;
+
+    if (folderName) {
+      zip.folder(folderName)?.file(filename, fileContent);
+    } else {
+      zip.file(filename, fileContent);
+    }
+  });
+
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const dateStr = new Date().toISOString().slice(0, 10);
+  downloadBlob(zipFilename || `selected-notes-${dateStr}.zip`, blob);
+}
+
+export function exportSelectedNotesToJSON(notes: Note[], filename?: string) {
+  const activeNotes = notes.filter((n) => !n.isDeleted);
+  const backup = {
+    appName: 'Notes App',
+    exportedAt: new Date().toISOString(),
+    totalNotes: activeNotes.length,
+    notes: activeNotes,
+  };
+  const dateStr = new Date().toISOString().slice(0, 10);
+  exportToJSON(backup, filename || `selected-notes-${dateStr}.json`);
+}
+
+export function exportNotesToCombinedMarkdown(notes: Note[], filename?: string) {
+  const activeNotes = notes.filter((n) => !n.isDeleted);
+  if (activeNotes.length === 0) return;
+
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const parts = activeNotes.map((note) => {
+    const tags = note.tags.length > 0 ? `*Tags: ${note.tags.map((t) => `#${t}`).join(' ')}*\n` : '';
+    const folder = note.folder ? `*Folder: ${note.folder}*\n` : '';
+    const mdBody = htmlToMarkdown(note.content || '');
+    return `# ${note.title || 'Untitled'}\n${folder}${tags}*Last edited: ${formatDate(note.lastEdited)}*\n\n${mdBody}`;
+  });
+
+  const combined = parts.join('\n\n---\n\n');
+  downloadFile(filename || `notes-collection-${dateStr}.md`, combined, 'text/markdown;charset=utf-8');
+}
+
+export function exportNotesToCombinedTxt(notes: Note[], filename?: string) {
+  const activeNotes = notes.filter((n) => !n.isDeleted);
+  if (activeNotes.length === 0) return;
+
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const parts = activeNotes.map((note) => {
+    const plainText = (note.content || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    return `TITLE: ${note.title || 'Untitled'}\nDATE: ${formatDate(note.lastEdited)}\nTAGS: ${note.tags.join(', ')}\n\n${plainText}`;
+  });
+
+  const combined = parts.join('\n\n========================================\n\n');
+  downloadFile(filename || `notes-collection-${dateStr}.txt`, combined, 'text/plain;charset=utf-8');
+}
+
 export function exportToPrint(note: Note) {
   // Clean excessive empty paragraphs from TipTap HTML
   const cleanedContent = (note.content || '')
