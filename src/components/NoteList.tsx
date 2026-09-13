@@ -602,20 +602,19 @@ export const NoteList: React.FC<NoteListProps> = ({
               )}
             </div>
           ) : viewMode === 'grid' ? (
-            /* Masonry Grid View */
-            <div className="columns-2 md:columns-3 lg:columns-1 gap-2.5 sm:gap-3 py-1 [column-fill:_balance]">
+            /* Grid View */
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-1 gap-2.5 sm:gap-3 py-1">
               {filteredNotes.map((note) => (
-                <div key={note.id} className="break-inside-avoid mb-2.5 sm:mb-3 inline-block w-full">
-                  <NoteGridCard
-                    note={note}
-                    isSelected={!isCreatingNewNote && selectedNoteId === note.id}
-                    onSelect={() => handleSelect(note.id)}
-                    isSelectionMode={isSelectionMode}
-                    isChecked={selectedIds.has(note.id)}
-                    onToggleCheck={() => toggleSelectNote(note.id)}
-                    onLongPress={() => handleLongPress(note.id)}
-                  />
-                </div>
+                <NoteGridCard
+                  key={note.id}
+                  note={note}
+                  isSelected={!isCreatingNewNote && selectedNoteId === note.id}
+                  onSelect={() => handleSelect(note.id)}
+                  isSelectionMode={isSelectionMode}
+                  isChecked={selectedIds.has(note.id)}
+                  onToggleCheck={() => toggleSelectNote(note.id)}
+                  onLongPress={() => handleLongPress(note.id)}
+                />
               ))}
             </div>
           ) : (

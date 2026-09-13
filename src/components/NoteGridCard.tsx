@@ -104,7 +104,7 @@ export const NoteGridCard: React.FC<NoteGridCardProps> = ({
           handleClick();
         }
       }}
-      className={`group relative p-3.5 sm:p-4 rounded-[18px] transition-all duration-150 cursor-pointer flex flex-col select-none text-left border ${
+      className={`group relative p-3.5 sm:p-4 rounded-[18px] transition-all duration-150 cursor-pointer flex flex-col select-none text-left border h-full ${
         isSelectionMode && isChecked
           ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50/60 dark:bg-blue-950/30 shadow-xs'
           : isSelected && !isSelectionMode
@@ -181,7 +181,7 @@ export const NoteGridCard: React.FC<NoteGridCardProps> = ({
       )}
 
       {/* Footer: Date and Pin Indicator (Web Blue #335CFF instead of yellow) */}
-      <div className="mt-3 pt-2 border-t border-neutral-200/60 dark:border-neutral-800/80 flex items-center justify-between text-xs text-neutral-500 dark:text-[#99A0AE]">
+      <div className="mt-auto pt-3 border-t border-neutral-200/60 dark:border-neutral-800/80 flex items-center justify-between text-xs text-neutral-500 dark:text-[#99A0AE]">
         <span className="text-[11px] sm:text-xs font-normal tracking-tight">
           {formatDate(note.lastEdited)}
         </span>
