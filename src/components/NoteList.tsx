@@ -167,58 +167,70 @@ export const NoteList: React.FC<NoteListProps> = ({
           </button>
 
           {/* Folders Dropdown / Modal Trigger */}
-          <button
-            type="button"
-            onClick={() => onOpenFoldersModal?.()}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-              activeView.type === 'folder'
-                ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30'
-                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700/60'
-            }`}
-          >
-            <FolderIcon className="w-3.5 h-3.5 text-blue-500" />
-            <span>{activeView.type === 'folder' ? activeView.folder : 'Folders'}</span>
-            {activeView.type === 'folder' ? (
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveView({ type: 'all' });
-                }}
-                className="hover:text-red-500 p-0.5 ml-0.5 font-bold"
+          {(() => {
+            const isUnpinnedFolderActive =
+              activeView.type === 'folder' && !pinnedFolders.includes(activeView.folder);
+            return (
+              <button
+                type="button"
+                onClick={() => onOpenFoldersModal?.()}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                  isUnpinnedFolderActive
+                    ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30'
+                    : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700/60'
+                }`}
               >
-                ✕
-              </span>
-            ) : (
-              <ChevronDown className="w-3 h-3 opacity-60" />
-            )}
-          </button>
+                <FolderIcon className="w-3.5 h-3.5 text-blue-500" />
+                <span>{isUnpinnedFolderActive ? activeView.folder : 'Folders'}</span>
+                {isUnpinnedFolderActive ? (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveView({ type: 'all' });
+                    }}
+                    className="hover:text-red-500 p-0.5 ml-0.5 font-bold"
+                  >
+                    ✕
+                  </span>
+                ) : (
+                  <ChevronDown className="w-3 h-3 opacity-60" />
+                )}
+              </button>
+            );
+          })()}
 
           {/* Tags Dropdown / Modal Trigger */}
-          <button
-            type="button"
-            onClick={() => onOpenTagsModal?.()}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-              activeView.type === 'tag'
-                ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30'
-                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700/60'
-            }`}
-          >
-            <TagIcon className="w-3.5 h-3.5 text-purple-500" />
-            <span>{activeView.type === 'tag' ? `#${activeView.tag}` : 'Tags'}</span>
-            {activeView.type === 'tag' ? (
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveView({ type: 'all' });
-                }}
-                className="hover:text-red-500 p-0.5 ml-0.5 font-bold"
+          {(() => {
+            const isUnpinnedTagActive =
+              activeView.type === 'tag' && !pinnedTags.includes(activeView.tag);
+            return (
+              <button
+                type="button"
+                onClick={() => onOpenTagsModal?.()}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                  isUnpinnedTagActive
+                    ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30'
+                    : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700 border border-neutral-200/60 dark:border-neutral-700/60'
+                }`}
               >
-                ✕
-              </span>
-            ) : (
-              <ChevronDown className="w-3 h-3 opacity-60" />
-            )}
-          </button>
+                <TagIcon className="w-3.5 h-3.5 text-purple-500" />
+                <span>{isUnpinnedTagActive ? `#${activeView.tag}` : 'Tags'}</span>
+                {isUnpinnedTagActive ? (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveView({ type: 'all' });
+                    }}
+                    className="hover:text-red-500 p-0.5 ml-0.5 font-bold"
+                  >
+                    ✕
+                  </span>
+                ) : (
+                  <ChevronDown className="w-3 h-3 opacity-60" />
+                )}
+              </button>
+            );
+          })()}
 
           {/* Archive Pill */}
           <button
@@ -268,7 +280,16 @@ export const NoteList: React.FC<NoteListProps> = ({
                 <FolderIcon className="w-3 h-3 text-blue-500 shrink-0" />
                 <span>{f}</span>
                 {isActive && (
-                  <span className="hover:text-red-500 p-0.5 ml-0.5 font-bold">✕</span>
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveView({ type: 'all' });
+                    }}
+                    className="hover:text-red-500 p-0.5 ml-0.5 font-bold"
+                    title="Clear filter"
+                  >
+                    ✕
+                  </span>
                 )}
               </button>
             );
@@ -299,7 +320,16 @@ export const NoteList: React.FC<NoteListProps> = ({
                 <TagIcon className="w-3 h-3 text-purple-500 shrink-0" />
                 <span>#{t}</span>
                 {isActive && (
-                  <span className="hover:text-red-500 p-0.5 ml-0.5 font-bold">✕</span>
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveView({ type: 'all' });
+                    }}
+                    className="hover:text-red-500 p-0.5 ml-0.5 font-bold"
+                    title="Clear filter"
+                  >
+                    ✕
+                  </span>
                 )}
               </button>
             );
