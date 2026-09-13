@@ -477,8 +477,8 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
       <div
         id="note-editor-scroll-container"
         style={{
-          marginBottom: isMobileOrTablet && isToolbarActive ? `${keyboardOffset + 50}px` : '0px',
-          scrollPaddingBottom: isMobileOrTablet ? '100px' : '60px',
+          marginBottom: isMobileOrTablet && isToolbarActive ? `${keyboardOffset + 56}px` : '0px',
+          scrollPaddingBottom: isMobileOrTablet ? '50vh' : '25vh',
         }}
         className={`flex-1 flex flex-col p-4 md:p-6 lg:p-8 overflow-y-auto transition-[margin] duration-100 h-full ${
           isFocusMode ? 'max-w-4xl mx-auto w-full' : ''
