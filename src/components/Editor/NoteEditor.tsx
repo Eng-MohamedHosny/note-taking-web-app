@@ -63,7 +63,10 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
         setSaveStatus('saved');
       }
     } else if (selectedNote) {
-      if (lastLoadedIdRef.current !== selectedNote.id) {
+      const isDifferentNote = lastLoadedIdRef.current !== selectedNote.id;
+      const hasContentChangedExternally = !isDirtyRef.current && content !== selectedNote.content;
+
+      if (isDifferentNote || hasContentChangedExternally) {
         lastLoadedIdRef.current = selectedNote.id;
         setTitle(selectedNote.title);
         setContent(selectedNote.content);
@@ -367,7 +370,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
       </div>
 
       {/* 3. Main Content Body */}
-      <div className="flex-1 flex flex-col p-6 md:p-8 overflow-y-auto">
+      <div className="flex-1 flex flex-col p-6 md:p-8 pb-24 lg:pb-8 overflow-y-auto">
         {/* Title Input */}
         <input
           type="text"

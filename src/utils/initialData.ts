@@ -5,9 +5,24 @@ export const INITIAL_NOTES: Note[] = [
     id: "welcome-note",
     title: "Welcome to Notes App",
     tags: ["Welcome"],
-    content: "Welcome to your new digital notebook! Here is a quick guide to the 10 most important features:\n\n1. Instant Note Creation & Auto-Save – Write freely with automatic saving and full bi-directional support (English & Arabic).\n2. Tag Organization – Group and organize your notes with custom tags to keep things clean and structured.\n3. Real-Time Search – Instantly search and highlight keywords across titles, body content, and tags.\n4. Pin Priority Notes – Pin your crucial notes to keep them visible at the very top.\n5. Archive & Trash – Declutter your active list by archiving notes, or safely restore deleted ones from the Trash.\n6. Responsive Grid & List Views – Toggle between a classic list and a sleek 2-column grid view on all screen sizes.\n7. Color Themes & OLED Dark Mode – Choose Light, Dark, or true pitch-black OLED Extra Dark mode.\n8. Customizable Typography – Select between Sans-serif, Serif, and Monospace fonts.\n9. Supabase Cloud Sync – Seamlessly sync and backup your notes across all your devices in real-time.\n10. Offline-First PWA – Install the app on desktop or mobile and use it anywhere, even without internet.",
+    content: `<h2>Welcome to your new digital notebook! 👋</h2>
+<p>Here is a quick guide to help you get the most out of your notes:</p>
+<ol>
+  <li><strong>Instant Note Creation &amp; Auto-Save:</strong> Write freely without worry—your work saves automatically with full bi-directional support (English &amp; Arabic).</li>
+  <li><strong>Folder &amp; Tag Organization:</strong> Group and organize your notes with custom folders and tags to keep things clean and structured.</li>
+  <li><strong>Rich Media &amp; Images:</strong> Insert images by uploading local files, pasting URLs, or directly pasting screenshots from your clipboard!</li>
+  <li><strong>Real-Time Search:</strong> Instantly search and highlight keywords across titles, body content, tags, and folders.</li>
+  <li><strong>Pin Priority Notes:</strong> Pin your crucial notes so they stay right at the top of your list.</li>
+  <li><strong>Archive &amp; Trash:</strong> Declutter your active list by archiving notes, or safely restore deleted ones from the Trash.</li>
+  <li><strong>Responsive Grid &amp; List Views:</strong> Toggle between a classic list and a sleek grid view on any device.</li>
+  <li><strong>Themes &amp; OLED Mode:</strong> Switch between Light, Dark, or true pitch-black OLED Extra Dark mode.</li>
+  <li><strong>Custom Typography:</strong> Personalize your reading experience with Sans-serif, Serif, or Monospace fonts.</li>
+  <li><strong>Supabase Cloud Sync &amp; Offline PWA:</strong> Sync across devices in real time, or use offline anywhere with PWA capabilities.</li>
+</ol>
+<blockquote>💡 <em>Tip: You can highlight text to apply formatting, or use keyboard shortcuts like Ctrl+B for bold and Ctrl+I for italic.</em></blockquote>`,
     lastEdited: new Date().toISOString(),
     isArchived: false,
     isPinned: true
   }
 ];
+

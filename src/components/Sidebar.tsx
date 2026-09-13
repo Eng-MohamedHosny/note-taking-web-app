@@ -14,6 +14,7 @@ import {
   Trash2,
   PanelLeftClose,
   PanelLeft,
+  Pencil,
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -23,6 +24,7 @@ export const Sidebar: React.FC = () => {
     allTags,
     allFolders,
     createFolder,
+    renameFolder,
     deleteFolder,
     notes,
   } = useNotes();
@@ -70,6 +72,10 @@ export const Sidebar: React.FC = () => {
   const [isAddingFolder, setIsAddingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
 
+  // Inline folder editing
+  const [editingFolder, setEditingFolder] = useState<string | null>(null);
+  const [editFolderName, setEditFolderName] = useState<string>('');
+
   const handleAddFolderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newFolderName.trim()) return;
@@ -77,6 +83,18 @@ export const Sidebar: React.FC = () => {
     if (ok) {
       setNewFolderName('');
       setIsAddingFolder(false);
+    }
+  };
+
+  const handleRenameFolderSubmit = (e: React.FormEvent, oldName: string) => {
+    e.preventDefault();
+    if (!editFolderName.trim() || editFolderName.trim() === oldName) {
+      setEditingFolder(null);
+      return;
+    }
+    const ok = renameFolder(oldName, editFolderName.trim());
+    if (ok) {
+      setEditingFolder(null);
     }
   };
 
@@ -321,9 +339,47 @@ export const Sidebar: React.FC = () => {
                   allFolders.map((f) => {
                     const isFolderActive =
                       activeView.type === 'folder' && activeView.folder === f;
+                    const isCurrentlyEditing = editingFolder === f;
                     const folderCount = notes.filter(
                       (n) => !n.isDeleted && !n.isArchived && n.folder === f
                     ).length;
+
+                    if (isCurrentlyEditing) {
+                      return (
+                        <form
+                          key={f}
+                          onSubmit={(e) => handleRenameFolderSubmit(e, f)}
+                          className="flex items-center gap-1 px-2 py-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <input
+                            type="text"
+                            autoFocus
+                            value={editFolderName}
+                            onChange={(e) => setEditFolderName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Escape') setEditingFolder(null);
+                            }}
+                            className="flex-1 min-w-0 px-2 py-1 text-xs rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-hidden focus:border-[#335CFF]"
+                          />
+                          <button
+                            type="submit"
+                            className="p-1 rounded bg-[#335CFF] text-white hover:bg-blue-600 cursor-pointer"
+                            title="Save"
+                          >
+                            <Check className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingFolder(null)}
+                            className="p-1 rounded text-neutral-400 hover:text-neutral-700 dark:hover:text-white cursor-pointer"
+                            title="Cancel"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </form>
+                      );
+                    }
 
                     return (
                       <div
@@ -344,12 +400,25 @@ export const Sidebar: React.FC = () => {
                           <span className="truncate">{f}</span>
                         </div>
 
-                        <div className="flex items-center gap-1 shrink-0">
+                        <div className="flex items-center gap-0.5 shrink-0">
                           {folderCount > 0 && (
-                            <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-neutral-200/70 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-normal">
+                            <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-neutral-200/70 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-normal mr-0.5">
                               {folderCount}
                             </span>
                           )}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingFolder(f);
+                              setEditFolderName(f);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-1 text-neutral-400 hover:text-[#335CFF] rounded transition-opacity cursor-pointer"
+                            title={`Rename folder "${f}"`}
+                            aria-label={`Rename folder "${f}"`}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
                           <button
                             type="button"
                             onClick={(e) => {
@@ -358,6 +427,7 @@ export const Sidebar: React.FC = () => {
                             }}
                             className="opacity-0 group-hover:opacity-100 p-1 text-neutral-400 hover:text-red-500 rounded transition-opacity cursor-pointer"
                             title={`Delete folder "${f}"`}
+                            aria-label={`Delete folder "${f}"`}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

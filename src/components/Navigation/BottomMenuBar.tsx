@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNotes } from '../../context/NotesContext';
-import { HomeIcon, SearchIcon, ArchiveIcon, TagIcon } from '../Icons';
+import { HomeIcon, ArchiveIcon, TagIcon } from '../Icons';
 import { Folder as FolderIcon } from 'lucide-react';
 
 interface BottomMenuBarProps {
@@ -12,7 +12,6 @@ export const BottomMenuBar: React.FC<BottomMenuBarProps> = ({ onOpenTagsModal, o
   const { activeView, setActiveView } = useNotes();
 
   const isHome = activeView.type === 'all';
-  const isSearch = activeView.type === 'search';
   const isArchived = activeView.type === 'archived';
   const isTag = activeView.type === 'tag';
   const isFolder = activeView.type === 'folder';
@@ -37,23 +36,6 @@ export const BottomMenuBar: React.FC<BottomMenuBarProps> = ({ onOpenTagsModal, o
       </button>
 
       {/* Divider (Tablet only, hidden on mobile matching Figma) */}
-      <div className="hidden md:block w-px h-6 bg-[#E0E4EA] dark:bg-[#232530] shrink-0" />
-
-      {/* Search Button matching Figma */}
-      <button
-        type="button"
-        onClick={() => setActiveView({ type: 'search' })}
-        className={`flex-1 md:w-[80px] md:flex-initial py-1.5 md:py-1 flex flex-col items-center justify-center gap-1 rounded-[4px] transition-colors cursor-pointer ${
-          isSearch
-            ? 'bg-[#EBF1FF] dark:bg-[#2B303B] text-[#335CFF]'
-            : 'bg-transparent text-[#525866] dark:text-[#99A0AE] hover:bg-[#F3F5F8] dark:hover:bg-[#232530]/60'
-        }`}
-      >
-        <SearchIcon className="w-5 h-5 md:w-5 md:h-5 shrink-0" />
-        <span className="hidden md:block text-[12px] font-normal leading-none tracking-tight">Search</span>
-      </button>
-
-      {/* Divider */}
       <div className="hidden md:block w-px h-6 bg-[#E0E4EA] dark:bg-[#232530] shrink-0" />
 
       {/* Archived Button matching Figma */}

@@ -112,15 +112,14 @@ export const NoteList: React.FC<NoteListProps> = ({ onSelectMobileNote }) => {
           </div>
         </div>
 
-        {/* Dedicated Search Input on Mobile/Tablet when in Search Tab */}
-        {activeView.type === 'search' && (
+        {/* Search Input on Mobile/Tablet (Visible on Home & note views) */}
+        {activeView.type !== 'settings' && (
           <div className="relative w-full mt-4">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
               <SearchIcon className="w-5 h-5 text-[#525866] dark:text-[#99A0AE]" />
             </div>
             <input
               type="text"
-              autoFocus
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by title, content, or tags…"

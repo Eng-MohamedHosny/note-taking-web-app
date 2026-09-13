@@ -28,6 +28,7 @@ interface NotesContextType {
   startNewNote: () => void;
   saveNote: (updated: { title: string; content: string; tags: string[]; folder?: string; silent?: boolean }) => string | undefined;
   createFolder: (name: string) => boolean;
+  renameFolder: (oldName: string, newName: string) => boolean;
   deleteFolder: (name: string) => void;
   archiveNote: (id: string) => void;
   restoreNote: (id: string) => void;
@@ -43,6 +44,13 @@ const NotesContext = createContext<NotesContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'notes_app_data_v2';
 
+const isUnformattedWelcomeNote = (n: Note) => {
+  return (
+    (n.id === 'welcome-note' || n.title.toLowerCase().includes('welcome')) &&
+    (!n.content || !n.content.includes('<ol>') || !n.content.includes('<h2>'))
+  );
+};
+
 export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isGuest } = useAuth();
   const [notes, setNotes] = useState<Note[]>(() => {
@@ -53,7 +61,14 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (Array.isArray(parsed) && parsed.length > 0) {
           // If stored notes are the old dummy dataset, reset to single clean initial note
           const isOldDataset = parsed.some((n: Note) => n.id === 'note-1' || n.title === 'React Performance Optimization');
-          if (!isOldDataset) return parsed;
+          if (!isOldDataset) {
+            return parsed.map((n: Note) => {
+              if (isUnformattedWelcomeNote(n)) {
+                return { ...n, content: INITIAL_NOTES[0].content, lastEdited: new Date().toISOString() };
+              }
+              return n;
+            });
+          }
         }
       }
     } catch (e) {
@@ -93,14 +108,45 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(notes));
   }, [notes]);
 
+  // One-time automatic upgrade effect to replace any existing unformatted welcome note
+  useEffect(() => {
+    setNotes((prev) => {
+      let needsUpgrade = false;
+      const updated = prev.map((n) => {
+        if (isUnformattedWelcomeNote(n)) {
+          needsUpgrade = true;
+          return { ...n, content: INITIAL_NOTES[0].content, lastEdited: new Date().toISOString() };
+        }
+        return n;
+      });
+      if (needsUpgrade) {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+        if (!isGuest && user) {
+          const target = updated.find((n) => n.id === 'welcome-note' || n.title.toLowerCase().includes('welcome'));
+          if (target) upsertCloudNote(target, user.id);
+        }
+        return updated;
+      }
+      return prev;
+    });
+  }, [user, isGuest]);
+
   // Cloud sync effect when user logs in with Supabase or switches to Guest
   useEffect(() => {
     if (!isGuest && user) {
       setSyncStatus('syncing');
       fetchCloudNotes(user.id).then((cloudNotes) => {
         if (cloudNotes && cloudNotes.length > 0) {
-          setNotes(cloudNotes);
-          setSelectedNoteId(cloudNotes[0].id);
+          const upgradedCloudNotes = cloudNotes.map((n: Note) => {
+            if (isUnformattedWelcomeNote(n)) {
+              const upgraded = { ...n, content: INITIAL_NOTES[0].content, lastEdited: new Date().toISOString() };
+              upsertCloudNote(upgraded, user.id);
+              return upgraded;
+            }
+            return n;
+          });
+          setNotes(upgradedCloudNotes);
+          setSelectedNoteId(upgradedCloudNotes[0].id);
         } else {
           // New user with 0 notes in Supabase: give them only the single initial welcome note
           setNotes(INITIAL_NOTES);
@@ -118,7 +164,12 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           setSelectedNoteId(INITIAL_NOTES[0].id);
           return INITIAL_NOTES;
         }
-        return prev;
+        return prev.map((n) => {
+          if (isUnformattedWelcomeNote(n)) {
+            return { ...n, content: INITIAL_NOTES[0].content, lastEdited: new Date().toISOString() };
+          }
+          return n;
+        });
       });
       setSyncStatus('local');
     } else {
@@ -192,6 +243,57 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setActiveView({ type: 'all' });
     }
     addToast(`Folder "${name}" deleted`, 'info');
+  };
+
+  const renameFolder = (oldName: string, newName: string): boolean => {
+    const trimmedOld = oldName.trim();
+    const trimmedNew = newName.trim();
+
+    if (!trimmedNew) {
+      addToast('Folder name cannot be empty', 'error');
+      return false;
+    }
+
+    if (trimmedOld.toLowerCase() === trimmedNew.toLowerCase()) {
+      if (trimmedOld === trimmedNew) return true;
+    } else {
+      const exists = allFolders.some(
+        (f) => f.toLowerCase() === trimmedNew.toLowerCase() && f.toLowerCase() !== trimmedOld.toLowerCase()
+      );
+      if (exists) {
+        addToast('A folder with this name already exists', 'error');
+        return false;
+      }
+    }
+
+    setCustomFolders((prev) => {
+      const updated = prev.map((f) => (f === trimmedOld ? trimmedNew : f));
+      if (!updated.includes(trimmedNew)) {
+        updated.push(trimmedNew);
+      }
+      localStorage.setItem('notes_app_folders', JSON.stringify(updated));
+      return updated;
+    });
+
+    setNotes((prev) =>
+      prev.map((n) => {
+        if (n.folder === trimmedOld) {
+          const updatedNote = { ...n, folder: trimmedNew, lastEdited: new Date().toISOString() };
+          if (!isGuest && user) {
+            upsertCloudNote(updatedNote, user.id);
+          }
+          return updatedNote;
+        }
+        return n;
+      })
+    );
+
+    if (activeView.type === 'folder' && activeView.folder === trimmedOld) {
+      setActiveView({ type: 'folder', folder: trimmedNew });
+    }
+
+    addToast(`Folder renamed to "${trimmedNew}"`, 'success');
+    return true;
   };
 
   // Extract unique tags alphabetically
@@ -466,6 +568,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         startNewNote,
         saveNote,
         createFolder,
+        renameFolder,
         deleteFolder,
         archiveNote,
         restoreNote,

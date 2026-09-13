@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNotes } from '../../context/NotesContext';
 import { CrossIcon } from '../Icons';
-import { Folder as FolderIcon, Plus, Check, X, Trash2 } from 'lucide-react';
+import { Folder as FolderIcon, Plus, Check, X, Trash2, Pencil } from 'lucide-react';
 
 interface FoldersModalProps {
   isOpen: boolean;
@@ -9,9 +9,11 @@ interface FoldersModalProps {
 }
 
 export const FoldersModal: React.FC<FoldersModalProps> = ({ isOpen, onClose }) => {
-  const { allFolders, notes, activeView, setActiveView, createFolder, deleteFolder } = useNotes();
+  const { allFolders, notes, activeView, setActiveView, createFolder, renameFolder, deleteFolder } = useNotes();
   const [isAddingFolder, setIsAddingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
+  const [editingFolder, setEditingFolder] = useState<string | null>(null);
+  const [editFolderName, setEditFolderName] = useState('');
 
   if (!isOpen) return null;
 
@@ -24,6 +26,18 @@ export const FoldersModal: React.FC<FoldersModalProps> = ({ isOpen, onClose }) =
     if (ok) {
       setNewFolderName('');
       setIsAddingFolder(false);
+    }
+  };
+
+  const handleRenameFolderSubmit = (e: React.FormEvent, oldName: string) => {
+    e.preventDefault();
+    if (!editFolderName.trim() || editFolderName.trim() === oldName) {
+      setEditingFolder(null);
+      return;
+    }
+    const ok = renameFolder(oldName, editFolderName.trim());
+    if (ok) {
+      setEditingFolder(null);
     }
   };
 
@@ -97,9 +111,48 @@ export const FoldersModal: React.FC<FoldersModalProps> = ({ isOpen, onClose }) =
           ) : (
             allFolders.map((folder) => {
               const isSelected = currentFolder === folder;
+              const isCurrentlyEditing = editingFolder === folder;
               const folderCount = notes.filter(
                 (n) => !n.isDeleted && !n.isArchived && n.folder === folder
               ).length;
+
+              if (isCurrentlyEditing) {
+                return (
+                  <form
+                    key={folder}
+                    onSubmit={(e) => handleRenameFolderSubmit(e, folder)}
+                    className="flex items-center gap-2 px-3 py-2 bg-neutral-100 dark:bg-neutral-800 rounded-lg"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <input
+                      type="text"
+                      autoFocus
+                      value={editFolderName}
+                      onChange={(e) => setEditFolderName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') setEditingFolder(null);
+                      }}
+                      className="flex-1 px-2 py-1 text-sm rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-hidden focus:border-[#335CFF]"
+                    />
+                    <button
+                      type="submit"
+                      className="p-1.5 rounded bg-[#335CFF] text-white hover:bg-blue-600 cursor-pointer"
+                      title="Save folder name"
+                    >
+                      <Check className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingFolder(null)}
+                      className="p-1.5 rounded text-neutral-400 hover:text-neutral-700 dark:hover:text-white cursor-pointer"
+                      title="Cancel"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </form>
+                );
+              }
+
               return (
                 <div
                   key={folder}
@@ -121,7 +174,7 @@ export const FoldersModal: React.FC<FoldersModalProps> = ({ isOpen, onClose }) =
                     />
                     <span className="truncate">{folder}</span>
                   </button>
-                  <div className="flex items-center gap-2 shrink-0 ml-2">
+                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
                     <span className="text-xs text-neutral-400 dark:text-neutral-500">
                       {folderCount}
                     </span>
@@ -130,6 +183,18 @@ export const FoldersModal: React.FC<FoldersModalProps> = ({ isOpen, onClose }) =
                         Active
                       </span>
                     )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingFolder(folder);
+                        setEditFolderName(folder);
+                      }}
+                      className="p-1 rounded text-neutral-400 hover:text-[#335CFF] hover:bg-neutral-200/60 dark:hover:bg-neutral-700 cursor-pointer"
+                      aria-label={`Rename folder ${folder}`}
+                      title={`Rename "${folder}"`}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

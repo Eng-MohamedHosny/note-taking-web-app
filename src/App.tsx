@@ -104,10 +104,12 @@ const MainLayout: React.FC = () => {
         )}
 
         {/* Mobile & Tablet Bottom Navigation Bar (Figma Tablet & Mobile specs) */}
-        <BottomMenuBar
-          onOpenTagsModal={() => setIsTagsModalOpen(true)}
-          onOpenFoldersModal={() => setIsFoldersModalOpen(true)}
-        />
+        {mobileView === 'list' && (
+          <BottomMenuBar
+            onOpenTagsModal={() => setIsTagsModalOpen(true)}
+            onOpenFoldersModal={() => setIsFoldersModalOpen(true)}
+          />
+        )}
 
         {/* Mobile & Tablet Floating Action Button (+ Create Note) */}
         {mobileView === 'list' && (
