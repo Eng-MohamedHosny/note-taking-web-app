@@ -647,7 +647,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
       )}
 
       {/* 3. Main Content Body - Apple Minimalist (Zero wasted space) */}
-      <div className={`flex-1 flex flex-col p-4 md:p-8 pb-24 lg:pb-8 overflow-y-auto transition-all ${isFocusMode ? 'max-w-4xl mx-auto w-full' : ''}`}>
+      <div className={`flex-1 flex flex-col p-4 md:p-6 lg:p-8 pb-4 lg:pb-8 overflow-y-auto transition-all h-full ${isFocusMode ? 'max-w-4xl mx-auto w-full' : ''}`}>
         {/* Title Input */}
         <input
           type="text"
@@ -716,7 +716,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ onBackToList }) => {
         </div>
 
         {/* 4. TipTap WYSIWYG Editor */}
-        <div className="flex-1 flex flex-col min-h-[360px]">
+        <div className="flex-1 flex flex-col min-h-full h-full">
           <WysiwygEditor
             content={content}
             onChange={handleContentChange}
