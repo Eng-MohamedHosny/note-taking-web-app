@@ -1,4 +1,4 @@
-# 📝 Note-Taking Web App (Full-Stack, Local-First, Pixel-Perfect)
+# 📝 Pretty Notes App (Full-Stack, Local-First, Pixel-Perfect)
 
 A modern, high-performance, pixel-perfect note-taking web application built according to the official **Frontend Mentor** challenge and **Figma design system**. Built with **React 19, TypeScript, Vite, Tailwind CSS v4, Supabase (BaaS)**, and designed for multi-platform access (**Web, PWA for Desktop/Mobile, and Chrome Extension**).
 
@@ -7,7 +7,8 @@ A modern, high-performance, pixel-perfect note-taking web application built acco
 
 - **🌐 Live Demo (Cloudflare Pages):** [https://pretty-notes-app.pages.dev](https://pretty-notes-app.pages.dev)
 - **💻 GitHub Repository:** [https://github.com/Eng-MohamedHosny/note-taking-web-app](https://github.com/Eng-MohamedHosny/note-taking-web-app)
-- **📖 Complete Features Guide & Showcase:** [docs/FEATURES_GUIDE.md](../docs/FEATURES_GUIDE.md) (العامية المصرية & English)
+- **📖 دليل المميزات والاستخدام (العامية المصرية 🇪🇬):** [docs/العربي.md](./docs/العربي.md)
+- **📘 Complete Features Guide (English 🇬🇧):** [docs/ENGLISH.md](./docs/ENGLISH.md)
 
 ![Design preview](./preview.jpg)
 
