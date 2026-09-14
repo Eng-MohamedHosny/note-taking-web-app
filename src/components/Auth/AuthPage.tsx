@@ -30,7 +30,22 @@ export const AuthPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace(/^#/, '');
+      const search = window.location.search.replace(/^\?/, '');
+      const hashParams = new URLSearchParams(hash);
+      const searchParams = new URLSearchParams(search);
+      const err = hashParams.get('error_description') || searchParams.get('error_description');
+      if (err) {
+        if (window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+        return err.replace(/\+/g, ' ');
+      }
+    }
+    return '';
+  });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
