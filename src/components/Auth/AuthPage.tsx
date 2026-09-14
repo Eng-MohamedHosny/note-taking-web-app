@@ -122,7 +122,7 @@ export const AuthPage: React.FC = () => {
         {/* Section Heading matching Figma */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold tracking-tight text-[#0E121B] dark:text-white">
-            {mode === 'login' && 'Welcome to Notes'}
+            {mode === 'login' && 'Welcome to Pretty Notes'}
             {mode === 'signup' && 'Create Your Account'}
             {mode === 'forgot' && 'Forgotten your password?'}
             {mode === 'reset' && 'Reset Your Password'}

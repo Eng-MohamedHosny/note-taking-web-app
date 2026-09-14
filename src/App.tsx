@@ -42,7 +42,7 @@ const MainLayout: React.FC = () => {
   // Show welcome toast if redirected after email confirmation
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location.hash.includes('type=signup')) {
-      addToast('Email confirmed successfully! Welcome to Notes App.', 'success');
+      addToast('Email confirmed successfully! Welcome to Pretty Notes.', 'success');
       if (window.history.replaceState) {
         window.history.replaceState(null, '', window.location.pathname);
       }

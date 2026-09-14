@@ -109,7 +109,7 @@ export const AuthModal: React.FC = () => {
           {/* Header Title & Subtitle */}
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-neutral-950 dark:text-white">
-              {authModal === 'login' && 'Welcome to Notes'}
+              {authModal === 'login' && 'Welcome to Pretty Notes'}
               {authModal === 'signup' && 'Create Your Account'}
               {authModal === 'forgot-password' && 'Forgotten your password?'}
               {authModal === 'reset-password' && 'Reset Your Password'}
