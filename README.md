@@ -3,10 +3,10 @@
 A modern, high-performance, pixel-perfect note-taking web application built according to the official **Frontend Mentor** challenge and **Figma design system**. Built with **React 19, TypeScript, Vite, Tailwind CSS v4, Supabase (BaaS)**, and designed for multi-platform access (**Web, PWA for Desktop/Mobile, and Chrome Extension**).
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Cloudflare%20Pages-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://pretty-notes-app.pages.dev)
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Eng-MohamedHosny/note-taking-web-app)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Eng-MohamedHosny/pretty-notes-app)
 
 - **🌐 Live Demo (Cloudflare Pages):** [https://pretty-notes-app.pages.dev](https://pretty-notes-app.pages.dev)
-- **💻 GitHub Repository:** [https://github.com/Eng-MohamedHosny/note-taking-web-app](https://github.com/Eng-MohamedHosny/note-taking-web-app)
+- **💻 GitHub Repository:** [https://github.com/Eng-MohamedHosny/pretty-notes-app](https://github.com/Eng-MohamedHosny/pretty-notes-app)
 - **📖 دليل المميزات والاستخدام (العامية المصرية 🇪🇬):** [docs/العربي.md](./docs/العربي.md)
 - **📘 Complete Features Guide (English 🇬🇧):** [docs/ENGLISH.md](./docs/ENGLISH.md)
 
@@ -67,7 +67,7 @@ A modern, high-performance, pixel-perfect note-taking web application built acco
 | **Database & BaaS** | Supabase (PostgreSQL + Auth + RLS) |
 | **PWA & Offline** | Service Worker API + Web App Manifest |
 | **Companion Extension** | Chrome Manifest V3 |
-| **Hosting & Deployment** | Cloudflare Pages / Vercel |
+| **Hosting & Deployment** | Cloudflare Pages (Production) |
 
 ---
 
@@ -124,8 +124,8 @@ note-taking-web-app/
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/your-username/note-taking-web-app.git
-cd note-taking-web-app
+git clone https://github.com/Eng-MohamedHosny/pretty-notes-app.git
+cd pretty-notes-app
 npm install
 ```
 
