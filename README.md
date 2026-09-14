@@ -7,6 +7,7 @@ A modern, high-performance, pixel-perfect note-taking web application built acco
 
 - **🌐 Live Demo (Cloudflare Pages):** [https://pretty-notes-app.pages.dev](https://pretty-notes-app.pages.dev)
 - **💻 GitHub Repository:** [https://github.com/Eng-MohamedHosny/note-taking-web-app](https://github.com/Eng-MohamedHosny/note-taking-web-app)
+- **📖 Complete Features Guide & Showcase:** [docs/FEATURES_GUIDE.md](../docs/FEATURES_GUIDE.md) (العامية المصرية & English)
 
 ![Design preview](./preview.jpg)
 
