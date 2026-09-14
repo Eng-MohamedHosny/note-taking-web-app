@@ -10,7 +10,7 @@ A modern, high-performance, pixel-perfect note-taking web application built acco
 - **📖 دليل المميزات والاستخدام (العامية المصرية 🇪🇬):** [docs/العربي.md](./docs/العربي.md)
 - **📘 Complete Features Guide (English 🇬🇧):** [docs/ENGLISH.md](./docs/ENGLISH.md)
 
-![Design preview](./preview.jpg)
+![Pretty Notes Workspace](./preview.png)
 
 ---
 

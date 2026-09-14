@@ -1,5 +1,5 @@
-# 📝 Pretty Notes - Complete Features Guide & Showcase
-### Welcome to your modern, blazing-fast digital notebook! 🚀✨
+# 📝 Pretty Notes App - Complete Features Guide & Showcase
+### A Comprehensive, Visual Tour of Every Implemented Feature 🚀✨
 
 <div align="center">
 
@@ -12,120 +12,125 @@
 
 ---
 
-> 🌐 **Live Web Application**: [https://pretty-notes-app.pages.dev](https://pretty-notes-app.pages.dev)  
-> 💡 **Tech Stack**: React 19, Vite, Tailwind CSS v4, TipTap Rich Text, Supabase, Brevo SMTP, Cloudflare Pages.
+> 🌐 **Live Production Application**: [https://pretty-notes-app.pages.dev](https://pretty-notes-app.pages.dev)  
+> 💡 **Tech Stack**: React 19, TypeScript, Vite, Tailwind CSS v4, TipTap Rich Text, Supabase PostgreSQL, Brevo SMTP, Cloudflare Pages.
 
-Designed for speed, clarity, and delight, **Pretty Notes** blends a lightweight local-first architecture with cloud synchronization, keyboard-driven productivity, and thoughtful micro-interactions inspired by the best mobile and desktop note apps.
+**Pretty Notes App** is a modern, high-performance digital workspace built from the ground up to combine a zero-latency local-first architecture (**Local-First**) with robust cloud persistence via **Supabase**, and an elegant editorial experience inspired by Notion and Apple Notes.
 
 ---
 
 ## 1. 🚀 Instant Frictionless Access: Guest Mode & Cloud Sync
-No tedious mandatory registration just to jot down a quick idea.
+No tedious registration hurdles just to jot down quick thoughts:
 
-![Authentication & Instant Guest Mode](./images/auth_login_card.png)
+![Authentication & Instant Guest Mode](./images/01_auth_screen.png)
 
-* **One-Click "Join as Guest"**: Launch directly into the workspace with zero delay. All data is saved securely into browser storage (Local-First).
-* **Supabase Cloud Sync**: Create an account anytime to seamlessly sync notes across mobile devices, tablets, and desktops with PostgreSQL Row-Level Security (RLS).
-* **Branded Brevo SMTP Deliverability**: Direct inbox delivery for verification emails and password reset links with no spam drops.
-* **Automated Password Reset Flow**: Clicking the recovery email link automatically intercepts the token and presents the "Reset Password" modal cleanly.
-
----
-
-## 2. ✍️ Full-Featured TipTap Rich Text Editor
-A distraction-free writing experience equipped with powerful formatting capabilities:
-
-![Rich Text Editor in Dark Mode](./images/desktop_editor_dark.png)
-
-### Editor Highlights:
-* **Typography & Structure**:
-  - Headings: `H1`, `H2`, and `H3` with clean visual scale.
-  - Text Styles: **Bold** (`Ctrl+B`), *Italic* (`Ctrl+I`), <u>Underline</u> (`Ctrl+U`), ~~Strikethrough~~, `Inline Code`.
-  - Content Blocks: Blockquotes and styled Code Blocks with syntax monospace fonts.
-* **Interactive Checklists (To-Do Lists)**: Checkable items with automated strikethrough for task tracking.
-* **Curated Color Palette**:
-  
-  ![Color Palette Picker](./images/editor_color_palette.png)
-  
-  - 11 hand-picked colors optimized for readability in both light and dark themes.
-  - Native custom HEX color picker for exact shade customization.
-* **Drag-and-Drop & Clipboard Image Insertion**:
-  - Insert images via file upload, image URL, or direct clipboard pasting (`Ctrl+V` / `Cmd+V`).
-* **Real-Time Auto-Save with Visual Feedback**:
-  - Zero worry about losing unsaved changes; status badges indicate `Saving...` and `Saved` in real time.
-* **Bilingual Arabic (RTL) & English (LTR) Support**: Natural text direction detection and tailored typography for comfortable reading.
+* **One-Click "Join as Guest"**: Jump immediately into your notes workspace without credentials. All notes, folders, and tags persist reliably in your browser storage (Local-First).
+* **Encrypted Cloud Sync with Supabase**: Sign up with an email address to sync notes in real time across mobile phones, tablets, and laptops, protected by PostgreSQL **Row-Level Security (RLS)**.
+* **Branded Brevo SMTP Deliverability**: Integrated custom SMTP relay ensures confirmation emails and password recovery messages land instantly in your inbox without spam flags.
+* **Automated Password Recovery Flow**: Clicking the recovery link automatically detects the token, redirects safely, and opens the "Reset Password" modal cleanly.
 
 ---
 
-## 3. 🗂️ Intuitive Organization: Folders, Tags & Pinned Items
-Keep your thoughts categorized without friction:
+## 2. 💻 Comprehensive Desktop Workspace
+A high-productivity 3-column layout engineered for clarity and ergonomics:
 
-![Folder view with curved chevron](./images/mobile_folder_view.jpg)
+![Desktop Workspace Overview](./images/02_desktop_overview.png)
 
-* **Custom Folders**: Organize notes into custom folders (e.g., Personal, Work, Ideas). Easily create, rename, and delete folders.
-* **Curved Chevron Back Button**:
-  - A clean, modern `rounded-xl` back button positioned right next to the folder title.
-  - Seamlessly integrated with browser navigation history and mobile swipe-back gestures.
-* **Multi-Tagging System**: Add hashtags (`#work`, `#ideas`) to any note with automatic tag badges and one-click filtering.
-* **Pinned Notes & Sticky Quick-Filters**:
-  
-  ![Pinned Note Card](./images/note_card_pinned.png)
-  
-  - Pin important notes to anchor them firmly at the top of the list with an amber pin icon.
-  - Pin favorite folders and tags directly into the sticky action bar for single-tap navigation.
-* **Archive & Safe Trash Management**:
-  - Archive completed notes to keep your active list clutter-free.
-  - Soft-delete to Trash with instant restore capability, plus an empty trash confirmation safeguard.
+* **Intuitive Navigation Sidebar**:
+  - All Notes view with live count.
+  - Dedicated Archived Notes & Trash containers.
+  - Folders section with instant creation, renaming, and deletion.
+  - Tags list with badge counters and pin-to-quick-bar toggles.
+* **Top Navigation Header**:
+  - `[☑ Select]` button to toggle multi-select mode instantly.
+  - Real-time search bar querying titles, content, and tags in milliseconds.
+  - Quick settings gear and profile management.
+
+---
+
+## 3. ✍️ Full-Featured TipTap Rich Text Editor
+A distraction-free writing environment packed with formatting versatility:
+
+![Rich Text Editor in Dark Mode](./images/03_desktop_editor.png)
+
+* **Typography & Hierarchy**:
+  - Headings: `H1`, `H2`, and `H3` with refined proportional scaling.
+  - Formatting Shortcuts: **Bold** (`Ctrl+B`), *Italic* (`Ctrl+I`), <u>Underline</u> (`Ctrl+U`), ~~Strikethrough~~, and `Inline Code`.
+  - Blocks: Styled Blockquotes, horizontal dividers, and syntax-styled Code Blocks.
+* **Interactive Checklists (To-Do Lists)**: Checkable boxes with automated strikethrough animation for task tracking.
+* **Curated Color Palette**: 11 hand-picked colors optimized for contrast, plus an integrated HEX Custom Color picker.
+* **Rich Image Insertion**: Upload image files, paste URLs, or paste screenshots directly from your clipboard (`Ctrl + V`).
+* **Real-Time Auto-Save**: Dynamic status badge indicating `Saving...` and `Saved` with zero latency.
+* **Bilingual Arabic (RTL) & English (LTR) Support**: Automatic text direction detection for comfortable bilingual writing.
 
 ---
 
 ## 4. ⚡ Multi-Select & Floating Action Dock
-Perform batch actions across dozens of notes in seconds:
+Execute batch operations across multiple notes simultaneously:
 
-* **Activation**:
-  - **Mobile**: Long-press (~450ms with subtle haptic vibration feedback) on any note card, or tap the Select toggle.
+![Desktop Multi-Select Mode & Floating Action Dock](./images/04_desktop_bulk_select.png)
+
+* **Effortless Activation**:
   - **Desktop**: Click the `[☑ Select]` button in the top navigation header.
+  - **Mobile**: Long-press (~450ms with subtle haptic vibration feedback) on any note card.
 * **Floating Action Dock**:
-  - An animated bottom bar appears with live count (`X of Y selected`) and quick-access actions:
-    1. 🏷️ **Bulk Tag**: Apply tags across all selected notes simultaneously.
-    2. 📁 **Bulk Move**: Relocate selected notes to any folder in a single click.
-    3. 📦 **Bulk Archive / Unarchive**: Mass archive or restore notes.
-    4. 💾 **Bulk Export**: Download selected notes as JSON, Markdown (`.md`), Plain Text (`.txt`), or a compressed `.zip` archive.
-    5. 🗑️ **Bulk Delete**: Safely send all selected notes to Trash.
+  1. 🏷️ **Bulk Tag**: Apply tags across all selected notes in a single click.
+  2. 📁 **Bulk Move**: Relocate selected notes to any folder instantly.
+  3. 📦 **Bulk Archive / Unarchive**: Mass declutter your active view.
+  4. 💾 **Bulk Export**: Download notes as Markdown (`.md`), Plain Text (`.txt`), JSON backup, or a bundled `.zip` archive.
+  5. 🗑️ **Bulk Delete**: Safely send all selected notes to Trash.
 
 ---
 
-## 5. 📱 Layout Innovation & Mobile-First UX
-Engineered for smooth, native-like interactions on every screen:
+## 5. 🎨 Customization, Themes & OLED Mode (Settings)
+Tailor the workspace aesthetics to match your daily workflow:
 
-![Balanced 2-Column Mobile Grid](./images/mobile_grid_view.jpg)
-
-* **Balanced 2-Column Responsive CSS Grid**:
-  - Clean side-by-side note cards on mobile without awkward single-column vertical stretches.
-  - Card footers align systematically using `mt-auto` for a polished, uniform look.
-* **Smooth Collapsible Header (Apple Notes Feel)**:
-  - Header and search input smoothly glide up and tuck under on scroll.
-  - Action chips bar locks into a sleek sticky frosted-glass header (`backdrop-blur`) with **0% layout shift, 0% container resizing, and 0% jitter**.
-* **Bottom Navigation Bar on Mobile**: Ergonomic one-thumb navigation tabs for Home, Archive, Tags, and Folders.
-* **Floating Action Button (FAB)**: Quick-launch note creation button with smooth press animations.
-
----
-
-## 6. 🎨 Customization, Themes & Typography
-Personalize the app to suit your working style:
+![Settings Modal & Theme Switcher](./images/05_settings_modal.png)
 
 * **Theme Modes**:
-  - **Light Mode**: Crisp, high-contrast daylight reading.
-  - **Dark Mode**: Soft low-light dark theme.
-  - **OLED Extra Dark**: Deep pitch-black background for battery saving and zero screen glare.
-* **Accent Color Themes**: Pick your favorite accent hue (Amber, Blue, Purple, Green, etc.) applied dynamically across buttons, chips, and highlights.
-* **Typography Switching**: Choose between Sans-serif (clean & modern), Serif (editorial & classic), or Monospace (code-focused).
+  - **Light Mode**: Crisp, high-contrast daylight clarity.
+  - **Dark Mode**: Soft low-light dark aesthetic.
+  - **Extra Dark Mode (OLED Black)**: Pure pitch-black background for battery conservation and zero screen glare.
+  - **Notion Dark Mode**: Warm charcoal styling inspired by Notion's iconic canvas (`#191919`).
+  - **System**: Dynamically adapts to your operating system's preference.
+* **Accent Colors**:
+  - Ocean Blue, Iris Purple, Emerald Green, Sunset Amber, Ruby Rose, and Aqua Teal.
+* **Typography Switching**:
+  - **Sans-serif**: Clean modern aesthetic (`Inter`).
+  - **Serif**: Classic editorial typography (`Noto Serif`).
+  - **Monospace**: Developer-friendly code typography (`Source Code Pro`).
 
 ---
 
-## 7. 📲 Progressive Web App (PWA) - Pretty Notes
-* Fully installable on iOS, Android, macOS, and Windows under the name **Pretty Notes**.
-* Runs in standalone window mode without browser URL bars.
-* Instant offline cache support for uninterrupted productivity anywhere.
+## 6. 📱 Layout Innovation & Mobile-First UX
+Engineered specifically for fluid, native-grade interactions on smaller screens:
+
+![Balanced 2-Column Mobile Grid](./images/06_mobile_grid.png)
+
+* **Balanced 2-Column Responsive CSS Grid**:
+  - Even, side-by-side note cards on mobile without awkward single-column vertical stretches.
+  - Systematic `mt-auto` card footers ensure dates and tags align on an identical horizontal baseline.
+* **Smooth Collapsible Header (Apple Notes Feel)**:
+  - Header and search input smoothly glide up and tuck under on scroll.
+  - The Action Chips bar locks into a sleek sticky frosted-glass header (`backdrop-blur`) with **0% layout shift, 0% container resizing, and 0% jitter**.
+* **Ergonomic Bottom Navigation Bar & FAB**:
+  - Thumb-friendly navigation tabs for Home, Archive, Tags, and Folders, accompanied by a floating action button (`+`) for single-tap note creation.
+
+---
+
+## 7. 📲 Mobile Editorial Flow & Curved Chevron Navigation
+Optimized touch interactions and crystal-clear feedback:
+
+| Mobile Rich Text Editor | Mobile Multi-Select Dock |
+| :---: | :---: |
+| ![Mobile Editor](./images/07_mobile_editor.png) | ![Mobile Bulk Dock](./images/09_mobile_bulk_dock.png) |
+
+* **Curved Chevron Back Button**:
+  - Sleek `rounded-xl` box button positioned directly beside folder titles, synced with browser navigation history and mobile swipe gestures.
+* **Centered Toast Notifications**:
+  - Success and status messages are now perfectly centered horizontally on mobile and tablet screens (`left-1/2 -translate-x-1/2`), floating safely above the FAB and bottom bar.
+* **Progressive Web App (PWA)**:
+  - Installable directly to your phone's home screen under the name **Pretty Notes**, running in standalone mode with full offline functionality.
 
 ---
 
