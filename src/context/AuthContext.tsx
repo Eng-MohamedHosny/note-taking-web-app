@@ -41,6 +41,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
+    const isRecoveryUrl =
+      typeof window !== 'undefined' &&
+      (window.location.hash.includes('type=recovery') ||
+       window.location.search.includes('type=recovery'));
+
+    if (isRecoveryUrl) {
+      setAuthModal('reset-password');
+    }
+
     // Check existing Supabase session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -48,10 +57,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsGuest(false);
         localStorage.setItem('notes_auth_guest', 'false');
       }
+      if (isRecoveryUrl) {
+        setAuthModal('reset-password');
+      }
       setIsLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        if (session?.user) {
+          setUser({ id: session.user.id, email: session.user.email || '' });
+          setIsGuest(false);
+          localStorage.setItem('notes_auth_guest', 'false');
+        }
+        setAuthModal('reset-password');
+        setIsLoading(false);
+        return;
+      }
+
       if (session?.user) {
         setUser({ id: session.user.id, email: session.user.email || '' });
         setIsGuest(false);
@@ -59,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         setUser(null);
       }
+      setIsLoading(false);
     });
 
     return () => {
@@ -151,7 +175,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!supabase) {
       return {};
     }
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+    });
     if (error) return { error: error.message };
     return {};
   };

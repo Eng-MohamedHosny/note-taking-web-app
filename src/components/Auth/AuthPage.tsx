@@ -15,7 +15,16 @@ export const AuthPage: React.FC = () => {
   } = useAuth();
   const { addToast } = useNotes();
 
-  const [mode, setMode] = useState<'login' | 'signup' | 'forgot' | 'reset'>('login');
+  const [mode, setMode] = useState<'login' | 'signup' | 'forgot' | 'reset'>(() => {
+    if (
+      typeof window !== 'undefined' &&
+      (window.location.hash.includes('type=recovery') ||
+       window.location.search.includes('type=recovery'))
+    ) {
+      return 'reset';
+    }
+    return 'login';
+  });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -75,8 +84,11 @@ export const AuthPage: React.FC = () => {
         if (res.error) {
           setError(res.error);
         } else {
-          addToast('Password updated! Please log in.', 'success');
+          addToast('Password updated successfully! Please log in.', 'success');
           setMode('login');
+          if (typeof window !== 'undefined' && window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname);
+          }
         }
       }
     } finally {

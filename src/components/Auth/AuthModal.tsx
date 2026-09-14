@@ -65,12 +65,22 @@ export const AuthModal: React.FC = () => {
         const res = await updatePassword(password);
         if (res.error) setError(res.error);
         else {
-          addToast('Password reset successful! Please log in.', 'success');
-          setAuthModal('login');
+          addToast('Password updated successfully! Welcome back.', 'success');
+          setAuthModal(null);
+          if (typeof window !== 'undefined' && window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname);
+          }
         }
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    setAuthModal(null);
+    if (typeof window !== 'undefined' && window.history.replaceState) {
+      window.history.replaceState(null, '', window.location.pathname);
     }
   };
 
@@ -83,7 +93,7 @@ export const AuthModal: React.FC = () => {
       >
         {/* Close Button */}
         <button
-          onClick={() => setAuthModal(null)}
+          onClick={handleClose}
           className="absolute right-4 top-4 p-1.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 rounded-lg transition-colors cursor-pointer z-10"
           aria-label="Close dialog"
         >
@@ -220,6 +230,18 @@ export const AuthModal: React.FC = () => {
                 ? 'Send Reset Link'
                 : 'Reset Password'}
             </button>
+
+            {authModal === 'reset-password' && (
+              <div className="mt-3 text-center">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors cursor-pointer"
+                >
+                  Skip and keep existing password
+                </button>
+              </div>
+            )}
           </form>
 
           {/* Social or Guest options */}
